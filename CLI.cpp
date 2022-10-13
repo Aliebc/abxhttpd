@@ -79,9 +79,7 @@ int main(int argc,char * argv[]){
         pid_t _pd;
         hi.Http_S.Path=CmdArrayIs(d,'D')?d['D']:std::string(".");
         if(CmdArrayIs(d,'d')){
-            char * _name=(char *)malloc(1024);
-            strcpy(_name,"Abxhttpd: worker process");
-            strcpy(argv[0],"abxhttpd");
+            //char * _name=(char *)malloc(1024);
             if(CmdArrayIs(d,'l')&&CmdArrayIs(d,'e')){
 
             }else{
@@ -114,16 +112,7 @@ int main(int argc,char * argv[]){
                 sprintf(cp,"%s ",argv[i]);
                 cp+=strlen(argv[i])+1;
             }
-            if(
-            ShellExecute(
-                NULL,
-                "open",
-                argv[0],
-                CLA,
-                ".",
-                SW_HIDE
-            )
-            ){
+            if(ShellExecuteA(NULL,"open",argv[0],CLA,".",SW_HIDE)){
                 ExitProcess(0);
             }else{
                 ABXHTTPD_CLI_ERR("Cannot create new process.");
