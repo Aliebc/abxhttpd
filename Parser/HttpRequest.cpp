@@ -20,7 +20,6 @@ void HttpRequest::parse(void){
     this->Length=_src.size();
     HttpRequest_Parser_Assert(this->Length > 5,-1L,"Http request too short.");
     HttpRequest_Parser_Assert(this->Length < ULONG_MAX,-1L,"Http request too long.");
-    this->begin=_src.c_str();
     size_t _p1=0;
     size_t _p2=0;
     _p1=_src.find_first_of(' ');
@@ -108,6 +107,11 @@ std::string & HttpRequest::header(const std::string & _header){
     std::string _h(_header);
     std::transform(_h.begin(),_h.end(),_h.begin(),(int(*)(int))toupper_s);
     return this->Headers[_h];
+}
+
+HttpRequest::HttpRequest(HttpRequest const & SS) {
+    this->Raw = SS.Raw;
+    this->parse();
 }
 
 StrArray & HttpRequest::headers(void){

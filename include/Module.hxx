@@ -1,5 +1,6 @@
 #ifndef MODULE_H
 #define MODULE_H
+#include "Version.hxx"
 #include <cstring>
 #include <string>
 
@@ -16,7 +17,11 @@ namespace abxhttpd{
     std::string ShowModules();
 }
 
+#ifndef ABXHTTPD_MSVC
 #define ABXHTTPD_MODINITFUNC __attribute__((constructor)) void
+#else
+#define ABXHTTPD_MODINITFUNC void
+#endif
 
 #ifdef ABXHTTPD_GUI
 namespace abxhttpd{

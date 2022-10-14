@@ -1,16 +1,40 @@
 #include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
 #include <string>
 #include <iostream>
 #include <map>
+#include <signal.h>
 #include "include/abxhttpd.H"
 
+#ifdef _MSC_VER
+#pragma comment(lib, "ws2_32.lib")
+#endif
+
 using namespace abxhttpd;
+
+int sigint_handle(int sig){
+    if(sig==SIGINT){
+
+    }
+    return 0;
+}
 
 int main(int argc,char * argv[]){
     //std::ios::sync_with_stdio(false);
     CmdArray d=CmdParse(argc,(const char **)argv);
+    if(CmdArrayIs(d,'v')){
+        try{
+            if(d['v'].at(0)=='c'){
+                info_color=1;
+                verbose=atoi(d['v'].c_str()+1);
+            }else{
+                verbose=std::stoi(d['v']);
+            }
+        }catch(std::exception &e){
+            verbose=0;
+        }
+    }
+    ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");
     HttpdCore * _HttpdCore;
     if(CmdArrayIs(d,'h')){
         std::cout << ABXHTTPD_HELP <<std::endl;
@@ -38,18 +62,7 @@ int main(int argc,char * argv[]){
     }else{
         _HttpdCore=&DefaultHttpdCore;
     }
-    if(CmdArrayIs(d,'v')){
-        try{
-            if(d['v'].at(0)=='c'){
-                info_color=1;
-                verbose=atoi(d['v'].c_str()+1);
-            }else{
-                verbose=std::stoi(d['v']);
-            }
-        }catch(std::exception &e){
-            verbose=0;
-        }
-    }
+    
     
     if(CmdArrayIs(d,'p')){
         SocketSettingList si={0};
@@ -88,7 +101,6 @@ int main(int argc,char * argv[]){
             }
         }
         hi.Thread_S=ti;
-        pid_t _pd;
         hi.Http_S.Path=CmdArrayIs(d,'D')?d['D']:std::string(".");
         if(CmdArrayIs(d,'d')){
             //char * _name=(char *)malloc(1024);

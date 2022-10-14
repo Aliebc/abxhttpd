@@ -39,7 +39,6 @@ private:
     StrArray Headers;
     std::string Body;
     std::string Raw;
-    const char * begin;
 public:
     HttpRequest(const char * _src,size_t _len);
     HttpRequest(const std::string & _src);

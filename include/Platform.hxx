@@ -28,7 +28,7 @@
 #define ABXHTTPD_PLATFORM "Unknown"
 #endif
 
-#ifdef __arm64__
+#if (defined __arm64__) || (defined _M_ARM)
 #define ABXHTTPD_ARCH "arm64"
 #else
 #ifdef __aarch64__
@@ -39,7 +39,7 @@
 #ifdef __x86_64__
 #define ABXHTTPD_ARCH "x86_64"
 #else
-#ifdef __amd64__
+#if (defined __amd64__) || (defined _M_AMD64)
 #define ABXHTTPD_ARCH "amd64"
 #endif
 #endif
@@ -54,6 +54,7 @@
 
 #ifdef ABXHTTPD_UNIX
 
+#include <sys/stat.h>
 #include <unistd.h>
 #include <sys/utsname.h>
 

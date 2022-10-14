@@ -4,8 +4,10 @@
 #include "Platform.hxx"
 #include "HttpRequest.hxx"
 #include "HttpResponse.hxx"
+#include "Module.hxx"
 
 #ifdef ABXHTTPD_UNIX
+#include <unistd.h>
 #include <netinet/in.h>
 #include <sys/wait.h>
 #include <fcntl.h>
@@ -28,7 +30,9 @@
 #include <fstream>
 #include <ostream>
 
-#define ABXHTTPD_COREINITFUNC __attribute__((constructor)) void
+
+#define ABXHTTPD_COREINITFUNC ABXHTTPD_MODINITFUNC
+
 #define ABXHTTPD_CORE_MAX 64
 extern int verbose;
 extern int info_color;
@@ -50,6 +54,7 @@ typedef struct {
     int Bind_IP;
     long Bind_IP6;
     int Socket_modal;
+    int allocated_socket;
     int Max_connect_count;
     bool Is_reused;
     void * Args;
@@ -79,7 +84,7 @@ typedef struct {
 typedef HttpRequest (* IStreamFilter) (std::string &, void *);
 typedef HttpResponse (* HttpHandler) (HttpRequest &, void *);
 typedef std::string (* OStreamFilter) (HttpResponse &, void *);
-typedef int (* SocketInitializer) (const SocketSettingList &);
+typedef int (* SocketInitializer) (SocketSettingList &);
 
 typedef struct {
     IStreamFilter IFilter;
@@ -145,11 +150,13 @@ private:
     HttpdCore Core;
     CCore MCore;
     HttpdSettingList Setting;
+    httpd_t _status;
 public:
     Httpd(HttpdCore & _core, HttpdSettingList & _set);
     HttpdCore & core(void);
     httpd_t start(void);
     httpd_t start(void * _arg);
+    httpd_t status() const;
     httpd_t stop();
     httpd_t stop(int _signal);
     ~Httpd();

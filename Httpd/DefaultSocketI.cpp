@@ -4,7 +4,7 @@ namespace abxhttpd{
 
 #ifdef ABXHTTPD_UNIX
 
-int _DefaultSocketI(const SocketSettingList & _setting){
+int _DefaultSocketI(SocketSettingList & _setting){
     int _sk=socket(AF_INET,SOCK_STREAM,0);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked socket, returning %d",_sk);
     int optval=1;
@@ -33,7 +33,7 @@ int _DefaultSocketI(const SocketSettingList & _setting){
 
 #ifdef ABXHTTPD_WINDOWS
 
-int _DefaultSocketI(const SocketSettingList & _setting){
+int _DefaultSocketI(SocketSettingList & _setting){
     WSADATA wsadata;
     int wsa_c=WSAStartup(MAKEWORD(2,2),&wsadata);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked WSAStartup, returning %d",wsa_c);
@@ -49,7 +49,7 @@ int _DefaultSocketI(const SocketSettingList & _setting){
     _in.sin_addr.s_addr=(_setting.Bind_IP);
     _in.sin_port=htons(port);
     unsigned long ul=1;
-    int _ws=ioctlsocket(_sk,FIONBIO,(unsigned long *)&ul);
+    //int _ws=ioctlsocket(_sk,FIONBIO,(unsigned long *)&ul);
     int x1=bind(_sk,(struct sockaddr *)&_in,sizeof(_in));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
     int x2=listen(_sk,_setting.Max_connect_count);

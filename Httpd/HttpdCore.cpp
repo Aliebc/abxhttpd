@@ -80,5 +80,16 @@ httpd_t Httpd::start(void){
     return _r;
 }
 
+httpd_t Httpd::status() const {
+    return _status;
+}
+
+httpd_t Httpd::stop(void){
+    #ifdef ABXHTTD_UNIX
+    close(Setting.Socket_S.allocated_socket);
+    #endif
+    ABXHTTPD_INFO_PRINT(1,"[Main]Closed Socket %d",Setting.Socket_S.allocated_socket);
+    return 0;
+}
 
 }

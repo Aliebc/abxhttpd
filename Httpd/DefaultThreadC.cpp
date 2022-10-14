@@ -1,6 +1,4 @@
 #include "include/abxhttpd.H"
-#include <pthread.h>
-#include <unistd.h>
 #include <iostream>
 #include <thread>
 #include <ctime>
@@ -11,6 +9,7 @@
 #define MSG_DONTWAIT 0x0
 
 #endif
+
 
 namespace abxhttpd{
     typedef struct _SocketRequestWithSL
@@ -30,14 +29,15 @@ namespace abxhttpd{
                 int ad=-1;
                 #ifdef ABXHTTPD_UNIX
                 signal(SIGPIPE, SIG_IGN);
+                ABXHTTPD_INFO_PRINT(11,"[Core][System API]Now invoke accept.");
                 ad=accept(_set.Socket_n,(struct sockaddr *)&src_in,&sklen);
                 ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked accept, returning %d.",ad);
                 #endif
                 #ifdef ABXHTTPD_WINDOWS
                 while(ad<=0){
+                    ABXHTTPD_INFO_PRINT(11,"[Core][System API]Now invoke accept.");
                     ad=accept(_set.Socket_n,(struct sockaddr *)&src_in,&sklen);
                     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked accept, returning %d.",ad);
-                    usleep(1000L*100);
                 }
                 #endif
                 if(ad<0){
@@ -78,8 +78,8 @@ namespace abxhttpd{
         std::ostream *errout=src_sl.ts.abxerr;
         int ad=src._ad;
         ABXHTTPD_INFO_PRINT(4,"[Socket %d]Entered thread.",ad);
-        ssize_t _recv_s=0;
-        ssize_t _recv_len=0;
+        long int _recv_s=0;
+        long int _recv_len=0;
         time_t _ReadBegin=time(NULL);
         time_t _ReadEnd=time(NULL);
         int _retry=0;
@@ -87,8 +87,9 @@ namespace abxhttpd{
         std::string res;
         std::string req;
         while(true){
+            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke recv.",ad);
             _recv_s=recv(ad,_req,sizeof(_req),0);
-            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked recv, returning %d.",ad,_recv_s);
+            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked recv, returning %ld.",ad,_recv_s);
             if(_recv_s>0){
                 _ReadBegin=time(NULL);
                 ABXHTTPD_INFO_PRINT(3,"[Socket %d]Received %ld bytes.",ad,_recv_s);
@@ -126,19 +127,23 @@ namespace abxhttpd{
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %ld size.",ad,req.size());
                 H_req.remote_addr()=_ip;
                 *logout<< _time << _ip << " " << H_req.method() <<" "<< H_req.path() << " "<< H_req.header("User-Agent") <<std::endl;
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Logged this request.",ad);
                 HttpResponse H_res=src.MCore.Handler(H_req,_ptr);
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked core handler.",ad);
                 res=src.MCore.OFilter(H_res,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %ld size.",ad,res.size());
             }catch(abxhttpd_error e){
                 *errout<< _time << inet_ntoa(src.src_in.sin_addr) << " Error:" << e.what()<<std::endl;
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]An error occured, logged this error.",ad);
                 char bd[]="HTTP/1.1 400 Bad Request";
                 res=std::string(bd);
             }
             long int _send_lv=-1;
             size_t _send_len=0;
             while(true){
+                ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke send.",ad);
                 _send_lv=send(ad,res.c_str()+_send_len,res.size()-_send_len,MSG_DONTWAIT);
-                ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked send, returning %d.",ad,_send_len);
+                ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked send, returning %ld.",ad,_send_lv);
                 if(_send_lv>0){
                     _send_len+=_send_lv;
                     ABXHTTPD_INFO_PRINT(3,"[Socket %d]Wrote %ld bytes.",ad,_send_len);

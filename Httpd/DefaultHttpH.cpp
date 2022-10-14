@@ -3,11 +3,8 @@
 #include <fstream>
 #include <sstream>
 #include <fcntl.h>
-#include <unistd.h>
-#include <sys/stat.h>
 #include <iostream>
 #include <string.h>
-#include <pthread.h>
 #include <stdarg.h>
 
 ABXHTTPD_MODINITFUNC AX_HTTP(){
@@ -16,7 +13,7 @@ ABXHTTPD_MODINITFUNC AX_HTTP(){
 
 typedef struct {
     char _src[1<<12];
-    ssize_t _p;
+    long int _p;
 } ENV_TMP;
 
 #define putenv_s(_env_tmp,_env_str,...) {\
@@ -95,6 +92,49 @@ END:       _hr.header("Connection")=std::string(" close");
         if(fp==NULL){
             throw abxhttpd_error("File not exists");
         }
+        #ifdef ABXHTTPD_UNIX
+        struct stat _ft;
+        stat(_Path.c_str(),&_ft);
+        if(!S_ISREG(_ft.st_mode)){
+            throw abxhttpd_error("Not Regular File");
+        }
+        char _pc[4096];
+        size_t _rd=0;
+        size_t _ed=_ft.st_size;
+        size_t _pd=0;
+        #else
+        DWORD st =GetFileAttributes(_Path.c_str());
+        if(st&FILE_ATTRIBUTE_DIRECTORY){
+            throw abxhttpd_error("Not Regular File");
+        }
+        size_t f_size;
+        char _pc[4096];
+        fseek(fp,0,SEEK_END);
+        f_size=ftell(fp);
+        size_t _rd=0;
+        size_t _ed=f_size;
+        size_t _pd=0;
+        rewind(fp);
+        #endif
+        while(true){
+            _rd=fread(_pc,sizeof(char),sizeof(_pc),fp);
+            if(_pd==_ed){
+                break;
+            }
+            fps+=std::string(_pc,_rd);
+            memset(_pc,0,sizeof(_pc));
+            _pd+=_rd;
+        }
+        fclose(fp);
+        return fps;
+    }
+
+    /*std::string _FileRead_B(std::string _Path){
+        std::string fps;
+        FILE * fp=fopen(_Path.c_str(),"rb");
+        if(fp==NULL){
+            throw abxhttpd_error("File not exists");
+        }
         struct stat _ft;
         stat(_Path.c_str(),&_ft);
         if(!S_ISREG(_ft.st_mode)){
@@ -115,33 +155,7 @@ END:       _hr.header("Connection")=std::string(" close");
         }
         fclose(fp);
         return fps;
-    }
-
-    std::string _FileRead_UNIX(std::string _Path){
-        int fd=open(_Path.c_str(),O_RDONLY);
-        if(fd<0){
-            throw abxhttpd_error("File not exists");
-        }
-        struct stat _ft;
-        stat(_Path.c_str(),&_ft);
-        if(!S_ISREG(_ft.st_mode)){
-            throw abxhttpd_error("Not Regular File");
-        }
-        std::string fps;
-        char c;
-        char _pc[1024];
-        int rd;
-        while(1){
-            rd=read(fd,_pc,sizeof(_pc));
-            if(rd<=0){
-                break;
-            }
-            fps+=std::string(_pc,rd);
-            memset(_pc,0,sizeof(_pc));
-        }
-        close(fd);
-        return fps;
-    }
+    }*/
 
     std::string _FileSuffix(std::string _Name){
         size_t _Dot=_Name.find_last_of('.');
@@ -153,14 +167,14 @@ END:       _hr.header("Connection")=std::string(" close");
     }
 
     std::string _PipeRead(std::string _Path,std::string _Write){
-        FILE * _pipe=popen(_Path.c_str(),"r+");
+        std::string res;
+        /*FILE * _pipe=popen(_Path.c_str(),"r+");
         if(_pipe==NULL){
             throw abxhttpd_error("Cannot open pipe");
         }
         fwrite(_Write.c_str(),sizeof(char),_Write.size(),_pipe);
         char _pc[24];
         size_t _rd=0;
-        std::string res;
         while(true){
             _rd=fread(_pc,sizeof(char),sizeof(_pc),_pipe);
             if(_rd>0){
@@ -173,7 +187,7 @@ END:       _hr.header("Connection")=std::string(" close");
             }else{
                 break;
             }
-        }
+        }*/
         return res;
     }
 
