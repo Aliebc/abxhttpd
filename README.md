@@ -20,9 +20,17 @@ abxhttpd是一个微型的，采用C++编写的http服务器，可以做到简�
 
 · Android
 
-编译器
+支持的编译器
 
-GCC/Clang 
+GCC/Clang/MSVC
+
+在以下编译器已经编译测试通过:
+
+GCC 7-11
+
+Clang 13-15
+
+MSVC 19.29
 
 ## 第三方库
 
@@ -73,6 +81,10 @@ GCC/Clang
    ```shell
    x86_64-w64-mingw32-g++ -O3 -std=c++11 -I. -o abxhttpd *.cpp Httpd/*.cpp Parser/*.cpp Extension/*.cpp -lws2_32
    ```
+
+    3. CMake
+
+    进入目录后，执行cmake .，生成cmake文件后执行make(UNIX)或者启动cmake生成的Microsoft Visual  Studio项目，之后执行“生成/重新生成”.
 
 
 
