@@ -1,0 +1,7 @@
+cmake_minimum_required (VERSION 3.0.0)
+project(abxhttpd)
+set(CMAKE_CXX_STANDARD 11)
+include_directories(.)
+aux_source_directory(Httpd SOURCE_FILES)
+aux_source_directory(Parser SOURCE_FILES)
+add_executable(abxhttpd CLI.cpp ${SOURCE_FILES})
