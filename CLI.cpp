@@ -9,7 +9,7 @@
 using namespace abxhttpd;
 
 int main(int argc,char * argv[]){
-    std::ios::sync_with_stdio(false);
+    //std::ios::sync_with_stdio(false);
     CmdArray d=CmdParse(argc,(const char **)argv);
     HttpdCore * _HttpdCore;
     if(CmdArrayIs(d,'h')){
@@ -37,6 +37,18 @@ int main(int argc,char * argv[]){
         ABXHTTPD_CLI_ERR2(_HttpdCore!=NULL,"Cannot find specified Httpd Core. Please use -m option to see useable core symbol.");
     }else{
         _HttpdCore=&DefaultHttpdCore;
+    }
+    if(CmdArrayIs(d,'v')){
+        try{
+            if(d['v'].at(0)=='c'){
+                info_color=1;
+                verbose=atoi(d['v'].c_str()+1);
+            }else{
+                verbose=std::stoi(d['v']);
+            }
+        }catch(std::exception &e){
+            verbose=0;
+        }
     }
     
     if(CmdArrayIs(d,'p')){

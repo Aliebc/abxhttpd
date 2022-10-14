@@ -1,8 +1,11 @@
 #include "include/Httpd.hxx"
+#include "include/abxhttpd.H"
 #include <cstring>
 #include <string>
 
 char _errorstr[128];
+int verbose=0;
+int info_color=0;
 
 namespace abxhttpd{
 
@@ -22,14 +25,14 @@ HttpdCoreAddress PHPCGICore={
     "PHPCGICore","Call php by CGI.",NULL
 };
 
-HttpdCoreAddress HttpdCoreAddressTable[64]={
-    DefaultHttpdCoreAddress,PHPCGICore
+HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX]={
+    DefaultHttpdCoreAddress,0
 };
 
-core_t HttpdCoreAddressCount=2;
+core_t HttpdCoreAddressCount=0;
 
-void RegisterCore(HttpdCore &_core){
-
+ABXHTTPD_COREINITFUNC PHPInit(){
+    RegisterHttpdCore(&PHPCGICore);
 }
 
 std::string ShowHttpdCoreAddressTable(void){
@@ -47,6 +50,16 @@ HttpdCore * FindHttpdCore(const char * _src){
         }
     }
     return NULL;
+}
+
+int RegisterHttpdCore(HttpdCoreAddress * _core){
+    if(HttpdCoreAddressCount>=ABXHTTPD_CORE_MAX){
+        return 1;
+    }
+    memcpy(&HttpdCoreAddressTable[HttpdCoreAddressCount],_core,sizeof(HttpdCoreAddress));
+    ABXHTTPD_DEBUG_PRINTF("[Main]Registered Core: %s\n",_core->Symbol);
+    HttpdCoreAddressCount+=1;
+    return 0;
 }
 
 Httpd::Httpd(HttpdCore & _core, HttpdSettingList & _set){

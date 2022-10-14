@@ -58,11 +58,13 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 "For more information about these matters see\n" \
 "https://www.gnu.org/licenses/.\n"
 
-#define ABXHTTPD_HELP "Abxhttpd CLI Manual\n\nUsage: [option] ... [ -p port | -d dir | -] [arg] ...\n\n" \
+#define ABXHTTPD_HELP "Abxhttpd Manual\n\nUsage: [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
 "Options and arguments:\n" \
 "-V\t: See version and copyright information.\n" \
-"-v\t: Show detailed process when running the program.(Unrealized)\n" \
+"-v\t: Set detailed information grade.\n\t(Example: -v 1)\n" \
 "-m\t: Show cores and modules installed.\n" \
+"-c\t: Specify abxhttpd-core to use.\n\t(Example: -c OtherCore, some command line arguments may be different in this case)\n" \
+"-C\t: Dynamically load other core or module.(Unrealized)\n\t(Example: -C ./libothercore.so)\n" \
 "-h\t: Show manual page(This page).\n" \
 "-g\t: Start the graphical user interface(GUI).\n" \
 "-p\t: Specify and listening port.\n\t(Example: -p 80)\n" \
@@ -72,6 +74,6 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 "-l\t: Specify normal log files. Default to standard output(1).\n\t(Example: -l access.log)\n" \
 "-e\t: Specify error log files. Default to standard error(2).\n\t(Example: -e error.log)\n" \
 "-D\t: Set working directory.\n\t(Default: .(Current directory) Example: -D C:\\Users\\Administrator)\n" \
-"-T\t: Enable multi-thread mode(Experimental).\n\t(Default: disabled)\n" 
+"-T\t: Enable multi-thread mode.\n\t(Default: disabled)\n" 
 
 #endif

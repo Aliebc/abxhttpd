@@ -28,6 +28,19 @@
 #include <fstream>
 #include <ostream>
 
+#define ABXHTTPD_COREINITFUNC __attribute__((constructor)) void
+#define ABXHTTPD_CORE_MAX 64
+extern int verbose;
+extern int info_color;
+
+#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=verbose){\
+if(info_color==0){\
+    printf("[Abxhttpd INFO][Grade %d] " fmt "\n",grade,##__VA_ARGS__);\
+}else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Grade %d] \033[1;37m" fmt "\033[0m\n",grade,##__VA_ARGS__);fflush(stdout);}\
+}
+
+int HttpdInfo(int grade, const char * fmt, ...);
+
 namespace abxhttpd{
 
 typedef struct {
@@ -35,6 +48,7 @@ typedef struct {
     bool Is_windows;
     int Port;
     int Bind_IP;
+    long Bind_IP6;
     int Socket_modal;
     int Max_connect_count;
     bool Is_reused;
@@ -121,6 +135,7 @@ typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
 std::string ShowHttpdCoreAddressTable(void);
 HttpdCore * FindHttpdCore(const char * _src);
+int RegisterHttpdCore(HttpdCoreAddress * _core);
 
 typedef int8_t httpd_t;
 
