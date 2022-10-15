@@ -16,7 +16,6 @@ int _DefaultSocketI(SocketSettingList & _setting){
     struct sockaddr_in _in={0};
     _in.sin_family=AF_INET;
     _in.sin_addr.s_addr=(_setting.Bind_IP);
-    
     _in.sin_port=htons(port);
     int x1=bind(_sk,(struct sockaddr *)&_in,sizeof(_in));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
@@ -25,6 +24,7 @@ int _DefaultSocketI(SocketSettingList & _setting){
     if(!(x1>=0&&x2>=0)){
         throw abxhttpd_error(std::string(strerror(errno)));
     }
+    _setting.allocated_socket=_sk;
     ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",inet_ntoa(_in.sin_addr),port);
     return _sk;
 }
@@ -64,12 +64,36 @@ int _DefaultSocketI(SocketSettingList & _setting){
     if(!(x1>=0&&x2>=0)){
         throw abxhttpd_error(std::string(strerror(errno)));
     }
+    _setting.allocated_socket=_sk;
     ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",inet_ntoa(_in.sin_addr),port);
     return _sk;
 }
 
 #endif
 
+int _close_socket(int ad, int flag=0){
+    int st;
+    #ifdef ABXHTTPD_WINDOWS
+    st=closesocket(ad);
+    ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked closesocket, returning %d.",ad,st);
+    #endif
+    #ifdef ABXHTTPD_UNIX
+    st=close(ad);
+    ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
+    if(st==0){
+        ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
+    }else{
+        ABXHTTPD_INFO_PRINT(3,"Cannot close socket %d(Error code:%d)",ad,st);
+    }
+    #endif
+    return st;
+}
+
+int _DefaultSocketD(SocketSettingList & _setting){
+    return _close_socket(_setting.allocated_socket);
+}
+
 SocketInitializer DefaultSocketI=_DefaultSocketI;
+SocketDestructor DefaultSocketD=_DefaultSocketD;
 
 }

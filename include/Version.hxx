@@ -33,7 +33,7 @@ ABXHTTPD_STR(ABXHTTPD_VERSION_LAST)
 #elif (defined __GNUC__)
 #define ABXHTTPD_COMPILER "GCC " __VERSION__
 #elif (defined _MSC_VER)
-#define ABXHTTPD_COMPILER "MSVC " ABXHTTPD_STR(_MSC_VER)
+#define ABXHTTPD_COMPILER "MSVC " ABXHTTPD_STR(_MSC_FULL_VER)
 #define ABXHTTPD_MSVC
 #define ssize_t long;
 #else

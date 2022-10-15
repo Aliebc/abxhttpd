@@ -43,6 +43,7 @@ public:
     HttpRequest(const char * _src,size_t _len);
     HttpRequest(const std::string & _src);
     HttpRequest(const char * _src);
+    HttpRequest();
     HttpRequest(const HttpRequest & _src);
     void parse(void);
     bool state;
@@ -59,6 +60,7 @@ public:
     std::string & remote_addr(void);
     std::string & raw(void);
     std::string & rebuild(void);
+    void clear();
     ~HttpRequest();
 };
 }

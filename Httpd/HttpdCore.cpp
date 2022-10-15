@@ -13,6 +13,7 @@ HttpdCore DefaultHttpdCore={
     DefaultIFilter,
     DefaultOFilter,
     DefaultSocketI,
+    DefaultSocketD,
     DefaultThreadC,
     DefaultHttpH,
 };
@@ -72,8 +73,9 @@ Httpd::Httpd(HttpdCore & _core, HttpdSettingList & _set){
 
 Httpd::~Httpd(){}
 
-httpd_t Httpd::start(void){
+httpd_t Httpd::start(){
     httpd_t _r;
+    Setting.Thread_S.Is_running=true;
     int _sk=this->Core.Initializer(this->Setting.Socket_S);
     this->Setting.Thread_S.Socket_n=_sk;
     this->Core.Controller(this->Setting.Thread_S,this->MCore,(void *)&this->Setting);
@@ -84,12 +86,15 @@ httpd_t Httpd::status() const {
     return _status;
 }
 
-httpd_t Httpd::stop(void){
-    #ifdef ABXHTTD_UNIX
-    close(Setting.Socket_S.allocated_socket);
-    #endif
-    ABXHTTPD_INFO_PRINT(1,"[Main]Closed Socket %d",Setting.Socket_S.allocated_socket);
-    return 0;
+httpd_t Httpd::stop(){
+    int st=Core.Destructor(Setting.Socket_S);
+    Setting.Thread_S.Is_running=false;
+    if(st==0){
+        ABXHTTPD_INFO_PRINT(1,"[Core]Shutted down.");
+        return 0;
+    }else{
+        return 1;
+    }
 }
 
 }

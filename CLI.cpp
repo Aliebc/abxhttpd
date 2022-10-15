@@ -11,17 +11,23 @@
 #endif
 
 using namespace abxhttpd;
+abxhttpd::Httpd * CMain=NULL;
 
-int sigint_handle(int sig){
+void sigint_handle(int sig){
     if(sig==SIGINT){
-
+        ABXHTTPD_INFO_PRINT(1,"[Main]Recieved SIGINT, shutting down.");
+        if(CMain!=NULL){
+            httpd_t st=CMain->stop();
+            ABXHTTPD_INFO_PRINT(1,"[Main]Exit with %d.",st);
+            exit(st);
+        }
     }
-    return 0;
 }
 
 int main(int argc,char * argv[]){
     //std::ios::sync_with_stdio(false);
     CmdArray d=CmdParse(argc,(const char **)argv);
+    signal(SIGINT,sigint_handle);
     if(CmdArrayIs(d,'v')){
         try{
             if(d['v'].at(0)=='c'){
@@ -144,6 +150,7 @@ int main(int argc,char * argv[]){
             #endif
         }
         Httpd ma(*_HttpdCore,hi);
+        CMain=&ma;
         try{
             ma.start();
         }catch (abxhttpd_error e){

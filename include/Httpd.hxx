@@ -66,6 +66,7 @@ typedef struct {
     int Socket_n;
     bool Multi_thread;
     bool Is_block;
+    bool Is_running;
     std::ostream * abxout;
     std::ostream * abxerr;
 }ThreadSettingList;
@@ -85,6 +86,7 @@ typedef HttpRequest (* IStreamFilter) (std::string &, void *);
 typedef HttpResponse (* HttpHandler) (HttpRequest &, void *);
 typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 typedef int (* SocketInitializer) (SocketSettingList &);
+typedef int (* SocketDestructor) (SocketSettingList &);
 
 typedef struct {
     IStreamFilter IFilter;
@@ -108,6 +110,7 @@ typedef void * (* ThreadController) (const ThreadSettingList &, const CCore &, v
 
 extern HttpHandler DefaultHttpH;
 extern SocketInitializer DefaultSocketI;
+extern SocketDestructor DefaultSocketD;
 extern ThreadController DefaultThreadC;
 extern IStreamFilter DefaultIFilter;
 extern OStreamFilter DefaultOFilter;
@@ -116,6 +119,7 @@ typedef struct {
     IStreamFilter IFilter;
     OStreamFilter OFilter;
     SocketInitializer Initializer;
+    SocketDestructor Destructor;
     ThreadController Controller;
     HttpHandler Handler;
 } HttpdCore;

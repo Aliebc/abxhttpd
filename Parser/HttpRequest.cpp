@@ -67,6 +67,10 @@ HttpRequest::HttpRequest(const std::string & _src){
     this->Raw=_src;
 }
 
+HttpRequest::HttpRequest(){
+    this->state=false;
+}
+
 HttpRequest::HttpRequest(const char * _src,size_t _len){
     this->state=false;
     this->Raw.append(_src,_len);
@@ -121,6 +125,15 @@ StrArray & HttpRequest::headers(void){
 std::string & HttpRequest::raw(void){
     return this->Raw;
 };
+
+void HttpRequest::clear(){
+    this->Raw.clear();
+    
+}
+
+bool HttpRequest::is_header(const char * _header){
+    return (this->header(_header).size()!=0);
+}
 
 HttpRequest::~HttpRequest(){};
 

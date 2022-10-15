@@ -64,7 +64,8 @@ namespace abxhttpd{
                 _hr.body()=_DefaultCodePage(404);
             }
         }
-END:       _hr.header("Connection")=std::string(" close");
+END:    
+        _hr.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):std::string("close");
         _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
         _hr.header("Receive-Size")=std::to_string(_src.body().size());
         _hr.header("Server")=std::string(" " ABXHTTPD_VERSION_SERVER);

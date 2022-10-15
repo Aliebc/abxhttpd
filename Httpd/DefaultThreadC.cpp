@@ -23,7 +23,7 @@ namespace abxhttpd{
     void * _ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args){
         HttpdSettingList args=*(HttpdSettingList *)_args;
         ABXHTTPD_INFO_PRINT(2,"[Core]Entered main ThreadController, multi-thread status: %s",_set.Multi_thread?"Enabled":"Disabled");
-            while(true){
+            while(_set.Is_running){
                 struct sockaddr_in src_in;
                 socklen_t sklen=sizeof(src_in);
                 int ad=-1;
@@ -35,6 +35,9 @@ namespace abxhttpd{
                 #endif
                 #ifdef ABXHTTPD_WINDOWS
                 while(ad<=0){
+                    if(!_set.Is_running){
+                        break;
+                    }
                     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Now invoke accept.");
                     ad=accept(_set.Socket_n,(struct sockaddr *)&src_in,&sklen);
                     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked accept, returning %d.",ad);
@@ -67,6 +70,23 @@ namespace abxhttpd{
         return NULL;
     }
 
+    void close_socket(int ad){
+        int st;
+        #ifdef ABXHTTPD_WINDOWS
+        st=shutdown(ad,2);
+        ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked shutdown, returning %d.",ad,st);
+        #endif
+        #ifdef ABXHTTPD_UNIX
+        st=close(ad);
+        ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
+        if(st==0){
+            ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
+        }else{
+            ABXHTTPD_INFO_PRINT(3,"Cannot close socket %d(Error code:%d)",ad,st);
+        }
+        #endif
+    }
+
     void * _ThreadHandler(void * _ptr){
         char _req[1024];
         char _time[128];
@@ -86,6 +106,9 @@ namespace abxhttpd{
         std::string _ip(inet_ntoa(src.src_in.sin_addr));
         std::string res;
         std::string req;
+RE_RECV:
+        req.clear();
+        res.clear();
         while(true){
             ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke recv.",ad);
             _recv_s=recv(ad,_req,sizeof(_req),0);
@@ -114,24 +137,27 @@ namespace abxhttpd{
                     break;
                 }
             }else if(_recv_s==0){
-                #ifdef ABXHTTPD_DEBUG
-                printf("[Socket %d]Closed by peer.\n",ad);
-                #endif
-                break;
+                ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed by remote.",ad);
+                close_socket(ad);
+                return NULL;
             }
             //usleep(1000L*100);
         }
+        bool is_keep=false;
         if(_recv_len>0){
             try{
-                HttpRequest H_req=src.MCore.IFilter(req,_ptr);
+                HttpRequest H_req;
+                HttpResponse H_res;
+                H_req=src.MCore.IFilter(req,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %ld size.",ad,req.size());
                 H_req.remote_addr()=_ip;
                 *logout<< _time << _ip << " " << H_req.method() <<" "<< H_req.path() << " "<< H_req.header("User-Agent") <<std::endl;
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Logged this request.",ad);
-                HttpResponse H_res=src.MCore.Handler(H_req,_ptr);
+                H_res=src.MCore.Handler(H_req,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked core handler.",ad);
                 res=src.MCore.OFilter(H_res,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %ld size.",ad,res.size());
+                is_keep=(H_res.header("Connection")=="keep-alive");
             }catch(abxhttpd_error e){
                 *errout<< _time << inet_ntoa(src.src_in.sin_addr) << " Error:" << e.what()<<std::endl;
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]An error occured, logged this error.",ad);
@@ -150,6 +176,7 @@ namespace abxhttpd{
                     if(_send_len==res.size()){
                         break;
                     }
+                    
                 }else if(_send_lv<0){
                     if(errno==0||errno==EWOULDBLOCK){
                         continue;
@@ -161,35 +188,12 @@ namespace abxhttpd{
                     continue;
                 }
             }
-            int st;
-            #ifdef ABXHTTPD_WINDOWS
-            st=shutdown(ad,2);
-            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked shutdown, returning %d.",ad,st);
-            #endif
-            #ifdef ABXHTTPD_UNIX
-            st=close(ad);
-            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
-            if(st==0){
-                ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
-            }else{
-                ABXHTTPD_INFO_PRINT(3,"Cannot close socket %d(Error code:%d)",ad,st);
+            if(is_keep){
+                goto RE_RECV;
             }
-            #endif
+            close_socket(ad);
         }else{
-            int st;
-            #ifdef ABXHTTPD_WINDOWS
-            st=shutdown(ad,2);
-            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked shutdown, returning %d.",ad,st);
-            #endif
-            #ifdef ABXHTTPD_UNIX
-            st=close(ad);
-            ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
-            if(st==0){
-                ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
-            }else{
-                ABXHTTPD_INFO_PRINT(3,"Cannot close socket %d(Error code:%d)",ad,st);
-            }
-            #endif
+            close_socket(ad);
         }
         delete (SocketRequestWithSL *)_ptr;
         return NULL;
