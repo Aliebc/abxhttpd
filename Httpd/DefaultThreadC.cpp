@@ -3,6 +3,7 @@
 #include <thread>
 #include <ctime>
 #include <signal.h>
+#include "Extension/SSL.H"
 
 
 namespace abxhttpd{
@@ -12,8 +13,7 @@ namespace abxhttpd{
         ThreadSettingList ts;
     }SocketRequestWithSL;
 
-    void * _ThreadHandler(void * _ptr);
-
+    template <class SocketStream>
     void * _ThreadHandler(void * _ptr){
         char _req[1024];
         char _time[128];
@@ -28,7 +28,8 @@ namespace abxhttpd{
         std::string _ip(inet_ntoa(src.src_in.sin_addr));
         std::string res;
         std::string req;
-        HttpdSocket sk_stream(src);
+        //SSLSocket sk_stream2(src);
+        SocketStream sk_stream(src);
 RE_RECV:
         req.clear();
         res.clear();
@@ -62,6 +63,7 @@ RE_RECV:
             long int _send_lv=-1;
             size_t _send_len=0;
             sk_stream.write(res);
+            ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",ad,res.c_str());
             if(is_keep){
                 goto RE_RECV;
             }
@@ -74,6 +76,7 @@ RE_RECV:
         return NULL;
     }
 
+    template <class SocketStream>
     void * _ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args){
         HttpdSettingList args=*(HttpdSettingList *)_args;
         ABXHTTPD_INFO_PRINT(2,"[Core]Entered main ThreadController, multi-thread status: %s",_set.Multi_thread?"Enabled":"Disabled");
@@ -111,7 +114,7 @@ RE_RECV:
                 SocketRequestWithSL * __src=new SocketRequestWithSL({_src,_set});
                 if(_set.Multi_thread){
                     try{
-                        std::thread _th(_ThreadHandler,__src);
+                        std::thread _th(_ThreadHandler<SocketStream>,__src);
                         _th.detach();
                         ABXHTTPD_INFO_PRINT(4,"[Core]Detached thread for socket %d.",ad);
                     }catch(std::exception e){
@@ -119,11 +122,16 @@ RE_RECV:
                         *_set.abxerr << "THREAD ERROR:" << e.what() <<std::endl;
                     }
                 }else{
-                    _ThreadHandler(__src);
+                    _ThreadHandler<SocketStream>(__src);
                 }
             }
         return NULL;
     }
 
-    ThreadController DefaultThreadC=_ThreadController;
+    void * __ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args){
+        _ThreadController<HttpdSocket>(_set,_core,_args);
+        return NULL;
+    }
+
+    ThreadController DefaultThreadC=__ThreadController;
 }

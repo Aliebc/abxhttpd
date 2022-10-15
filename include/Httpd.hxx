@@ -34,12 +34,6 @@
 extern int verbose;
 extern int info_color;
 
-#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=verbose){\
-if(info_color==0){\
-    printf("[Abxhttpd INFO][Grade %d] " fmt "\n",grade,##__VA_ARGS__);\
-}else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Grade %d] \033[1;37m" fmt "\033[0m\n",grade,##__VA_ARGS__);fflush(stdout);}\
-}
-
 int HttpdInfo(int grade, const char * fmt, ...);
 
 namespace abxhttpd{
@@ -57,7 +51,8 @@ typedef struct {
     void * Args;
 }SocketSettingList;
 
-typedef struct {
+
+typedef struct _ThreadSettingList {
     size_t Stack_size;
     int Thread_count;
     int Socket_n;
@@ -66,7 +61,7 @@ typedef struct {
     bool Is_running;
     std::ostream * abxout;
     std::ostream * abxerr;
-}ThreadSettingList;
+} ThreadSettingList;
 
 typedef struct {
     std::string Path;
@@ -84,6 +79,7 @@ typedef HttpResponse (* HttpHandler) (HttpRequest &, void *);
 typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 typedef int (* SocketInitializer) (SocketSettingList &);
 typedef int (* SocketDestructor) (SocketSettingList &);
+
 
 typedef struct {
     IStreamFilter IFilter;
@@ -113,6 +109,7 @@ extern ThreadController DefaultThreadC;
 extern IStreamFilter DefaultIFilter;
 extern OStreamFilter DefaultOFilter;
 
+
 typedef struct {
     IStreamFilter IFilter;
     OStreamFilter OFilter;
@@ -140,9 +137,9 @@ extern HttpdCoreAddress DefaultHttpdCoreAddress;
 extern HttpdCoreAddress HttpdCoreAddressTable[64];
 typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
-std::string ShowHttpdCoreAddressTable(void);
+std::string ShowHttpdCoreAddressTable();
 HttpdCore * FindHttpdCore(const char * _src);
-int RegisterHttpdCore(HttpdCoreAddress * _core);
+void RegisterHttpdCore(HttpdCoreAddress _core);
 
 typedef int8_t httpd_t;
 
@@ -167,8 +164,8 @@ public:
 class HttpdCore_R 
 {
 public:
-    HttpdCore_R(HttpdCoreAddress &);
-    ~HttpdCore_R(){}
+    HttpdCore_R(HttpdCoreAddress);
+    ~HttpdCore_R();
 };
 
 }

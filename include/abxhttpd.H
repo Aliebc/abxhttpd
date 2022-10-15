@@ -2,6 +2,18 @@
 #ifndef _ABXHTTPD_H_
 #define _ABXHTTPD_H_
 
+/*
+    ___     __           __     __   __              __
+   /   |   / /_   _  __ / /_   / /_ / /_ ____   ____/ /
+  / /| |  / __ \ | |/_// __ \ / __// __// __ \ / __  / 
+ / ___ | / /_/ /_>  < / / / // /_ / /_ / /_/ // /_/ /  
+/_/  |_|/_.___//_/|_|/_/ /_/ \__/ \__// .___/ \__,_/   
+                                     /_/               
+This is ABXHTTPD main header file, including every sub module's header file.
+In your program, you can only include this file to get whole functions.
+
+*/
+
 #include "Version.hxx"
 #include "abxerror.hxx"
 #include "config.hxx"
@@ -14,10 +26,15 @@
 #include "Httpd.hxx"
 #include "AbxInfo.hxx"
 #include "HttpdSocket.hxx"
+#include "HttpdTools.hxx"
 #include <iostream>
 #include <fstream>
 
 extern char _errorstr[];
+
+extern int global_argc;
+extern char ** global_argv;
+extern CmdArray * global_argu;
 
 #define ABXHTTPD_CLI_ERR(fmt,...) \
 if(info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);exit(1);}\
@@ -34,5 +51,17 @@ else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS_
 #endif
 
 #define ABXHTTPD_CLI_ERR2(cond,fmt,...) if(!(cond)){ABXHTTPD_CLI_ERR(fmt,##__VA_ARGS__);}
+
+#define ABXHTTPD_ZERO_MEMORY(dst) memset(dst,0,sizeof(dst))
+
+#ifndef ABXHTTPD_NO_INFO
+#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=verbose){\
+if(info_color==0){\
+    printf("[Abxhttpd INFO][Grade %d] " fmt "\n",grade,##__VA_ARGS__);\
+}else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Grade %d] \033[1;37m" fmt "\033[0m\n",grade,##__VA_ARGS__);fflush(stdout);}\
+}
+#else
+#define ABXHTTPD_INFO_PRINT(grade,fmt,...)
+#endif
 
 #endif

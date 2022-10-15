@@ -26,7 +26,10 @@ void sigint_handle(int sig){
 
 int main(int argc,char * argv[]){
     //std::ios::sync_with_stdio(false);
+    global_argc=argc;
+    global_argv=argv;
     CmdArray d=CmdParse(argc,(const char **)argv);
+    global_argu=&d;
     signal(SIGINT,sigint_handle);
     if(CmdArrayIs(d,'v')){
         try{
@@ -152,6 +155,7 @@ int main(int argc,char * argv[]){
         Httpd ma(*_HttpdCore,hi);
         CMain=&ma;
         try{
+            ABXHTTPD_INFO_PRINT(5,"[Main]Start Core at %p.",_HttpdCore);
             ma.start();
         }catch (abxhttpd_error e){
             ABXHTTPD_CLI_ERR("Start failed: %s",e.what());

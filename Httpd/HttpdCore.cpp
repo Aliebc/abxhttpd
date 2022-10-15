@@ -6,6 +6,9 @@
 char _errorstr[128];
 int verbose=0;
 int info_color=0;
+int global_argc;
+char ** global_argv;
+CmdArray * global_argu;
 
 namespace abxhttpd{
 
@@ -26,23 +29,16 @@ HttpdCoreAddress PHPCGICore={
     "PHPCGICore","Call php by CGI.",NULL
 };
 
-HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX]={
-    DefaultHttpdCoreAddress,0
-};
+HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX];
 
-core_t HttpdCoreAddressCount=1;
+core_t HttpdCoreAddressCount=0;
 
-HttpdCore_R::HttpdCore_R(HttpdCoreAddress & src){
-    RegisterHttpdCore(&src);
-}
-
-HttpdCore_R php_core(PHPCGICore);
+HttpdCore_R MainC(DefaultHttpdCoreAddress);
 
 std::string ShowHttpdCoreAddressTable(void){
     std::string _ret;
     for(core_t _i=0;_i<HttpdCoreAddressCount;_i++){
-        _ret+=std::string(HttpdCoreAddressTable[_i].Symbol)+"\t("+std::string(HttpdCoreAddressTable[_i].Info)+")\n";
-    }
+        _ret+=std::string(HttpdCoreAddressTable[_i].Symbol)+"\t("+std::string(HttpdCoreAddressTable[_i].Info)+")\n";    }
     return _ret;
 }
 
@@ -55,15 +51,16 @@ HttpdCore * FindHttpdCore(const char * _src){
     return NULL;
 }
 
-int RegisterHttpdCore(HttpdCoreAddress * _core){
-    if(HttpdCoreAddressCount>=ABXHTTPD_CORE_MAX){
-        return 1;
-    }
-    memcpy(&HttpdCoreAddressTable[HttpdCoreAddressCount],_core,sizeof(HttpdCoreAddress));
-    ABXHTTPD_DEBUG_PRINTF("[Main]Registered Core: %s\n",_core->Symbol);
-    HttpdCoreAddressCount+=1;
-    return 0;
+void RegisterHttpdCore(HttpdCoreAddress _core){
+        memcpy((void *)&HttpdCoreAddressTable[HttpdCoreAddressCount],(void *)&_core,sizeof(HttpdCoreAddress));
+        ABXHTTPD_DEBUG_PRINTF("[Main]Registered Core: %s\n",_core.Symbol);
+        HttpdCoreAddressCount++;
 }
+
+HttpdCore_R::HttpdCore_R(HttpdCoreAddress src){
+    RegisterHttpdCore(src);
+}
+HttpdCore_R::~HttpdCore_R(){}
 
 Httpd::Httpd(HttpdCore & _core, HttpdSettingList & _set){
     this->Core=_core;
