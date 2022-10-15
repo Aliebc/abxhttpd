@@ -4,14 +4,15 @@ namespace abxhttpd{
     MIMEs MIMEList
     {
         {".pdf","application/pdf"},
+        {".wasm","application/wasm"},
         {".html","text/html"},
         {".htm","text/html"},
-        {".js","text/js"},
+        {".js","application/javascript"},
         {".css","text/css"},
         {".jpg","image/jpeg"},
         {".gif","image/gif"},
         {".png","image/png"},
-        {".ico","image/ico"},
+        {".ico","image/x-icon"},
         {".mp4","video/mp4"}
     };
 

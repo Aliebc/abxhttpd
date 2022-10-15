@@ -7,9 +7,7 @@
 #include <string.h>
 #include <stdarg.h>
 
-ABXHTTPD_MODINITFUNC AX_HTTP(){
-    abxhttpd::RegisterModule( "HttpParserEngine" , "AB.X HTTP Parser");
-}
+abxhttpd::Module AX_HTTP("http" , "AB.X HTTP Parser");
 
 typedef struct {
     char _src[1<<12];

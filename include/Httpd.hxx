@@ -30,9 +30,6 @@
 #include <fstream>
 #include <ostream>
 
-
-#define ABXHTTPD_COREINITFUNC ABXHTTPD_MODINITFUNC
-
 #define ABXHTTPD_CORE_MAX 64
 extern int verbose;
 extern int info_color;
@@ -101,6 +98,7 @@ typedef struct
     int _ad;
     int _sd;
     struct sockaddr_in src_in;
+    bool is_noblocked;
     int port_in;
     CCore MCore;
     HttpSettingList Http_S;
@@ -164,6 +162,13 @@ public:
     httpd_t stop();
     httpd_t stop(int _signal);
     ~Httpd();
+};
+
+class HttpdCore_R 
+{
+public:
+    HttpdCore_R(HttpdCoreAddress &);
+    ~HttpdCore_R(){}
 };
 
 }

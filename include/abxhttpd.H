@@ -13,14 +13,15 @@
 #include "Platform.hxx"
 #include "Httpd.hxx"
 #include "AbxInfo.hxx"
+#include "HttpdSocket.hxx"
 #include <iostream>
 #include <fstream>
 
 extern char _errorstr[];
 
 #define ABXHTTPD_CLI_ERR(fmt,...) \
-if(info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);}\
-else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS__);}
+if(info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);exit(1);}\
+else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS__);exit(1);}
 
 #ifdef ABXHTTPD_DEBUG
 #ifdef ABXHTTPD_NOCOLOR

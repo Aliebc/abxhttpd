@@ -30,11 +30,13 @@ HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX]={
     DefaultHttpdCoreAddress,0
 };
 
-core_t HttpdCoreAddressCount=0;
+core_t HttpdCoreAddressCount=1;
 
-ABXHTTPD_COREINITFUNC PHPInit(){
-    RegisterHttpdCore(&PHPCGICore);
+HttpdCore_R::HttpdCore_R(HttpdCoreAddress & src){
+    RegisterHttpdCore(&src);
 }
+
+HttpdCore_R php_core(PHPCGICore);
 
 std::string ShowHttpdCoreAddressTable(void){
     std::string _ret;

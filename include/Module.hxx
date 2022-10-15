@@ -9,12 +9,22 @@ namespace abxhttpd{
     {
         char Name[64];
         char Info[128];
-    } Module;
+    } _Module;
     typedef unsigned int module_t;
-    extern Module ModuleList[128];
+    extern _Module ModuleList[128];
     extern module_t ModuleCount;
     void RegisterModule(const char * _name,const char * _info);
     std::string ShowModules();
+
+    class Module
+    {
+    private:
+        /* data */
+    public:
+        Module(const char * _name,const char * _info);
+        ~Module();
+    };
+    
 }
 
 #ifndef ABXHTTPD_MSVC

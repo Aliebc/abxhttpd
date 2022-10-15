@@ -1,14 +1,14 @@
 #include "include/Module.hxx"
 
 namespace abxhttpd{
-    Module ModuleList[128];
+    _Module ModuleList[128];
     module_t ModuleCount=0;
 
     void RegisterModule(const char * _name,const char * _info){
-        Module _mod;
+        _Module _mod;
         strcpy(_mod.Name,_name);
         strcpy(_mod.Info,_info);
-        memcpy((void *)&ModuleList[ModuleCount],(void *)&_mod,sizeof(Module));
+        memcpy((void *)&ModuleList[ModuleCount],(void *)&_mod,sizeof(_Module));
         ModuleCount++;
     }
 
@@ -18,5 +18,14 @@ namespace abxhttpd{
             _ret+=std::string(ModuleList[_i].Name)+"\t"+std::string(ModuleList[_i].Info)+"\n";
         }
         return _ret;
+    }
+
+    Module::Module(const char * _name,const char * _info)
+    {
+        RegisterModule(_name,_info);
+    }
+    
+    Module::~Module()
+    {
     }
 }
