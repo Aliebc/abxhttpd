@@ -62,7 +62,7 @@ int main(int argc,char * argv[]){
     }
     if(CmdArrayIs(d,'m')){
         std::cout << "[Cores]\n"<< ShowHttpdCoreAddressTable() <<std::endl;
-        std::cout << "[Modules]\n"<< ShowModules() <<std::endl;
+        std::cout << "[Modules]\n"<< ShowModules();
         exit(0);
     }
     if(CmdArrayIs(d,'c')){
@@ -138,7 +138,7 @@ int main(int argc,char * argv[]){
             TCHAR CLA[1024];
             ZeroMemory(CLA,sizeof(CLA));
             char * cp=(char *)&CLA;
-            for(int i=0;i<argc;i++){
+            for(int i=1;i<argc;i++){
                 if(strcmp("-d",argv[i])==0){
                     continue;
                 }

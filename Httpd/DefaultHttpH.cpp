@@ -7,7 +7,12 @@
 #include <string.h>
 #include <stdarg.h>
 
-abxhttpd::Module AX_HTTP("http" , "AB.X HTTP Parser");
+abxhttpd::ConfigureInfo AX_HTTP_INFO={"http",{
+    {"Support","enabled"},
+    {"Module Version","AB.X HTTP Parser 0.1"},
+    {"Protocol Version","HTTP/1.1"}
+}};
+abxhttpd::Module AX_HTTP_MODULE(AX_HTTP_INFO);
 
 typedef struct {
     char _src[1<<12];
@@ -33,7 +38,7 @@ namespace abxhttpd{
         _suffix=_FileSuffix(_src.path());
         if(_src.path()=="/abxhttpd"){
             _hr.status(200);
-            _hr.body()=std::string(ABXHTTPD_INFO_PAGE);
+            _hr.body()=std::string(ABXHTTPD_INFO_PAGE_1)+ShowModules_HTML(&_src)+std::string(ABXHTTPD_INFO_PAGE_2);
         }else{
             try{
                 std::string _b=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
@@ -61,12 +66,6 @@ END:
         %d %s</title>\n\t</head>\n<body>\n\t<center><h1>%d %s</h1><hr> " ABXHTTPD_VERSION_SERVER "</center>\
         \n</body>\n</html>",_code,_str,_code,_str);
         return std::string(_p);
-    }
-
-    HttpResponse _AbxhttpdPage(void){
-        HttpResponse _hr;
-        _hr.body()=std::string(ABXHTTPD_INFO_PAGE);
-        return _hr;
     }
 
     std::string _PipeRead(std::string _Path,std::string _Write){

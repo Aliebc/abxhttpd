@@ -1,37 +1,41 @@
 #ifndef MODULE_H
 #define MODULE_H
 #include "Version.hxx"
+#include "HttpRequest.hxx"
 #include <cstring>
 #include <string>
 
+#define ABXHTTPD_MAX_MODULE 64
+
 namespace abxhttpd{
-    typedef struct 
-    {
+
+    typedef struct {
+        char name[32];
+        char info[64];
+    } StrKey;
+    typedef struct {
         char Name[64];
-        char Info[128];
-    } _Module;
+        StrKey Conf[64];
+    }ConfigureInfo;
+    
     typedef unsigned int module_t;
-    extern _Module ModuleList[128];
+    extern ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
     extern module_t ModuleCount;
-    void RegisterModule(const char * _name,const char * _info);
+
+    void RegisterModule(ConfigureInfo _info);
+    void RegisterModule(ConfigureInfo _info);
     std::string ShowModules();
+    std::string ShowModules_HTML(HttpRequest * _src=NULL);
 
     class Module
     {
     private:
-        /* data */
+        
     public:
-        Module(const char * _name,const char * _info);
+        Module(ConfigureInfo _info);
         ~Module();
     };
-    
 }
-
-#ifndef ABXHTTPD_MSVC
-#define ABXHTTPD_MODINITFUNC __attribute__((constructor)) void
-#else
-#define ABXHTTPD_MODINITFUNC void
-#endif
 
 #ifdef ABXHTTPD_GUI
 namespace abxhttpd{

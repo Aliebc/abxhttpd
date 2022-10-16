@@ -1,10 +1,10 @@
 #ifndef HTTPD_TOOLS_H
 #define HTTPD_TOOLS_H
+
+#define ABXHTTPD_MIN(a,b) (a<b?a:b)
+
 namespace abxhttpd {
-    typedef struct _IPPortBin
-    {
-        int port;
-    }IPPortBin;
+    
     std::string _DefaultCodePage(int _code);
     std::string _FileRead(std::string _Path);
     std::string _FileSuffix(std::string _Name);
@@ -13,5 +13,6 @@ namespace abxhttpd {
     void * _ThreadHandler(void * _ptr);
     template <class SocketStream>
     void * _ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args);
+    //std::string ABX_InfoPageHTML(const HttpRequest & _req);
 }
 #endif

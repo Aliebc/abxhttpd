@@ -8,15 +8,13 @@
 
 #endif
 
-#define ABXHTTPD_MIN(a,b) (a<b?a:b)
-
 namespace abxhttpd{
     class HttpdSocket
     {
     public:
         HttpdSocket();
         HttpdSocket(SocketRequest &);
-        HttpdSocket(int); //不推荐
+        HttpdSocket(int);
         bool accept();
         virtual bool close();
         const SocketRequest & info();

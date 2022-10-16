@@ -39,7 +39,9 @@ namespace abxhttpd
 
 extern HttpdCoreAddress SSLHttpdCoreAddress;
 
-Module regssl("ssl","ssl module(experiment)");
+ConfigureInfo AX_SSL_INFO={"ssl",{{"Support","enabled"},{"OpenSSL Version",OPENSSL_VERSION_TEXT}}};
+
+Module AX_SSL_MODULE(AX_SSL_INFO);
 class SSLSocket:public HttpdSocket{
 private:
     SSL_CTX *ctx;

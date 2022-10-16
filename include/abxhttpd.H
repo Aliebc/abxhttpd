@@ -32,6 +32,7 @@ In your program, you can only include this file to get whole functions.
 #include "HttpdSocket.hxx"
 #include "HttpdTools.hxx"
 #include <iostream>
+#include <initializer_list>
 #include <fstream>
 
 extern char _errorstr[];
