@@ -14,6 +14,10 @@ In your program, you can only include this file to get whole functions.
 
 */
 
+#ifdef DEBUG
+#define ABXHTTPD_DEBUG
+#endif
+
 #include "Version.hxx"
 #include "abxerror.hxx"
 #include "config.hxx"

@@ -18,12 +18,12 @@ namespace abxhttpd{
         HttpdSocket(SocketRequest &);
         HttpdSocket(int); //不推荐
         bool accept();
-        bool close();
+        virtual bool close();
         const SocketRequest & info();
-        size_t read(std::string & _dst,size_t size = 0 );
-        size_t write(std::string & _content,size_t size = 0);
+        virtual size_t read(std::string & _dst,size_t size = 0 );
+        virtual size_t write(std::string & _content,size_t size = 0);
         bool should_close();
-        int status();
+        virtual int status();
         int & handle_count();
         const char * GetLastError();
         ~HttpdSocket();

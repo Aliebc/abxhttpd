@@ -3,14 +3,17 @@
 #include <thread>
 #include <ctime>
 #include <signal.h>
-#include "Extension/SSL.H"
 
+#ifdef ABXHTTPD_SSL
+#include "Extension/SSL.H"
+#endif
 
 namespace abxhttpd{
     typedef struct _SocketRequestWithSL
     {
         SocketRequest sr;
-        ThreadSettingList ts;
+        ThreadSettingList ThreadSet;
+        HttpdSocket * SocketStream;
     }SocketRequestWithSL;
 
     template <class SocketStream>
@@ -21,8 +24,8 @@ namespace abxhttpd{
         strftime(_time,128,"[%Y-%m-%d %H:%M:%S] ",localtime(&tt));
         SocketRequestWithSL src_sl=*(SocketRequestWithSL *)_ptr;
         SocketRequest src =(src_sl.sr);
-        std::ostream *logout=src_sl.ts.abxout;
-        std::ostream *errout=src_sl.ts.abxerr;
+        std::ostream *logout=src_sl.ThreadSet.abxout;
+        std::ostream *errout=src_sl.ThreadSet.abxerr;
         int ad=src._ad;
         ABXHTTPD_INFO_PRINT(4,"[Socket %d]Entered thread.",ad);
         std::string _ip(inet_ntoa(src.src_in.sin_addr));
@@ -71,7 +74,6 @@ RE_RECV:
         }else{
             sk_stream.close();
         }
-        //delete sk_stream;
         delete (SocketRequestWithSL *)_ptr;
         return NULL;
     }

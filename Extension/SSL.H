@@ -1,10 +1,5 @@
 #ifdef ABXHTTPD_SSL
-#ifndef MODULE_SSL_H
-#define MODULE_SSL_H
 #include "include/abxhttpd.H"
-#include "include/HttpdTools.hxx"
-#include "include/HttpdSocket.hxx"
-#include "include/Httpd.hxx"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -123,9 +118,8 @@ HttpdCoreAddress SSLHttpdCoreAddress={
     "SSLHttpdCore","Core using SSL, use -K(cert)/-k(key) to set SSL.",&SSLHttpdCore
 };
 
-HttpdCore_R *SSLCore=new HttpdCore_R(SSLHttpdCoreAddress);
+HttpdCore_R SSLCore(SSLHttpdCoreAddress);
 
 }
 
-#endif
 #endif
