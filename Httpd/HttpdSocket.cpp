@@ -59,7 +59,7 @@ namespace abxhttpd{
                     return 0;
                 }else if(_recv_s<0){
                     last_err=strerror(errno);
-                    ABXHTTPD_INFO_PRINT(11, "[Socket %d][System API]Error:%s.", last_err);
+                    ABXHTTPD_INFO_PRINT(11, "[Socket %d][System API]Error:%s.", ad, last_err);
                     if(errno==EWOULDBLOCK||errno==EAGAIN){
                         continue;
                     }else{
@@ -116,9 +116,4 @@ namespace abxhttpd{
         st=0;
         return (__close_socket(_src._ad)==0);
     }
-    /*template <class _A>
-    _A & operator>> ( _A & src, std::string & is){
-        src.read(is);
-        return src;
-    }*/
 }

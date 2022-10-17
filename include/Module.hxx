@@ -10,12 +10,12 @@
 namespace abxhttpd{
 
     typedef struct {
-        char name[32];
-        char info[64];
+        const char * name;
+        const char * info;
     } StrKey;
     typedef struct {
-        char Name[64];
-        StrKey Conf[64];
+        const char * Name;
+        StrKey Conf[ABXHTTPD_MAX_MODULE];
     }ConfigureInfo;
     
     typedef unsigned int module_t;

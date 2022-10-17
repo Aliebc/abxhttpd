@@ -25,7 +25,6 @@ void sigint_handle(int sig){
 }
 
 int main(int argc,char * argv[]){
-    //std::ios::sync_with_stdio(false);
     global_argc=argc;
     global_argv=argv;
     CmdArray d=CmdParse(argc,(const char **)argv);
@@ -44,7 +43,7 @@ int main(int argc,char * argv[]){
         }
     }
     ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");
-    HttpdCore * _HttpdCore;
+    const HttpdCore * _HttpdCore;
     if(CmdArrayIs(d,'h')){
         std::cout << ABXHTTPD_HELP <<std::endl;
         exit(0);

@@ -103,6 +103,16 @@ public:
     int status(){
         return st;
     }
+    bool close(){
+        SSL_shutdown(ssl);
+        int close_state=__close_socket(ad);
+        return (close_state==0);
+    }
+    ~SSLSocket(){
+        SSL_free(ssl);
+        SSL_CTX_free(ctx);
+        ABXHTTPD_INFO_PRINT(11,"[Socket %d][OpenSSL API]Free SSL context",ad);
+    }
 };
 
 ThreadController ssl_ctrl=_ThreadController<SSLSocket>;

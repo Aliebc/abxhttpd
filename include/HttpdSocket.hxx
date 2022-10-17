@@ -9,6 +9,7 @@
 #endif
 
 namespace abxhttpd{
+    int __close_socket(int ad);
     class HttpdSocket
     {
     public:

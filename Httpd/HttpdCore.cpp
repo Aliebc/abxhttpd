@@ -42,7 +42,7 @@ std::string ShowHttpdCoreAddressTable(void){
     return _ret;
 }
 
-HttpdCore * FindHttpdCore(const char * _src){
+const HttpdCore * FindHttpdCore(const char * _src){
     for(core_t _i=0;_i<HttpdCoreAddressCount;_i++){
         if(strcmp(_src,HttpdCoreAddressTable[_i].Symbol)==0){
             return HttpdCoreAddressTable[_i].Core;
@@ -62,7 +62,7 @@ HttpdCore_R::HttpdCore_R(HttpdCoreAddress src){
 }
 HttpdCore_R::~HttpdCore_R(){}
 
-Httpd::Httpd(HttpdCore & _core, HttpdSettingList & _set){
+Httpd::Httpd(const HttpdCore & _core, HttpdSettingList & _set){
     this->Core=_core;
     this->MCore.Handler=this->Core.Handler;
     this->MCore.IFilter=this->Core.IFilter;

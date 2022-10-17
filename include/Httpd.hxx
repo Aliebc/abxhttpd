@@ -128,9 +128,9 @@ extern HttpdCore DefaultHttpdCore;
 extern _HttpdStatus HttpdSatatus;
 
 typedef struct {
-    char Symbol[32];
-    char Info[128];
-    HttpdCore *Core;
+    const char * Symbol;
+    const char * Info;
+    const HttpdCore *Core;
 } HttpdCoreAddress;
 
 extern HttpdCoreAddress DefaultHttpdCoreAddress;
@@ -138,7 +138,7 @@ extern HttpdCoreAddress HttpdCoreAddressTable[64];
 typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
 std::string ShowHttpdCoreAddressTable();
-HttpdCore * FindHttpdCore(const char * _src);
+const HttpdCore * FindHttpdCore(const char * _src);
 void RegisterHttpdCore(HttpdCoreAddress _core);
 
 typedef int8_t httpd_t;
@@ -151,7 +151,7 @@ private:
     HttpdSettingList Setting;
     httpd_t _status;
 public:
-    Httpd(HttpdCore & _core, HttpdSettingList & _set);
+    Httpd(const HttpdCore & _core, HttpdSettingList & _set);
     HttpdCore & core(void);
     httpd_t start(void);
     httpd_t start(void * _arg);
