@@ -34,7 +34,7 @@ namespace abxhttpd{
     {
         memset(tmp,0,sizeof(tmp));
         int ad=_src._ad;
-        size_t _recv_s=0;
+        long int _recv_s=0;
         size_t _recv_len=0;
         if(size==0){
             size-=1;
@@ -59,10 +59,12 @@ namespace abxhttpd{
                     return 0;
                 }else if(_recv_s<0){
                     last_err=strerror(errno);
+                    ABXHTTPD_INFO_PRINT(11, "[Socket %d][System API]Error:%s.", last_err);
                     if(errno==EWOULDBLOCK||errno==EAGAIN){
                         continue;
                     }else{
-                        //Timeout
+                        this->close();
+                        return 0;
                     }
                 }
             }

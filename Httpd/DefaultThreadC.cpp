@@ -20,8 +20,7 @@ namespace abxhttpd{
     void * _ThreadHandler(void * _ptr){
         char _req[1024];
         char _time[128];
-        time_t tt=time(NULL);
-        strftime(_time,128,"[%Y-%m-%d %H:%M:%S] ",localtime(&tt));
+        time_t tt;
         SocketRequestWithSL src_sl=*(SocketRequestWithSL *)_ptr;
         SocketRequest src =(src_sl.sr);
         std::ostream *logout=src_sl.ThreadSet.abxout;
@@ -31,13 +30,17 @@ namespace abxhttpd{
         std::string _ip(inet_ntoa(src.src_in.sin_addr));
         std::string res;
         std::string req;
-        //SSLSocket sk_stream2(src);
         SocketStream sk_stream(src);
 RE_RECV:
         req.clear();
+        req.shrink_to_fit();
         res.clear();
+        res.shrink_to_fit();
         sk_stream >> req;
+        tt=time(NULL);
+        strftime(_time,128,"[%Y-%m-%d %H:%M:%S] ",localtime(&tt));
         if(sk_stream.status()==0){
+            delete (SocketRequestWithSL *)_ptr;
             return NULL;
         }
         size_t _recv_len=req.size();

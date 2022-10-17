@@ -73,7 +73,7 @@ Httpd::Httpd(HttpdCore & _core, HttpdSettingList & _set){
 Httpd::~Httpd(){}
 
 httpd_t Httpd::start(){
-    httpd_t _r;
+    httpd_t _r=0;
     Setting.Thread_S.Is_running=true;
     int _sk=this->Core.Initializer(this->Setting.Socket_S);
     this->Setting.Thread_S.Socket_n=_sk;
