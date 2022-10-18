@@ -43,27 +43,24 @@ namespace abxhttpd{
         if(_src.path()=="/abxhttpd"){
             _hr.status(200);
             _hr.body()=std::string(ABXHTTPD_INFO_PAGE_1)+ShowModules_HTML(&_src)+std::string(ABXHTTPD_INFO_PAGE_2);
+            _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
         }else{
             try{
-                //std::string _b=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
                 _hr.header("Content-Type")=_GMIME(_suffix);
-                _hr.need_send_from_stream=true;
                 size_t x=_FileLength(_path);
                 _hr.header("Content-Length")=std::to_string(x);
+                _hr.need_send_from_stream=true;
                 _hr.need_send_from_stream_src=(_path);
-                //_hr.need_send_from_path=(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
-                //_hr.body()=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
             }catch (abxhttpd_error _e){
                 _hr.status(404);
                 _suffix=std::string(".html");
                 _hr.header("Content-Type")=_GMIME(_suffix);
-                _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
                 _hr.body()=_DefaultCodePage(404);
+                _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
             }
         }
-END:    
+END:
         _hr.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):std::string("close");
-        //_hr.header("Receive-Size")=std::to_string(_src.body().size());
         _hr.header("Server")=std::string(" " ABXHTTPD_VERSION_SERVER);
         return _hr;
     }
