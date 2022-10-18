@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string.h>
 #include <stdarg.h>
+#include "include/HttpdTools.hxx"
 
 abxhttpd::ConfigureInfo AX_HTTP_INFO={"http",{
     {"Support","enabled"},
@@ -26,7 +27,6 @@ typedef struct {
 }
 
 namespace abxhttpd{
-    
     HttpResponse _PHPCGI(std::string & _CGIP, HttpRequest & _Hreq, void * _args);
 }
 
@@ -34,6 +34,7 @@ namespace abxhttpd{
     HttpResponse _DefaultHttpH(HttpRequest & _src, void * _args){
         SocketRequest _ssrc =*(SocketRequest *)_args;
         HttpResponse _hr;
+        std::string _path=std::string(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
         if(_src.path()=="/"){
             _src.path().insert(_src.path().size(),"index.html");
         }
@@ -46,18 +47,23 @@ namespace abxhttpd{
             try{
                 //std::string _b=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
                 _hr.header("Content-Type")=_GMIME(_suffix);
-                _hr.body()=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
+                _hr.need_send_from_stream=true;
+                size_t x=_FileLength(_path);
+                _hr.header("Content-Length")=std::to_string(x);
+                _hr.need_send_from_stream_src=(_path);
+                //_hr.need_send_from_path=(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
+                //_hr.body()=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
             }catch (abxhttpd_error _e){
                 _hr.status(404);
                 _suffix=std::string(".html");
                 _hr.header("Content-Type")=_GMIME(_suffix);
+                _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
                 _hr.body()=_DefaultCodePage(404);
             }
         }
 END:    
         _hr.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):std::string("close");
-        _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
-        _hr.header("Receive-Size")=std::to_string(_src.body().size());
+        //_hr.header("Receive-Size")=std::to_string(_src.body().size());
         _hr.header("Server")=std::string(" " ABXHTTPD_VERSION_SERVER);
         return _hr;
     }

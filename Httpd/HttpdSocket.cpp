@@ -20,6 +20,11 @@ namespace abxhttpd{
         return st;
     }
 
+    HttpdSocket::HttpdSocket()
+    {
+        
+    }
+
     HttpdSocket::HttpdSocket(SocketRequest & _sk_req)
     {
         st=1;

@@ -32,6 +32,17 @@ namespace abxhttpd{
         return ret;
     }
 
+    size_t _FileLength(std::string _Path){
+        FILE * fp=fopen(_Path.c_str(),"rb");
+        if(fp==NULL){
+            throw abxhttpd_error("File not exists");
+        }
+        size_t f_size;
+        fseek(fp,0,SEEK_END);
+        f_size=ftell(fp);
+        fclose(fp);
+        return f_size;
+    }
 
     std::string _FileRead(std::string && _Path){
         std::string fps;

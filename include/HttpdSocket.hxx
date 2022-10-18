@@ -2,6 +2,7 @@
 #define HTTPDSOCKET_H
 
 #include "abxhttpd.H"
+#include "Httpd.hxx"
 #ifdef ABXHTTPD_WINDOWS
 
 #define MSG_DONTWAIT 0x0

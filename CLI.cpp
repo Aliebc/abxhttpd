@@ -82,7 +82,7 @@ int main(int argc,char * argv[]){
             si.Bind_IP=bind_ip.s_addr;
         }
         si.Port=atoi(cmd_argu['p'].c_str());
-        si.Max_connect_count=7;
+        si.Max_connect_count=SOMAXCONN;
         HttpdSettingList hi;
         hi.Socket_S=si;
         ThreadSettingList thread_set;

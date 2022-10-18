@@ -4,6 +4,7 @@
 #include <ctime>
 #include <mutex>
 #include <signal.h>
+#include "include/FileSocket.hxx"
 
 #ifdef ABXHTTPD_SSL
 #include "Extension/SSL.H"
@@ -37,9 +38,6 @@ RE_RECV:
         res.clear();
         res.shrink_to_fit();
         sk_stream >> req;
-        
-        std::string a("Hello");
-        sk_stream.write(a,2);
         tt=time(NULL);
         strftime(_time,128,"[%Y-%m-%d %H:%M:%S] ",localtime(&tt));
         if(sk_stream.status()==0){
@@ -49,10 +47,10 @@ RE_RECV:
         size_t _recv_len=req.size();
         ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[IStream]\n%s[End IStream]\n",src._ad,req.c_str());
         bool is_keep=false;
+        HttpRequest H_req;
+        HttpResponse H_res;
         if(_recv_len>0){
             try{
-                HttpRequest H_req;
-                HttpResponse H_res;
                 H_req=src.MCore.IFilter(req,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %lu size.",src._ad,req.size());
                 H_req.remote_addr()=_ip;
@@ -72,6 +70,10 @@ RE_RECV:
                 res=std::string(bd);
             }
             sk_stream << res;
+            if(H_res.need_send_from_stream){
+                FileSocket fio(H_res.need_send_from_stream_src.c_str());
+                sk_stream << fio;
+            }
             ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",src._ad,res.c_str());
             if(is_keep){
                 goto RE_RECV;

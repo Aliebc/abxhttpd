@@ -6,7 +6,8 @@
 namespace abxhttpd {
     
     std::string _DefaultCodePage(int _code);
-    std::string _FileRead(std::string && _Path);
+    size_t _FileLength(std::string _Path);
+    std::string _FileRead(std::string _Path);
     std::string _FileSuffix(std::string _Name);
     std::string ABX_URLDecode(std::string & _src);
     template <class SocketStream>

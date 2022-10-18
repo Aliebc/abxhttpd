@@ -40,6 +40,8 @@ private:
     std::string Raw;
     const char * begin;
 public:
+    bool need_send_from_stream=false;
+    std::string need_send_from_stream_src;
     HttpResponse(const char * _src,size_t _len);
     HttpResponse(const char * _src);
     HttpResponse(std::string & _src);
