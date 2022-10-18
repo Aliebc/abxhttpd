@@ -34,10 +34,10 @@ namespace abxhttpd{
     HttpResponse _DefaultHttpH(HttpRequest & _src, void * _args){
         SocketRequest _ssrc =*(SocketRequest *)_args;
         HttpResponse _hr;
-        std::string _path=std::string(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
         if(_src.path()=="/"){
             _src.path().insert(_src.path().size(),"index.html");
         }
+        std::string _path=std::string(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
         std::string _suffix;
         _suffix=_FileSuffix(_src.path());
         if(_src.path()=="/abxhttpd"){
