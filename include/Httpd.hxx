@@ -95,6 +95,7 @@ typedef struct
     int _ad;
     int _sd;
     struct sockaddr_in src_in;
+    std::string src_in_ip;
     bool is_noblocked;
     int port_in;
     CCore MCore;

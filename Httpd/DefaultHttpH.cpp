@@ -44,9 +44,9 @@ namespace abxhttpd{
             _hr.body()=std::string(ABXHTTPD_INFO_PAGE_1)+ShowModules_HTML(&_src)+std::string(ABXHTTPD_INFO_PAGE_2);
         }else{
             try{
-                std::string _b=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
+                //std::string _b=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
                 _hr.header("Content-Type")=_GMIME(_suffix);
-                _hr.body()=_b;
+                _hr.body()=_FileRead(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
             }catch (abxhttpd_error _e){
                 _hr.status(404);
                 _suffix=std::string(".html");

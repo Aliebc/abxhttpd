@@ -80,9 +80,10 @@ namespace abxhttpd{
         if(size==0){
             size-=1;
         }
-        while(_send_len<ABXHTTPD_MIN(_res.size(),size)){
+        size_t _r_send_len=ABXHTTPD_MIN(_res.size(),size);
+        while(_send_len<_r_send_len){
             ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke send.",ad);
-            _send_lv=send(ad,_res.c_str()+_send_len,_res.size()-_send_len,MSG_DONTWAIT);
+            _send_lv=send(ad,_res.c_str()+_send_len,_r_send_len-_send_len,MSG_DONTWAIT);
             ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked send, returning %ld.",ad,_send_lv);
             ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",ad,_res.c_str());
             if(_send_lv>0){

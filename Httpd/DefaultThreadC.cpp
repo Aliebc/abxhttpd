@@ -2,6 +2,7 @@
 #include <iostream>
 #include <thread>
 #include <ctime>
+#include <mutex>
 #include <signal.h>
 
 #ifdef ABXHTTPD_SSL
@@ -9,25 +10,24 @@
 #endif
 
 namespace abxhttpd{
+    std::mutex io_lock;
     typedef struct _SocketRequestWithSL
     {
-        SocketRequest sr;
-        ThreadSettingList ThreadSet;
-        HttpdSocket * SocketStream;
+        SocketRequest socket_r;
+        ThreadSettingList thread_s;
+        HttpdSocket * socket_s;
     }SocketRequestWithSL;
 
     template <class SocketStream>
     void * _ThreadHandler(void * _ptr){
-        char _req[1024];
         char _time[128];
         time_t tt;
-        SocketRequestWithSL src_sl=*(SocketRequestWithSL *)_ptr;
-        SocketRequest src =(src_sl.sr);
-        std::ostream *logout=src_sl.ThreadSet.abxout;
-        std::ostream *errout=src_sl.ThreadSet.abxerr;
-        int ad=src._ad;
-        ABXHTTPD_INFO_PRINT(4,"[Socket %d]Entered thread.",ad);
-        std::string _ip(inet_ntoa(src.src_in.sin_addr));
+        SocketRequestWithSL * src_sl=(SocketRequestWithSL *)_ptr;
+        SocketRequest src =(src_sl->socket_r);
+        std::ostream *logout=src_sl->thread_s.abxout;
+        std::ostream *errout=src_sl->thread_s.abxerr;
+        ABXHTTPD_INFO_PRINT(4,"[Socket %d]Entered thread.",src._ad);
+        std::string & _ip =src_sl->socket_r.src_in_ip;
         std::string res;
         std::string req;
         SocketStream sk_stream(src);
@@ -37,6 +37,9 @@ RE_RECV:
         res.clear();
         res.shrink_to_fit();
         sk_stream >> req;
+        
+        std::string a("Hello");
+        sk_stream.write(a,2);
         tt=time(NULL);
         strftime(_time,128,"[%Y-%m-%d %H:%M:%S] ",localtime(&tt));
         if(sk_stream.status()==0){
@@ -44,32 +47,32 @@ RE_RECV:
             return NULL;
         }
         size_t _recv_len=req.size();
-        ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[IStream]\n%s[End IStream]\n",ad,req.c_str());
+        ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[IStream]\n%s[End IStream]\n",src._ad,req.c_str());
         bool is_keep=false;
         if(_recv_len>0){
             try{
                 HttpRequest H_req;
                 HttpResponse H_res;
                 H_req=src.MCore.IFilter(req,_ptr);
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %lu size.",ad,req.size());
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %lu size.",src._ad,req.size());
                 H_req.remote_addr()=_ip;
+                io_lock.lock();
                 *logout<< _time << _ip << " " << H_req.method() <<" "<< H_req.path() << " "<< H_req.header("User-Agent") <<std::endl;
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Logged this request.",ad);
+                io_lock.unlock();
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Logged this request.",src._ad);
                 H_res=src.MCore.Handler(H_req,_ptr);
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked core handler.",ad);
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked core handler.",src._ad);
                 res=src.MCore.OFilter(H_res,_ptr);
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %lu size.",ad,res.size());
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %lu size.",src._ad,res.size());
                 is_keep=(H_res.header("Connection")=="keep-alive");
             }catch(abxhttpd_error &e){
-                *errout<< _time << inet_ntoa(src.src_in.sin_addr) << " Error:" << e.what()<<std::endl;
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]An error occured, logged this error.",ad);
+                *errout<< _time << _ip << " Error:" << e.what()<<std::endl;
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]An error occured, logged this error.",src._ad);
                 char bd[]="HTTP/1.1 400 Bad Request";
                 res=std::string(bd);
             }
-            long int _send_lv=-1;
-            size_t _send_len=0;
-            sk_stream.write(res);
-            ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",ad,res.c_str());
+            sk_stream << res;
+            ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",src._ad,res.c_str());
             if(is_keep){
                 goto RE_RECV;
             }
@@ -112,6 +115,7 @@ RE_RECV:
                 SocketRequest _src;
                 _src._ad=ad;
                 _src.is_noblocked=true;
+                _src.src_in_ip=std::string(inet_ntoa(src_in.sin_addr));
                 _src._sd=_set.Socket_n;
                 _src.src_in=src_in;
                 _src.MCore=_core;

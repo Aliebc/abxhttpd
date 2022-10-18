@@ -1,4 +1,5 @@
 #include "include/abxhttpd.H"
+#include <ctime>
 
 namespace abxhttpd{
 
@@ -15,12 +16,12 @@ namespace abxhttpd{
                         if(*argv[_p+1]=='-'){
                             ret[*(argv[_p]+1)]=std::string();
                         }else{
-                            ret[*(argv[_p]+1)]=std::string(argv[_p+1]);
+                            ret[*(argv[_p]+1)]=argv[_p+1];
                             _p++;
                         }
                     }
                 }else if(strlen(argv[_p])>2){
-                    ret[*(argv[_p]+1)]=std::string(argv[_p]+2);
+                    ret[*(argv[_p]+1)]=argv[_p]+2;
                 }
             }
             if(_p==argc-1){
@@ -32,7 +33,7 @@ namespace abxhttpd{
     }
 
 
-    std::string _FileRead(std::string _Path){
+    std::string _FileRead(std::string && _Path){
         std::string fps;
         FILE * fp=fopen(_Path.c_str(),"rb");
         if(fp==NULL){
@@ -75,7 +76,7 @@ namespace abxhttpd{
         return fps;
     }
 
-    std::string _FileSuffix(std::string _Name){
+    std::string _FileSuffix(std::string  _Name){
         size_t _Dot=_Name.find_last_of('.');
         size_t _Len=_Name.size();
         if(std::string::npos==_Dot){
@@ -84,7 +85,7 @@ namespace abxhttpd{
         return _Name.substr(_Dot,_Len-_Dot);
     }
 
-        std::string _ABX_URLDecode(std::string & _src){
+        std::string _ABX_URLDecode(std::string  _src){
         std::string res;
         auto src=_src.begin();
         while(src!=_src.end()){

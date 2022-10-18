@@ -8,8 +8,8 @@
 typedef std::map <char,std::string> CmdArray;
 
 extern int global_argc;
-extern char ** global_argv;
-extern CmdArray * global_argu;
+extern const char ** global_argv;
+extern const CmdArray * global_argu;
 
 namespace abxhttpd{
 

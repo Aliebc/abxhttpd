@@ -3,12 +3,11 @@
 #include <cstring>
 #include <string>
 
-char _errorstr[128];
 int verbose=0;
 int info_color=0;
 int global_argc;
-char ** global_argv;
-CmdArray * global_argu;
+const char ** global_argv;
+const CmdArray * global_argu;
 
 namespace abxhttpd{
 
