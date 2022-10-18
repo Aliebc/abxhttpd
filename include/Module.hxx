@@ -24,7 +24,7 @@ namespace abxhttpd{
 
     void RegisterModule(ConfigureInfo _info);
     void RegisterModule(ConfigureInfo _info);
-    std::string ShowModules();
+    std::string ShowModules(char sep='\n');
     std::string ShowModules_HTML(HttpRequest * _src=NULL);
 
     class Module

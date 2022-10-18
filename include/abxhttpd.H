@@ -37,10 +37,6 @@ In your program, you can only include this file to get whole functions.
 
 extern char _errorstr[];
 
-extern int global_argc;
-extern char ** global_argv;
-extern CmdArray * global_argu;
-
 #define ABXHTTPD_CLI_ERR(fmt,...) \
 if(info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);exit(1);}\
 else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS__);exit(1);}

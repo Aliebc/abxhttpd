@@ -1,6 +1,37 @@
 #include "include/abxhttpd.H"
 
 namespace abxhttpd{
+
+    CmdArray CmdParse(int argc, const char * argv[]){
+        int _p=0;
+        CmdArray ret;
+        while(true){
+            if(*argv[_p]=='-'){
+                if(strlen(argv[_p])==2){
+                    if(_p==argc-1){
+                        ret[*(argv[_p]+1)]=std::string();
+                        break;
+                    }else{
+                        if(*argv[_p+1]=='-'){
+                            ret[*(argv[_p]+1)]=std::string();
+                        }else{
+                            ret[*(argv[_p]+1)]=std::string(argv[_p+1]);
+                            _p++;
+                        }
+                    }
+                }else if(strlen(argv[_p])>2){
+                    ret[*(argv[_p]+1)]=std::string(argv[_p]+2);
+                }
+            }
+            if(_p==argc-1){
+                break;
+            }
+            _p++;
+        }
+        return ret;
+    }
+
+
     std::string _FileRead(std::string _Path){
         std::string fps;
         FILE * fp=fopen(_Path.c_str(),"rb");

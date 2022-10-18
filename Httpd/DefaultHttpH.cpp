@@ -34,6 +34,9 @@ namespace abxhttpd{
     HttpResponse _DefaultHttpH(HttpRequest & _src, void * _args){
         SocketRequest _ssrc =*(SocketRequest *)_args;
         HttpResponse _hr;
+        if(_src.path()=="/"){
+            _src.path().insert(_src.path().size(),"index.html");
+        }
         std::string _suffix;
         _suffix=_FileSuffix(_src.path());
         if(_src.path()=="/abxhttpd"){
@@ -93,7 +96,7 @@ END:
         return res;
     }
 
-    HttpResponse _PHPCGI(std::string & _CGIP, HttpRequest & _Hreq, void * _args){
+    /*HttpResponse _PHPCGI(std::string & _CGIP, HttpRequest & _Hreq, void * _args){
         HttpResponse RET;
         ENV_TMP env_tmp={0};
         SocketRequest _ssrc =*(SocketRequest *)_args;
@@ -131,7 +134,7 @@ END:
         RET.header("Content-Type")=" text/html; charset=utf-8";
         RET.body()=cgi_str;
         return RET;
-    }
+    }*/
 
     HttpHandler DefaultHttpH=_DefaultHttpH;
 }

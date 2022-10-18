@@ -30,7 +30,7 @@ int main(int argc,char * argv[]){
     CmdArray d=CmdParse(argc,(const char **)argv);
     global_argu=&d;
     signal(SIGINT,sigint_handle);
-    if(CmdArrayIs(d,'v')){
+    if(CmdArrayIs((const CmdArray *)&d,'v')){
         try{
             if(d['v'].at(0)=='c'){
                 info_color=1;
@@ -44,27 +44,27 @@ int main(int argc,char * argv[]){
     }
     ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");
     const HttpdCore * _HttpdCore;
-    if(CmdArrayIs(d,'h')){
+    if(CmdArrayIs((const CmdArray *)&d,'h')){
         std::cout << ABXHTTPD_HELP <<std::endl;
         exit(0);
     }
-    if(CmdArrayIs(d,'V')){
+    if(CmdArrayIs((const CmdArray *)&d,'V')){
         std::cout << ABXHTTPD_INFO <<std::endl;
         exit(0);
     }
-    if(CmdArrayIs(d,'g')){
+    if(CmdArrayIs((const CmdArray *)&d,'g')){
         #ifdef ABXHTTPD_GUI
         start_gui(NULL);
         #else
         ABXHTTPD_CLI_ERR("GUI Module not installed.");
         #endif
     }
-    if(CmdArrayIs(d,'m')){
+    if(CmdArrayIs((const CmdArray *)&d,'m')){
         std::cout << "[Cores]\n"<< ShowHttpdCoreAddressTable() <<std::endl;
-        std::cout << "[Modules]\n"<< ShowModules();
+        std::cout << "[Modules]\n"<< ShowModules()<<std::endl ;
         exit(0);
     }
-    if(CmdArrayIs(d,'c')){
+    if(CmdArrayIs((const CmdArray *)&d,'c')){
         _HttpdCore=FindHttpdCore(d['c'].c_str());
         ABXHTTPD_CLI_ERR2(_HttpdCore!=NULL,"Cannot find specified Httpd Core. Please use -m option to see useable core symbol.");
     }else{
@@ -72,10 +72,10 @@ int main(int argc,char * argv[]){
     }
     
     
-    if(CmdArrayIs(d,'p')){
+    if(CmdArrayIs((const CmdArray *)&d,'p')){
         SocketSettingList si={0};
         si.Is_reused=true;
-        if(CmdArrayIs(d,'b')){
+        if(CmdArrayIs((const CmdArray *)&d,'b')){
             struct in_addr bind_ip;
             if(inet_pton(AF_INET,d['b'].c_str(),&bind_ip)==0){
                 ABXHTTPD_CLI_ERR("Cannot Bind IP %s.(Format Error)",d['b'].c_str());
@@ -87,12 +87,12 @@ int main(int argc,char * argv[]){
         HttpdSettingList hi;
         hi.Socket_S=si;
         ThreadSettingList ti;
-        ti.Multi_thread=CmdArrayIs(d,'T');
+        ti.Multi_thread=CmdArrayIs((const CmdArray *)&d,'T');
         std::ofstream out_log;
         std::ofstream out_err;
         ti.abxout=&std::cout;
         ti.abxerr=&std::cerr;
-        if(CmdArrayIs(d,'l')){
+        if(CmdArrayIs((const CmdArray *)&d,'l')){
             out_log.open(d['l'],std::ios::app);
             if(out_log.is_open()){
                 ti.abxout=&out_log;
@@ -100,7 +100,7 @@ int main(int argc,char * argv[]){
                 ABXHTTPD_CLI_ERR("Cannot open file %s.",d['l'].c_str());
             }
         }
-        if(CmdArrayIs(d,'e')){
+        if(CmdArrayIs((const CmdArray *)&d,'e')){
             out_err.open(d['e'],std::ios::app);
             if(out_err.is_open()){
                 ti.abxerr=&out_err;
@@ -109,10 +109,10 @@ int main(int argc,char * argv[]){
             }
         }
         hi.Thread_S=ti;
-        hi.Http_S.Path=CmdArrayIs(d,'D')?d['D']:std::string(".");
-        if(CmdArrayIs(d,'d')){
+        hi.Http_S.Path=CmdArrayIs((const CmdArray *)&d,'D')?d['D']:std::string(".");
+        if(CmdArrayIs((const CmdArray *)&d,'d')){
             //char * _name=(char *)malloc(1024);
-            if(CmdArrayIs(d,'l')&&CmdArrayIs(d,'e')){
+            if(CmdArrayIs((const CmdArray *)&d,'l')&&CmdArrayIs((const CmdArray *)&d,'e')){
 
             }else{
                 ABXHTTPD_CLI_ERR("You should specify log file and error log file in deamon mode.");

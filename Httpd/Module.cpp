@@ -1,7 +1,7 @@
 #include "include/Module.hxx"
+#include "include/Httpd.hxx"
 #include "include/Platform.hxx"
-extern int global_argc;
-extern char ** global_argv;
+#include "include/config.hxx"
 #include <sstream>
 #include <iostream>
 #include <initializer_list>
@@ -21,16 +21,17 @@ namespace abxhttpd{
         }
     }
 
-    std::string ShowModules(){
+    std::string ShowModules(char sep){
         std::stringstream _ret;
-        for(module_t _i=0;_i<ModuleCount;_i++){
-            _ret<< _ConfData[_i].Name <<std::endl;
+        for(module_t _i=0;_i<ModuleCount-1;_i++){
+            _ret<< _ConfData[_i].Name <<sep;
         }
+        _ret<< _ConfData[ModuleCount-1].Name;
         return _ret.str();
     }
 
     template <class _A,class _B>
-    std::stringstream & ModuleHTML_PAIR(std::stringstream & _ret,_A & t1,_B & t2){
+    std::stringstream & ModuleHTML_PAIR(std::stringstream & _ret,_A & t1,_B && t2){
         _ret<< "<tr><td class=\"left\">" << t1 << "</td><td class=\"right\">";
         _ret<< t2 << "</td></tr>";
         _ret<<std::endl;
@@ -54,19 +55,21 @@ namespace abxhttpd{
         #else
         struct utsname x;
         uname(&x);
-        return std::string(x.sysname)+std::string(" ")+std::string(x.version);
+        return std::string(x.sysname)+std::string(" ")+std::string(x.version)+std::string(" ")+std::string(x.machine);
         #endif
     }
 
     std::string ShowModules_HTML(HttpRequest * _src){
         std::stringstream _ret;
         std::string arg;
-        _ret<< "<div class=\"sub-title\">" << "System" <<"</div>"<<std::endl;
+        _ret<< "<div class=\"sub-title\"> core </div>"<<std::endl;
         _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
-        arg=Get_OS();
-        ModuleHTML_PAIR(_ret,"Current OS",arg);
-        arg=Get_StartArgu();
-        ModuleHTML_PAIR(_ret,"Start Arguments",arg);
+        ModuleHTML_PAIR(_ret,"Current OS",Get_OS());
+        ModuleHTML_PAIR(_ret,"Start Arguments",Get_StartArgu());
+        ModuleHTML_PAIR(_ret,"Registered Cores",ShowHttpdCoreAddressTable(','));
+        ModuleHTML_PAIR(_ret,"Registered Modules",ShowModules(','));
+        ModuleHTML_PAIR(_ret,"Multithreading",(CmdArrayIs(global_argu,'T')?"enabled":"disabled"));
+        
         _ret<< "</table></div>" <<std::endl;
         for(module_t _i=0;_i<ModuleCount;_i++){
             _ret<< "<div class=\"sub-title\">" << _ConfData[_i].Name <<"</div>"<<std::endl;

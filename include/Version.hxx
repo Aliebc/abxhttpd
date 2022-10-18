@@ -47,29 +47,22 @@ ABXHTTPD_INT_DEF(ABXHTTPD_VERSION_HEX)
 ABXHTTPD_STR_DEF(ABXHTTPD_VERSION_TEXT)
 ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 
-#define ABXHTTPD_INFO "Abxhttpd version " ABXHTTPD_VERSION_TEXT "\n" \
+#define ABXHTTPD_INFO "Abxhttpd version: " ABXHTTPD_VERSION_SERVER "\n" \
 "Built by " ABXHTTPD_COMPILER "\n" \
-"Release-Date: " ABXHTTPD_RELEASE_DATE "\n" \
-"Compile-Time: " ABXHTTPD_COMPILE_TIME "\n" \
-"Copyright (C) 2022 AB.X Org." "\n" \
-"Platform: " ABXHTTPD_PLATFORM " - " ABXHTTPD_ARCH "\n\n" \
-"Abxhttpd is a tiny http server developed by C++.\n" \
-"You are welcome to redistribute it under the terms of the\n" \
-"GNU General Public License versions 2 or 3.\n" \
-"For more information about these matters see\n" \
-"https://www.gnu.org/licenses/.\n"
+"Build Time: " ABXHTTPD_COMPILE_TIME "\n" \
+"Copyright (C) 2022 Abxhttpd Group."
 
 #define ABXHTTPD_HELP "Abxhttpd Manual\n\nUsage: [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
 "Options and arguments:\n" \
 "-V\t: See version and copyright information.\n" \
-"-v\t: Set detailed information grade.\n\t(Example: -v 1)\n" \
+"-v\t: Set detailed information grade.\n\tDetailed info of given grade will be printed to STDOUT.\n\tAdd c before grade can print colorful info\n\t(Example: -v 5/-vc11)\n" \
 "-m\t: Show cores and modules installed.\n" \
 "-c\t: Specify abxhttpd-core to use.\n\t(Example: -c OtherCore, some command line arguments may be different in this case)\n" \
 "-C\t: Dynamically load other core or module.(Unrealized)\n\t(Example: -C ./libothercore.so)\n" \
 "-h\t: Show manual page(This page).\n" \
 "-g\t: Start the graphical user interface(GUI).\n" \
 "-p\t: Specify and listening port.\n\t(Example: -p 80)\n" \
-"-d\t: Start deamon.\n\t(Example: -d)(Deamon function on windows is experimental)\n" \
+"-d\t: Start deamon.\n\t(Example: -d)\n" \
 "-b\t: Specify bind IP(Only support TCP4 now).\n\t(Example: -b 127.0.0.1(Default:0.0.0.0))\n" \
 "-i\t: Specify the config file.\n\t(Example: -i httpd.ini)(Unrealized)\n" \
 "-l\t: Specify normal log files. Default to standard output(1).\n\t(Example: -l access.log)\n" \

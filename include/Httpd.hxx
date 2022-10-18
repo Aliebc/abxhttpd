@@ -42,6 +42,7 @@ typedef struct {
     bool Is_unix;
     bool Is_windows;
     int Port;
+    int Bing_IP_protocol;
     int Bind_IP;
     long Bind_IP6;
     int Socket_modal;
@@ -137,7 +138,7 @@ extern HttpdCoreAddress DefaultHttpdCoreAddress;
 extern HttpdCoreAddress HttpdCoreAddressTable[64];
 typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
-std::string ShowHttpdCoreAddressTable();
+std::string ShowHttpdCoreAddressTable(char sep='\n');
 const HttpdCore * FindHttpdCore(const char * _src);
 void RegisterHttpdCore(HttpdCoreAddress _core);
 

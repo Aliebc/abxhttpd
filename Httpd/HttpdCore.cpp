@@ -35,11 +35,14 @@ core_t HttpdCoreAddressCount=0;
 
 HttpdCore_R MainC(DefaultHttpdCoreAddress);
 
-std::string ShowHttpdCoreAddressTable(void){
-    std::string _ret;
-    for(core_t _i=0;_i<HttpdCoreAddressCount;_i++){
-        _ret+=std::string(HttpdCoreAddressTable[_i].Symbol)+"\t("+std::string(HttpdCoreAddressTable[_i].Info)+")\n";    }
-    return _ret;
+std::string ShowHttpdCoreAddressTable(char sep){
+    std::stringstream _ret;
+    for(core_t _i=0;_i+1<HttpdCoreAddressCount;_i++){
+        _ret<<HttpdCoreAddressTable[_i].Symbol <<sep;
+    }
+    
+    _ret<<HttpdCoreAddressTable[HttpdCoreAddressCount-1].Symbol;
+    return _ret.str();
 }
 
 const HttpdCore * FindHttpdCore(const char * _src){

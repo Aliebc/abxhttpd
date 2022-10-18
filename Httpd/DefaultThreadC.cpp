@@ -51,14 +51,14 @@ RE_RECV:
                 HttpRequest H_req;
                 HttpResponse H_res;
                 H_req=src.MCore.IFilter(req,_ptr);
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %ld size.",ad,req.size());
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked istream filiter, handled %lu size.",ad,req.size());
                 H_req.remote_addr()=_ip;
                 *logout<< _time << _ip << " " << H_req.method() <<" "<< H_req.path() << " "<< H_req.header("User-Agent") <<std::endl;
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Logged this request.",ad);
                 H_res=src.MCore.Handler(H_req,_ptr);
                 ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked core handler.",ad);
                 res=src.MCore.OFilter(H_res,_ptr);
-                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %ld size.",ad,res.size());
+                ABXHTTPD_INFO_PRINT(4,"[Socket %d]Invoked ostream filiter, handled %lu size.",ad,res.size());
                 is_keep=(H_res.header("Connection")=="keep-alive");
             }catch(abxhttpd_error &e){
                 *errout<< _time << inet_ntoa(src.src_in.sin_addr) << " Error:" << e.what()<<std::endl;
