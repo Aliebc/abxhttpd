@@ -1,7 +1,9 @@
 #include "include/abxhttpd.H"
 #include <iostream>
-#include <thread>
 #include <ctime>
+#include <thread>
+#include <condition_variable>
+#include <queue>
 #include <mutex>
 #include <signal.h>
 #include "include/FileSocket.hxx"
@@ -12,18 +14,46 @@
 
 namespace abxhttpd{
     std::mutex io_lock;
+    std::mutex thread_count;
+    std::condition_variable all_thread_cv;
+    std::mutex thread_lock;
+    
+    int Idle_Thread;
     typedef struct _SocketRequestWithSL
     {
         SocketRequest socket_r;
         ThreadSettingList thread_s;
-        HttpdSocket * socket_s;
     }SocketRequestWithSL;
+
+    std::queue<SocketRequestWithSL*> thread_queue;
+
+    template <class SocketStream>
+    void * _ThreadHandler(void * _ptr);
+    
+    template <class SocketStream>
+    void _MainThread(){
+        while(true){
+            thread_count.lock();
+            Idle_Thread--;
+            thread_count.unlock();
+            while(thread_queue.empty()){
+                std::unique_lock<std::mutex> tlck(thread_lock);
+                all_thread_cv.wait(tlck);
+            }
+            SocketRequestWithSL * pre_h=thread_queue.front();
+            thread_queue.pop();
+            _ThreadHandler<SocketStream>(pre_h);
+            thread_count.lock();
+            Idle_Thread++;
+            thread_count.unlock();
+        }
+    }
 
     template <class SocketStream>
     void * _ThreadHandler(void * _ptr){
+        SocketRequestWithSL * src_sl=(SocketRequestWithSL *)_ptr;
         char _time[128];
         time_t tt;
-        SocketRequestWithSL * src_sl=(SocketRequestWithSL *)_ptr;
         SocketRequest src =(src_sl->socket_r);
         std::ostream *logout=src_sl->thread_s.abxout;
         std::ostream *errout=src_sl->thread_s.abxerr;
@@ -90,6 +120,12 @@ RE_RECV:
     void * _ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args){
         HttpdSettingList args=*(HttpdSettingList *)_args;
         ABXHTTPD_INFO_PRINT(2,"[Core]Entered main ThreadController, multi-thread status: %s",_set.Multi_thread?"Enabled":"Disabled");
+        Idle_Thread=_set.Thread_count;
+        std::thread *HttpdThreadList = new std::thread[_set.Thread_count];
+        for(int _i=0;_i<_set.Thread_count;_i++){
+            std::thread tmp(_MainThread<SocketStream>);
+            HttpdThreadList[_i]=std::move(tmp);
+        }
             while(_set.Is_running){
                 struct sockaddr_in src_in;
                 socklen_t sklen=sizeof(src_in);
@@ -125,8 +161,16 @@ RE_RECV:
                 SocketRequestWithSL * __src=new SocketRequestWithSL({_src,_set});
                 if(_set.Multi_thread){
                     try{
-                        std::thread _th(_ThreadHandler<SocketStream>,__src);
-                        _th.detach();
+                        //std::thread _th(_ThreadHandler<SocketStream>,__src);
+                        //_th.detach();
+                        if(Idle_Thread>0){
+                            thread_queue.push(__src);
+                            std::unique_lock<std::mutex> tlck(thread_lock);
+                            all_thread_cv.notify_one();
+                        }else{
+                            std::thread _th(_ThreadHandler<SocketStream>,__src);
+                            _th.detach();
+                        }
                         ABXHTTPD_INFO_PRINT(4,"[Core]Detached thread for socket %d.",ad);
                     }catch(std::exception e){
                         ABXHTTPD_INFO_PRINT(1,"[Core]Cannot create thread for socket %d:%s.",ad,e.what());

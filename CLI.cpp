@@ -86,6 +86,7 @@ int main(int argc,char * argv[]){
         HttpdSettingList hi;
         hi.Socket_S=si;
         ThreadSettingList thread_set;
+        thread_set.Thread_count=0;
         thread_set.Multi_thread=CmdArrayIs((const CmdArray *)&cmd_argu,'T');
         std::ofstream out_log;
         std::ofstream out_err;
