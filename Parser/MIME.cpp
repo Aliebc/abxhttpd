@@ -10,6 +10,7 @@ namespace abxhttpd{
         {".js","application/javascript"},
         {".css","text/css"},
         {".jpg","image/jpeg"},
+        {".svg","image/svg+xml"},
         {".gif","image/gif"},
         {".png","image/png"},
         {".ico","image/x-icon"},

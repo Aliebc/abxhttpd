@@ -33,19 +33,23 @@ namespace abxhttpd{
     template <class SocketStream>
     void _MainThread(){
         while(true){
-            thread_count.lock();
-            Idle_Thread--;
-            thread_count.unlock();
-            while(thread_queue.empty()){
+            SocketRequestWithSL * pre_h;
+            {
                 std::unique_lock<std::mutex> tlck(thread_lock);
                 all_thread_cv.wait(tlck);
+                if(!thread_queue.empty()){
+                    pre_h=thread_queue.front();
+                    thread_queue.pop();
+                }else{
+                    continue;
+                }
+                Idle_Thread--;
             }
-            SocketRequestWithSL * pre_h=thread_queue.front();
-            thread_queue.pop();
             _ThreadHandler<SocketStream>(pre_h);
-            thread_count.lock();
-            Idle_Thread++;
-            thread_count.unlock();
+            {
+                std::unique_lock<std::mutex> tlck(thread_lock);
+                Idle_Thread++;
+            }
         }
     }
 
@@ -163,9 +167,9 @@ RE_RECV:
                     try{
                         //std::thread _th(_ThreadHandler<SocketStream>,__src);
                         //_th.detach();
+                        std::unique_lock<std::mutex> tlck(thread_lock);
                         if(Idle_Thread>0){
                             thread_queue.push(__src);
-                            std::unique_lock<std::mutex> tlck(thread_lock);
                             all_thread_cv.notify_one();
                         }else{
                             std::thread _th(_ThreadHandler<SocketStream>,__src);
@@ -180,6 +184,7 @@ RE_RECV:
                     _ThreadHandler<SocketStream>(__src);
                 }
             }
+        delete [] HttpdThreadList;
         return NULL;
     }
 

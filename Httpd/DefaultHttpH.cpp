@@ -34,7 +34,7 @@ namespace abxhttpd{
     HttpResponse _DefaultHttpH(HttpRequest & _src, void * _args){
         SocketRequest _ssrc =*(SocketRequest *)_args;
         HttpResponse _hr;
-        if(_src.path()=="/"){
+        if(_src.path().at(_src.path().size()-1)=='/'){
             _src.path().insert(_src.path().size(),"index.html");
         }
         std::string _path=std::string(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
