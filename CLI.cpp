@@ -86,8 +86,13 @@ int main(int argc,char * argv[]){
         HttpdSettingList hi;
         hi.Socket_S=si;
         ThreadSettingList thread_set;
-        thread_set.Thread_count=atoi(cmd_argu['T'].c_str());
-        thread_set.Multi_thread=CmdArrayIs((const CmdArray *)&cmd_argu,'T');
+        if(CmdArrayIs((const CmdArray *)&cmd_argu,'T')){
+            thread_set.Multi_thread=true;
+            thread_set.Thread_count=atoi(cmd_argu['T'].c_str());
+        }else{
+            thread_set.Multi_thread=false;
+            thread_set.Thread_count=0;
+        }
         std::ofstream out_log;
         std::ofstream out_err;
         thread_set.abxout=&std::cout;

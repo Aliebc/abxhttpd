@@ -1,7 +1,7 @@
 #ifndef _PLATFORM_H
 #define _PLATFORM_H
 
-#if (defined __WIN32__) || (defined WINNT) || (defined WIN32)
+#if (defined __WIN32__) || (defined WINNT) || (defined _WIN32)  || (defined _WIN64)
 #define ABXHTTPD_PLATFORM "Windows"
 #define ABXHTTPD_WINDOWS
 #endif
@@ -28,7 +28,7 @@
 #define ABXHTTPD_PLATFORM "Unknown"
 #endif
 
-#if (defined __arm64__) || (defined _M_ARM)
+#if (defined __arm64__) || (defined _M_ARM) || (defined _M_ARM64)
 #define ABXHTTPD_ARCH "arm64"
 #else
 #ifdef __aarch64__
@@ -44,8 +44,8 @@
 #endif
 #endif
 
-#ifdef __i386__
-#define ABXHTTPD_ARCH "i386"
+#if (defined __i386__) || (defined __x86__) || (defined _M_IX86)
+#define ABXHTTPD_ARCH "x86"
 #endif
 
 #ifndef ABXHTTPD_ARCH
@@ -58,7 +58,7 @@
 #include <unistd.h>
 #include <sys/utsname.h>
 
-#else 
+#else
 
 #endif
 #endif

@@ -72,7 +72,11 @@ Httpd::Httpd(const HttpdCore & _core, HttpdSettingList & _set){
     this->Setting=_set;
 }
 
-Httpd::~Httpd(){}
+Httpd::~Httpd(){
+    #ifdef ABXHTTPD_WINDOWS
+    WSACleanup();
+    #endif 
+}
 
 httpd_t Httpd::start(){
     httpd_t _r=0;

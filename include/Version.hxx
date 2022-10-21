@@ -30,7 +30,7 @@ ABXHTTPD_STR(ABXHTTPD_VERSION_LAST)
 #define ABXHTTPD_COMPILER "GCC " __VERSION__
 #define ABXHTTPD_GCC
 #elif (defined _MSC_VER)
-#define ABXHTTPD_COMPILER "Microsoft Visual C++ ( _MSC_FULL_VER " ABXHTTPD_STR(_MSC_FULL_VER) " )"
+#define ABXHTTPD_COMPILER "MSVC (_MSC_FULL_VER " ABXHTTPD_STR(_MSC_FULL_VER) ")"
 #define ABXHTTPD_MSVC
 #define ssize_t long;
 #else
@@ -49,8 +49,8 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 
 #define ABXHTTPD_INFO "Abxhttpd version: " ABXHTTPD_VERSION_SERVER "\n" \
 "Built by " ABXHTTPD_COMPILER "\n" \
-"Build Time: " ABXHTTPD_COMPILE_TIME "\n" \
-"Copyright (C) 2022 Abxhttpd Group."
+"Build Date: " ABXHTTPD_COMPILE_TIME "\n" \
+"Copyright (C) 2022 The Abxhttpd Group."
 
 #define ABXHTTPD_HELP "Abxhttpd Manual\n\nUsage: [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
 "Options and arguments:\n" \

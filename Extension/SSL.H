@@ -3,6 +3,8 @@
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
+#define ABXHTTPD_SSL_STREAM 1
+
 SSL_CTX *create_context()
 {
     const SSL_METHOD *method;
@@ -46,32 +48,29 @@ class SSLSocket:public HttpdSocket{
 private:
     SSL_CTX *ctx;
     SSL *ssl;
-    char ttmp[2048];
-    int st;
-public:
     int ad;
+public:
     SSLSocket(SocketRequest & src):HttpdSocket(src){
-        st=1;
         ctx = create_context();
         configure_context(ctx);
         ssl = SSL_new(ctx);
-        SSL_set_fd(ssl, src._ad);
         ad=src._ad;
+        SSL_set_fd(ssl, ad);
         if(SSL_accept(ssl)<=0){
             this->close();
         }
     }
     size_t read(std::string & _dst,size_t size = 0){
-        ABXHTTPD_ZERO_MEMORY(ttmp);
+        ABXHTTPD_ZERO_MEMORY(tmp);
         size_t _recv_s=0;
         int _revc_l=0;
         while(true){
-            _revc_l=SSL_read(ssl,ttmp,sizeof(ttmp));
+            _revc_l=SSL_read(ssl,tmp,sizeof(tmp));
             ABXHTTPD_INFO_PRINT(11,"[Socket %d][OpenSSL API]Invoked SSL_read, returning %d.",ad,_revc_l);
             if(_revc_l>0){
-                _dst.insert(_dst.size(),ttmp,_revc_l);
+                _dst.insert(_dst.size(),tmp,_revc_l);
                 _recv_s+=_revc_l;
-                if(_recv_s==sizeof(ttmp)){
+                if(_recv_s==sizeof(tmp)){
                     continue;
                 }else{
                     break;
@@ -115,7 +114,15 @@ public:
     }
 };
 
-ThreadController ssl_ctrl=_ThreadController<SSLSocket>;
+
+void * _ThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args,int StreamType);
+
+void * __SSLThreadController (const ThreadSettingList & _set, const CCore & _core, void * _args){
+    _ThreadController(_set,_core,_args,ABXHTTPD_SSL_STREAM);
+    return NULL;
+}
+
+ThreadController ssl_ctrl=__SSLThreadController;
 
 HttpdCore SSLHttpdCore={
     DefaultIFilter,

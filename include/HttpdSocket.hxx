@@ -9,6 +9,8 @@
 
 #endif
 
+#define ABXHTTPD_SOCK_STREAM 0
+
 namespace abxhttpd{
     int __close_socket(int ad);
     class HttpdSocket
@@ -17,7 +19,6 @@ namespace abxhttpd{
         HttpdSocket();
         HttpdSocket(SocketRequest &);
         HttpdSocket(int);
-        bool accept();
         virtual bool close();
         const SocketRequest & info();
         virtual size_t read(std::string & _dst,size_t size = 0 );
@@ -37,11 +38,11 @@ namespace abxhttpd{
             src.read(is);
             return src;
         }
-    private:
+    protected:
+        char tmp[2048];
         SocketRequest _src;
         int st;
         int _hc;
-        char tmp[2048];
         char * last_err;
     };
 }

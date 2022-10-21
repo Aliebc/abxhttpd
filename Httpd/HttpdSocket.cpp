@@ -3,6 +3,9 @@
 namespace abxhttpd{
 
     int __close_socket(int ad){
+        if(ad<=0){
+            return 0;
+        }
         int st;
         #ifdef ABXHTTPD_WINDOWS
         st=shutdown(ad,2);
@@ -20,20 +23,14 @@ namespace abxhttpd{
         return st;
     }
 
-    HttpdSocket::HttpdSocket()
-    {
-        
-    }
-
     HttpdSocket::HttpdSocket(SocketRequest & _sk_req)
     {
         st=1;
         _src=_sk_req;
     }
-    HttpdSocket::HttpdSocket(int ad)
+    HttpdSocket::HttpdSocket(int sd)
     {
         st=1;
-        _src._ad=ad;
     }
     size_t HttpdSocket::read(std::string & _dst,size_t size)
     {
@@ -112,6 +109,9 @@ namespace abxhttpd{
     }
     HttpdSocket::~HttpdSocket()
     {
+        if(st!=0){
+            __close_socket(_src._ad);
+        }
     }
     int HttpdSocket::status()
     {
@@ -119,7 +119,9 @@ namespace abxhttpd{
     }
     bool HttpdSocket::close()
     {
-        st=0;
-        return (__close_socket(_src._ad)==0);
+        if(st!=0){
+            st=0;
+            return (__close_socket(_src._ad)==0);
+        }
     }
 }

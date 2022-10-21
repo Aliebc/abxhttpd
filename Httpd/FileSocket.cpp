@@ -2,7 +2,7 @@
 #include "include/FileSocket.hxx"
 
 namespace abxhttpd{
-FileSocket::FileSocket(const char * path){
+FileSocket::FileSocket(const char * path):HttpdSocket(0){
     fp=fopen(path,"rb");
     if(fp==NULL){
         throw abxhttpd_error("Not Regular File");

@@ -53,13 +53,13 @@ namespace abxhttpd{
                 _hr.need_send_from_stream_src=(_path);
             }catch (abxhttpd_error _e){
                 _hr.status(404);
-                _suffix=std::string(".html");
+                std::string _suffix(".html");
+                _hr.need_send_from_stream=false;
                 _hr.header("Content-Type")=_GMIME(_suffix);
                 _hr.body()=_DefaultCodePage(404);
                 _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
             }
         }
-END:
         _hr.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):std::string("close");
         _hr.header("Server")=std::string(" " ABXHTTPD_VERSION_SERVER);
         return _hr;
