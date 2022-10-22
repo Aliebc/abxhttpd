@@ -8,8 +8,8 @@ namespace abxhttpd{
         }
         int st;
         #ifdef ABXHTTPD_WINDOWS
-        st=shutdown(ad,2);
-        ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked shutdown, returning %d.",ad,st);
+        st=closesocket(ad);
+        ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked closesocket, returning %d.",ad,st);
         #endif
         #ifdef ABXHTTPD_UNIX
         st=close(ad);
@@ -123,5 +123,6 @@ namespace abxhttpd{
             st=0;
             return (__close_socket(_src._ad)==0);
         }
+        return true;
     }
 }

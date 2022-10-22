@@ -15,7 +15,7 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
                     void * _ptr;
                     {
                         std::unique_lock<std::mutex> tlck(thread_lock);
-                        thread_cv.wait(tlck);
+                        thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
                         if(!data_queue.empty()){
                             _ptr=data_queue.front();
                             data_queue.pop();
@@ -46,10 +46,10 @@ bool HttpdThreadPool::push(void * _ptr){
             {
                 std::unique_lock<std::mutex> tlck(thread_lock);
                 data_queue.push(_ptr);
-                thread_cv.notify_one();
                 idle_thread--;
-                return true;
+                thread_cv.notify_one();
             }
+            return true;
         }else{
             return false;
         }
