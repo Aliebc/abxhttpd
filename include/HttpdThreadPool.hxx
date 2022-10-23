@@ -1,5 +1,6 @@
 #ifndef _THREAD_POOL_H
 #define _THREAD_POOL_H
+#include "abxhttpd.H"
 
 #include <thread>
 #include <condition_variable>
@@ -14,6 +15,7 @@ private:
     int thread_count;
     std::thread * thread_list;
     std::mutex thread_lock;
+    std::mutex internal_lock;
     std::condition_variable thread_cv;
     std::queue<void *> data_queue;
     int idle_thread;

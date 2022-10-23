@@ -51,27 +51,18 @@ namespace abxhttpd{
                 _hr.header("Content-Length")=std::to_string(x);
                 _hr.need_send_from_stream=true;
                 _hr.need_send_from_stream_src=(_path);
-            }catch (abxhttpd_error _e){
-                _hr.status(404);
+            }catch (abxhttpd_error_http & _e){
+                _hr.status(_e.code());
                 std::string _suffix(".html");
                 _hr.need_send_from_stream=false;
                 _hr.header("Content-Type")=_GMIME(_suffix);
-                _hr.body()=_DefaultCodePage(404);
+                _hr.body()=_e.html();
                 _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
             }
         }
         _hr.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):std::string("close");
         _hr.header("Server")=std::string(" " ABXHTTPD_VERSION_SERVER);
         return _hr;
-    }
-
-    std::string _DefaultCodePage(int _code){
-        char _p[2048];
-        const char * _str=HttpCodeStatus(_code).c_str();
-        sprintf(_p,"<!DOCTYPE HTML>\n<html>\n\t<head>\n\t\t<title>\
-        %d %s</title>\n\t</head>\n<body>\n\t<center><h1>%d %s</h1><hr> " ABXHTTPD_VERSION_SERVER "</center>\
-        \n</body>\n</html>",_code,_str,_code,_str);
-        return std::string(_p);
     }
 
     std::string _PipeRead(std::string _Path,std::string _Write){

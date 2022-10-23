@@ -2,6 +2,7 @@
 #define ABX_ERROR_H
 #include <stdexcept>
 #include <string>
+#include <sstream>
 #include "include/HttpCode.hxx"
 
 namespace abxhttpd
@@ -18,18 +19,24 @@ namespace abxhttpd
     private:
         int error_code;
         const char * error_msg;
+        std::string err_html;
     public:
         abxhttpd_error_http(int error_c){
             error_code=error_c;
+            error_msg=HttpCodeStatus(error_c).c_str();
+            err_html=HttpCodeStatusHTML(error_code);
         }
         abxhttpd_error_http(int error_c,const char * _e):abxhttpd_error_http(error_c){
             error_msg=_e;
         }
+        const int & code(){
+            return error_code;
+        }
         const char * what(){
             return error_msg;
         }
-        std::string html(){
-            
+        const std::string & html(){
+            return err_html;
         }
     };
 }

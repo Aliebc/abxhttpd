@@ -116,7 +116,6 @@ int main(int argc,char * argv[]){
         hi.Thread_S=thread_set;
         hi.Http_S.Path=CmdArrayIs((const CmdArray *)&cmd_argu,'D')?cmd_argu['D']:".";
         if(CmdArrayIs((const CmdArray *)&cmd_argu,'d')){
-            //char * _name=(char *)malloc(1024);
             if(CmdArrayIs((const CmdArray *)&cmd_argu,'l')&&CmdArrayIs((const CmdArray *)&cmd_argu,'e')){
 
             }else{

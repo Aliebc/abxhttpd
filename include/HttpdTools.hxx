@@ -5,7 +5,6 @@
 
 namespace abxhttpd {
     
-    std::string _DefaultCodePage(int _code);
     size_t _FileLength(std::string _Path);
     std::string _FileRead(std::string _Path);
     std::string _FileSuffix(std::string _Name);

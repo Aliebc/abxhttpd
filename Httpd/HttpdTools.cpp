@@ -33,17 +33,18 @@ namespace abxhttpd{
     }
 
     size_t _FileLength(std::string _Path){
+        FILE * fp=fopen(_Path.c_str(),"rb");
+        if(fp==NULL){
+            throw abxhttpd_error_http(404);
+        }
         #ifdef ABXHTTPD_UNIX
         struct stat _ft;
         stat(_Path.c_str(),&_ft);
         if(!S_ISREG(_ft.st_mode)){
-            throw abxhttpd_error("Not Regular File");
+            throw abxhttpd_error_http(403);
+            //throw abxhttpd_error("Not Regular File");
         }
         #endif
-        FILE * fp=fopen(_Path.c_str(),"rb");
-        if(fp==NULL){
-            throw abxhttpd_error("File not exists");
-        }
         size_t f_size;
         fseek(fp,0,SEEK_END);
         f_size=ftell(fp);

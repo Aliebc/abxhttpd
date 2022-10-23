@@ -29,6 +29,10 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
                         idle_thread++;
                     }
                 }
+                {
+                    std::unique_lock<std::mutex> tl(internal_lock);
+                    std::cout << "Thread " <<std::this_thread::get_id() <<" Exit\n";
+                }
             });
             thread_list[_i]=std::move(tmp);
         }
