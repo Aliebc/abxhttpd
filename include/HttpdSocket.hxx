@@ -10,6 +10,7 @@
 #endif
 
 #define ABXHTTPD_SOCK_STREAM 0
+#define ABXHTTPD_BUFFER_SIZE 2048
 
 namespace abxhttpd{
     int __close_socket(int ad);
@@ -39,7 +40,7 @@ namespace abxhttpd{
             return src;
         }
     protected:
-        char tmp[2048];
+        char tmp[ABXHTTPD_BUFFER_SIZE];
         SocketRequest _src;
         int st;
         int _hc;

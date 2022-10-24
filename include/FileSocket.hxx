@@ -4,15 +4,13 @@
 #include <stdio.h>
 #include "HttpdSocket.hxx"
 
-#define ABXHTTPD_BUFFER_SIZE 1024
-
 namespace abxhttpd {
 class FileSocket:public HttpdSocket{
 private:
     FILE * fp;
     void get_file_length();
     size_t length;
-    char tmp[1024];
+    char tmp[ABXHTTPD_BUFFER_SIZE];
 public:
     FileSocket(const char * path);
     size_t read(std::string & dst,size_t size=0);

@@ -11,11 +11,16 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
         thread_list=new std::thread[thread_count];
         for(int _i=0;_i<thread_count;_i++){
             std::thread tmp([&](){
+                void * _ptr;
                 while(is_running){
-                    void * _ptr;
                     {
                         std::unique_lock<std::mutex> tlck(thread_lock);
-                        thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
+                        task_count=data_queue.size();
+                        while(data_queue.empty()){
+                            //thread_cv.wait(tlck);
+                            thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
+                        }
+                        //thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
                         if(!data_queue.empty()){
                             _ptr=data_queue.front();
                             data_queue.pop();
@@ -25,13 +30,9 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
                     }
                     data_func(_ptr);
                     {
-                        std::unique_lock<std::mutex> tlck(thread_lock);
+                        std::lock_guard<std::mutex> tlck(thread_lock);
                         idle_thread++;
                     }
-                }
-                {
-                    std::unique_lock<std::mutex> tl(internal_lock);
-                    std::cout << "Thread " <<std::this_thread::get_id() <<" Exit\n";
                 }
             });
             thread_list[_i]=std::move(tmp);
@@ -48,7 +49,7 @@ bool HttpdThreadPool::push(void * _ptr){
     {
         if(idle_thread>0){
             {
-                std::unique_lock<std::mutex> tlck(thread_lock);
+                std::lock_guard<std::mutex> tlck(thread_lock);
                 data_queue.push(_ptr);
                 idle_thread--;
                 thread_cv.notify_one();
@@ -58,7 +59,6 @@ bool HttpdThreadPool::push(void * _ptr){
             return false;
         }
     }
-    return true;
 }
 
 void HttpdThreadPool::stop(){

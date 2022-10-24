@@ -1,9 +1,10 @@
 #include "include/abxhttpd.H"
+#include "include/Module.hxx"
 #include <ctime>
 
 namespace abxhttpd{
 
-    CmdArray CmdParse(int argc, const char * argv[]){
+    CmdArray CmdParse(int argc, const char ** argv){
         int _p=0;
         CmdArray ret;
         while(true){
@@ -32,70 +33,31 @@ namespace abxhttpd{
         return ret;
     }
 
-    size_t _FileLength(std::string _Path){
-        FILE * fp=fopen(_Path.c_str(),"rb");
-        if(fp==NULL){
-            throw abxhttpd_error_http(404);
-        }
+    size_t _FileLength(std::string & _Path){
         #ifdef ABXHTTPD_UNIX
         struct stat _ft;
-        stat(_Path.c_str(),&_ft);
-        if(!S_ISREG(_ft.st_mode)){
-            throw abxhttpd_error_http(403);
-            //throw abxhttpd_error("Not Regular File");
+        int st=stat(_Path.c_str(),&_ft);
+        if(st!=0){
+            throw abxhttpd_error_http(404,"File cannot be opened");
         }
-        #endif
+        if(!S_ISREG(_ft.st_mode)){
+            throw abxhttpd_error_http(403,"Not Regular File");
+        }
+        return _ft.st_size;
+        #else
+        FILE * fp=fopen(_Path.c_str(),"rb");
+        if(fp==NULL){
+            throw abxhttpd_error_http(404,"File cannot be opened");
+        }
         size_t f_size;
         fseek(fp,0,SEEK_END);
         f_size=ftell(fp);
         fclose(fp);
         return f_size;
-    }
-
-    std::string _FileRead(std::string && _Path){
-        std::string fps;
-        FILE * fp=fopen(_Path.c_str(),"rb");
-        if(fp==NULL){
-            throw abxhttpd_error("File not exists");
-        }
-        #ifdef ABXHTTPD_UNIX
-        struct stat _ft;
-        stat(_Path.c_str(),&_ft);
-        if(!S_ISREG(_ft.st_mode)){
-            throw abxhttpd_error("Not Regular File");
-        }
-        char _pc[4096];
-        size_t _rd=0;
-        size_t _ed=_ft.st_size;
-        size_t _pd=0;
-        #else
-        DWORD st =GetFileAttributes(_Path.c_str());
-        if(st&FILE_ATTRIBUTE_DIRECTORY){
-            throw abxhttpd_error("Not Regular File");
-        }
-        size_t f_size;
-        char _pc[4096];
-        fseek(fp,0,SEEK_END);
-        f_size=ftell(fp);
-        size_t _rd=0;
-        size_t _ed=f_size;
-        size_t _pd=0;
-        rewind(fp);
         #endif
-        while(true){
-            _rd=fread(_pc,sizeof(char),sizeof(_pc),fp);
-            if(_pd==_ed){
-                break;
-            }
-            fps+=std::string(_pc,_rd);
-            memset(_pc,0,sizeof(_pc));
-            _pd+=_rd;
-        }
-        fclose(fp);
-        return fps;
     }
 
-    std::string _FileSuffix(std::string  _Name){
+    std::string _FileSuffix(std::string & _Name){
         size_t _Dot=_Name.find_last_of('.');
         size_t _Len=_Name.size();
         if(std::string::npos==_Dot){
@@ -104,7 +66,7 @@ namespace abxhttpd{
         return _Name.substr(_Dot,_Len-_Dot);
     }
 
-        std::string _ABX_URLDecode(std::string  _src){
+    std::string _ABX_URLDecode(std::string & _src){
         std::string res;
         auto src=_src.begin();
         while(src!=_src.end()){
@@ -115,7 +77,7 @@ namespace abxhttpd{
             }else{
                 int a;
                 sscanf(_src.c_str()+(src-_src.begin())+1,"%2X",&a);
-                a-=256;
+                a-=1<<9;
                 res.append(1,static_cast<char>(a));
                 src+=3;
             }
@@ -145,6 +107,7 @@ namespace abxhttpd{
 		}
 		return str;
 	}
+
     std::string ABX_URLDecode(std::string & _src){
         std::string utf_8_c(_ABX_URLDecode(_src));
         char * gbk_c=Utf8ToGB2312(utf_8_c.c_str());
@@ -157,4 +120,10 @@ namespace abxhttpd{
         return _ABX_URLDecode(_src);
     }
     #endif
+
+    std::string ABXInfoPageHTML(HttpRequest & _req){
+        std::stringstream res;
+        res<<ABXHTTPD_INFO_PAGE_1<<ShowModules_HTML(&_req)<<ABXHTTPD_INFO_PAGE_2;
+        return res.str();
+    }
 }

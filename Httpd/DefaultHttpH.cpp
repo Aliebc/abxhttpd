@@ -42,7 +42,7 @@ namespace abxhttpd{
         _suffix=_FileSuffix(_src.path());
         if(_src.path()=="/abxhttpd"){
             _hr.status(200);
-            _hr.body()=std::string(ABXHTTPD_INFO_PAGE_1)+ShowModules_HTML(&_src)+std::string(ABXHTTPD_INFO_PAGE_2);
+            _hr.body()=ABXInfoPageHTML(_src);
             _hr.header("Content-Length")=std::string(" ")+std::to_string(_hr.body().size());
         }else{
             try{

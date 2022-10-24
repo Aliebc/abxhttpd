@@ -55,6 +55,7 @@ namespace abxhttpd {
             tt = time(NULL);
             strftime(_time, 128, "[%Y-%m-%d %H:%M:%S] ", localtime(&tt));
             if (SocketStream->status() == 0) {
+                SocketStream->close();
                 delete (SocketRequestWithSL*)_ptr;
                 return NULL;
             }
