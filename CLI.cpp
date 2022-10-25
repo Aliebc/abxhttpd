@@ -60,7 +60,7 @@ int main(int argc,char * argv[]){
         #endif
     }
     if(CmdArrayIs((const CmdArray *)&cmd_argu,'m')){
-        std::cout << "[Cores]\n"<< ShowHttpdCoreAddressTable() <<std::endl;
+        std::cout << "[Cores]\n"<< ShowHttpdCoreAddressTable() <<std::endl << std::endl;
         std::cout << "[Modules]\n"<< ShowModules()<<std::endl ;
         exit(0);
     }

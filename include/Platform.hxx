@@ -57,8 +57,21 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include <sys/utsname.h>
+#define ABXHTTPD_API
 
 #else
+#ifdef xhttpd_EXPORTS
+#define ABXHTTPD_EXPORT
+#endif
 
+#ifdef ABXHTTPD_CLI
+#define ABXHTTPD_API
+#else
+#ifdef ABXHTTPD_EXPORT
+#define ABXHTTPD_API __declspec(dllexport)
+#else
+#define ABXHTTPD_API __declspec(dllimport)
+#endif
+#endif
 #endif
 #endif

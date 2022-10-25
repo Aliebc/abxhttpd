@@ -31,21 +31,17 @@
 #include <ostream>
 
 #define ABXHTTPD_CORE_MAX 64
-extern int verbose;
-extern int info_color;
+ABXHTTPD_API extern int verbose;
+ABXHTTPD_API extern int info_color;
 
 int HttpdInfo(int grade, const char * fmt, ...);
 
 namespace abxhttpd{
 
 typedef struct {
-    bool Is_unix;
-    bool Is_windows;
     int Port;
-    int Bing_IP_protocol;
     int Bind_IP;
     long Bind_IP6;
-    int Socket_modal;
     int allocated_socket;
     int Max_connect_count;
     bool Is_reused;
@@ -126,7 +122,7 @@ typedef struct {
     int * _ad_list;
 } _HttpdStatus;
 
-extern HttpdCore DefaultHttpdCore;
+ABXHTTPD_API extern HttpdCore DefaultHttpdCore;
 extern _HttpdStatus HttpdSatatus;
 
 typedef struct {
@@ -135,17 +131,17 @@ typedef struct {
     const HttpdCore *Core;
 } HttpdCoreAddress;
 
-extern HttpdCoreAddress DefaultHttpdCoreAddress;
-extern HttpdCoreAddress HttpdCoreAddressTable[64];
+//extern HttpdCoreAddress DefaultHttpdCoreAddress;
+//extern HttpdCoreAddress HttpdCoreAddressTable[64];
 typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
-std::string ShowHttpdCoreAddressTable(char sep='\n');
-const HttpdCore * FindHttpdCore(const char * _src);
+ABXHTTPD_API std::string ShowHttpdCoreAddressTable(char sep='\n');
+ABXHTTPD_API const HttpdCore * FindHttpdCore(const char * _src);
 void RegisterHttpdCore(HttpdCoreAddress _core);
 
 typedef int8_t httpd_t;
 
-class Httpd
+class ABXHTTPD_API Httpd
 {
 private:
     HttpdCore Core;
@@ -154,7 +150,6 @@ private:
     httpd_t _status;
 public:
     Httpd(const HttpdCore & _core, HttpdSettingList & _set);
-    HttpdCore & core(void);
     httpd_t start(void);
     httpd_t start(void * _arg);
     httpd_t status() const;

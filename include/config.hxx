@@ -7,13 +7,13 @@
 
 typedef std::map <char,std::string> CmdArray;
 
-extern int global_argc;
-extern const char ** global_argv;
-extern const CmdArray * global_argu;
+ABXHTTPD_API extern int global_argc;
+ABXHTTPD_API extern const char ** global_argv;
+ABXHTTPD_API extern const CmdArray * global_argu;
 
 namespace abxhttpd{
 
-CmdArray CmdParse(int argc, const char * argv[]);
+ABXHTTPD_API CmdArray CmdParse(int argc, const char * argv[]);
 
 static bool CmdArrayIs(const CmdArray * _src,char _find){
     auto _i=_src->find(_find);

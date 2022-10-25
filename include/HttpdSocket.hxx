@@ -14,7 +14,7 @@
 
 namespace abxhttpd{
     int __close_socket(int ad);
-    class HttpdSocket
+    class ABXHTTPD_API HttpdSocket
     {
     public:
         HttpdSocket();

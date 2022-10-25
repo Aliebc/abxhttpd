@@ -19,15 +19,14 @@ namespace abxhttpd{
     }ConfigureInfo;
     
     typedef unsigned int module_t;
-    extern ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
-    extern module_t ModuleCount;
+    //extern ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
+    //extern module_t ModuleCount;
 
-    void RegisterModule(ConfigureInfo _info);
-    void RegisterModule(ConfigureInfo _info);
-    std::string ShowModules(char sep='\n');
-    std::string ShowModules_HTML(HttpRequest * _src=NULL);
+    void RegisterModule(ConfigureInfo & _info);
+    ABXHTTPD_API std::string ShowModules(char sep='\n');
+    ABXHTTPD_API std::string ShowModules_HTML(HttpRequest * _src=NULL);
 
-    class Module
+    class ABXHTTPD_API Module
     {
     private:
         

@@ -5,9 +5,9 @@
 
 int verbose=0;
 int info_color=0;
-int global_argc;
-const char ** global_argv;
-const CmdArray * global_argu;
+int global_argc=0;
+const char ** global_argv=NULL;
+const CmdArray * global_argu=NULL;
 
 namespace abxhttpd{
 

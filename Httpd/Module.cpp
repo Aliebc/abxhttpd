@@ -13,8 +13,7 @@ namespace abxhttpd{
     ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
     module_t ModuleCount=0;
 
-    void RegisterModule(ConfigureInfo _info){
-        ConfigureInfo _cof;
+    void RegisterModule(ConfigureInfo & _info){
         if(ModuleCount<ABXHTTPD_MAX_MODULE){
             _ConfData[ModuleCount]=_info;
             ModuleCount++;
@@ -40,8 +39,12 @@ namespace abxhttpd{
 
     std::string Get_StartArgu(){
         std::stringstream _ret;
-        for(int i=0;i<global_argc;i++){
-            _ret << global_argv[i] << " ";
+        if(global_argv!=NULL){
+            for(int i=0;i<global_argc;i++){
+                _ret << global_argv[i] << " ";
+            }
+        }else{
+            _ret << "[Internal]";
         }
         return _ret.str();
     }
@@ -68,8 +71,7 @@ namespace abxhttpd{
         ModuleHTML_PAIR(_ret,"Start Arguments",Get_StartArgu());
         ModuleHTML_PAIR(_ret,"Registered Cores",ShowHttpdCoreAddressTable(','));
         ModuleHTML_PAIR(_ret,"Registered Modules",ShowModules(','));
-        ModuleHTML_PAIR(_ret,"Multithreading",(CmdArrayIs(global_argu,'T')?"enabled":"disabled"));
-        
+        //ModuleHTML_PAIR(_ret,"Multithreading",(CmdArrayIs(global_argu,'T')?"enabled":"disabled"));
         _ret<< "</table></div>" <<std::endl;
         for(module_t _i=0;_i<ModuleCount;_i++){
             _ret<< "<div class=\"sub-title\">" << _ConfData[_i].Name <<"</div>"<<std::endl;

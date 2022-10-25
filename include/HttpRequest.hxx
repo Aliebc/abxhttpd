@@ -4,12 +4,12 @@
 #include <string>
 #include <map>
 
-#include "include/abxerror.hxx"
+#include "abxerror.hxx"
 
 #ifdef DEBUG
 
 #define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
-    sprintf(errx,"HttpRequest Parser Error: At pointer %ld(%s).\
+    sprintf(errx,"HttpRequest Parser Error: At pointer %zu(%s).\
     \n(Debug info:at %d lines of %s)",_p,_s,__LINE__,__FILE__);\
 throw abxhttpd_error(errx);
 

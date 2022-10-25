@@ -18,8 +18,8 @@ void HttpRequest::parse(void){
     std::string _src=this->Raw;
     this->state=false;
     this->Length=_src.size();
-    HttpRequest_Parser_Assert(this->Length > 5,-1L,"Http request too short.");
-    HttpRequest_Parser_Assert(this->Length < ULONG_MAX,-1L,"Http request too long.");
+    HttpRequest_Parser_Assert(this->Length > 5,0LU,"Http request too short.");
+    HttpRequest_Parser_Assert(this->Length < ULONG_MAX,0LU,"Http request too long.");
     size_t _p1=0;
     size_t _p2=0;
     _p1=_src.find_first_of(' ');
