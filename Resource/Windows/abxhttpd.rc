@@ -7,7 +7,7 @@ BEGIN
     BLOCK "080904E4"
     BEGIN
       VALUE "CompanyName", "The Abxhttpd Group."
-      VALUE "FileDescription", "Abxhttpd CLI Tools"
+      VALUE "FileDescription", "Abxhttpd CLI Tool"
       VALUE "InternalName", "Abxhttpd"
       VALUE "LegalCopyright", "Copyright (C) 2022 The Abxhttpd Group."
       VALUE "OriginalFilename", "abxhttpd.exe"
