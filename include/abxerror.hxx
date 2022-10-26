@@ -35,7 +35,7 @@ namespace abxhttpd
         const char * what(){
             return error_msg;
         }
-        const std::string & html(){
+        std::string html(){
             return err_html;
         }
     };

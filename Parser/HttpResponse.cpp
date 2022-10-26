@@ -1,69 +1,79 @@
 #include "include/HttpResponse.hxx"
 #include "include/HttpCode.hxx"
 #include <stdio.h>
+#include <iostream>
 using namespace abxhttpd;
 
 HttpResponse::HttpResponse(std::string & _src){
-    this->Body=_src;
-    this->Code=200;
-    this->Protocol=std::string(ABXHTTPD_DEFAULT_PROTOCOL);
+    Body=_src;
+    Code=200;
+    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
 HttpResponse::HttpResponse(const char * _src,size_t _len){
-    this->Body=std::string(_src,_len);
-    this->Code=200;
-    this->Protocol=std::string(ABXHTTPD_DEFAULT_PROTOCOL);
+    Body=std::string(_src,_len);
+    Code=200;
+    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
 HttpResponse::HttpResponse(void){
-    this->Body=std::string();
-    this->Code=200;
-    this->Protocol=std::string(ABXHTTPD_DEFAULT_PROTOCOL);
+    Body=std::string();
+    Code=200;
+    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
 HttpResponse::HttpResponse(const char * _src){
-    this->Body=std::string(_src);
-    this->Code=200;
-    this->Protocol=std::string(ABXHTTPD_DEFAULT_PROTOCOL);
+    Body=std::string(_src);
+    Code=200;
+    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
 std::string & HttpResponse::header(const std::string & _h){
-    return this->Headers[_h];
+    return Headers[_h];
 }
 
 std::string & HttpResponse::body(void){
-    return this->Body;
+    return Body;
+}
+
+void HttpResponse::body(const std::string &&_src){
+    Body=std::move(_src);
 }
 
 std::string & HttpResponse::header(const char * _h){
-    return this->header(std::string(_h));
+    return header(std::string(_h));
+}
+
+void HttpResponse::header(const char * _h,std::string && _src){
+    _src.insert(0L, " ");
+    Headers[_h]=std::move(_src);
 }
 
 std::string HttpResponse::raw(void){
-    this->Raw+=this->Protocol+" ";
-    this->Raw+=std::to_string(this->Code);
-    this->Raw+=" ";
-    this->Raw+=this->CodeInfo+"\r\n";
-    StrArray::iterator _hi=this->Headers.begin();
-    while(_hi!=this->Headers.end()){
-        this->Raw+=_hi->first+":"+_hi->second+"\r\n";
+    Raw+=Protocol+" ";
+    Raw+=std::to_string(Code);
+    Raw+=" ";
+    Raw+=CodeInfo+"\r\n";
+    StrArray::iterator _hi=Headers.begin();
+    while(_hi!=Headers.end()){
+        Raw+=_hi->first+":"+_hi->second+"\r\n";
         _hi++;
     }
-    this->Raw+="\r\n";
-    this->Raw+=this->Body;
-    std::string _r=this->Raw;
+    Raw+="\r\n";
+    Raw+=Body;
+    std::string _r=Raw;
     return _r;
 }
 
 bool HttpResponse::status(int _code,const std::string & _str){
-    this->Code=_code;
-    this->CodeInfo=_str;
+    Code=_code;
+    CodeInfo=_str;
     return true;
 }
 
 bool HttpResponse::status(int _code){
-    this->Code=_code;
-    this->CodeInfo=HttpCodeStatus(_code);
+    Code=_code;
+    CodeInfo=HttpCodeStatus(_code);
     return true;
 }
 

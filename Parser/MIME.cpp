@@ -27,7 +27,15 @@ namespace abxhttpd{
         if(IsMIMEExist(_suffix)){
             return MIMEList[_suffix];
         }
-        return std::string("application/octet-stream");
+        return "application/octet-stream";
+    }
+
+    std::string _GMIME(const char * _suffix){
+        std::string __suffix(_suffix);
+        if(IsMIMEExist(__suffix)){
+            return MIMEList[__suffix];
+        }
+        return "application/octet-stream";
     }
 
 }

@@ -50,8 +50,10 @@ public:
     bool status(int _code,const std::string & _str);
     bool status(int _code);
     std::string & header(const char * _h);
+    void header(const char * _h,std::string && _src);
     std::string & header(const std::string & _h);
     std::string & body(void);
+    void body(const std::string && _src);
     std::string raw(void);
     ~HttpResponse();
 };

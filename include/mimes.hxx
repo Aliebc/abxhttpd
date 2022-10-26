@@ -9,6 +9,7 @@ namespace abxhttpd{
 typedef std::map <std::string,std::string> MIMEs;
 extern MIMEs MIMEList;
 std::string _GMIME(std::string & _suffix);
+std::string _GMIME(const char * _suffix);
 
 }
 
