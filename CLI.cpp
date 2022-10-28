@@ -69,15 +69,18 @@ int main(int argc,char * argv[]){
     
     if(CmdArrayIs((const CmdArray *)&cmd_argu,'p')){
         SocketSettingList si={0};
-        si.Is_reused=true;
         if(CmdArrayIs((const CmdArray *)&cmd_argu,'b')){
-            struct in_addr bind_ip;
-            if(inet_pton(AF_INET,cmd_argu['b'].c_str(),&bind_ip)==0){
-                ABXHTTPD_CLI_ERR("Cannot Bind IP %s.(Format Error)",cmd_argu['b'].c_str());
+            if(CmdArrayIs(&cmd_argu,'6')){
+                si.IPVer=6;
+            }else{
+                si.IPVer=4;
             }
-            si.Bind_IP=bind_ip.s_addr;
+            si.IPStr=cmd_argu['b'];
+        }else{
+            si.IPVer=4;
+            si.IPStr="0.0.0.0";
         }
-        si.Port=atoi(cmd_argu['p'].c_str());
+        si.Port=atoi(cmd_argu['p'].c_str())%65535;
         si.Max_connect_count=ABXHTTPD_CONNECT_MAX;
         HttpdSettingList hi;
         hi.Socket_S=si;

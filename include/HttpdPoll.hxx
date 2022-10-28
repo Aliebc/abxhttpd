@@ -26,6 +26,7 @@ private:
 public:
     HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const HttpdSettingList * http_s,int StreamType=ABXHTTPD_SOCK_STREAM);
     ~HttpdPoll();
+    static int accept(int sd,SocketRequestWithSL *,int type=ABXHTTPD_SOCK_STREAM);
     bool run();
     bool shutdown();
     const char * GetLastError();

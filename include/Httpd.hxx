@@ -21,9 +21,10 @@ typedef struct {
     int Port;
     int Bind_IP;
     long Bind_IP6;
+    std::string IPStr;
+    int IPVer;
     int allocated_socket;
     int Max_connect_count;
-    bool Is_reused;
     void * Args;
 }SocketSettingList;
 

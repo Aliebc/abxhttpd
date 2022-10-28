@@ -137,4 +137,12 @@ namespace abxhttpd{
     {
         return last_err;
     }
+    HttpdSocket & operator>> ( HttpdSocket & src, std::string & is){
+        src.read(is);
+        return src;
+    }
+    HttpdSocket & operator<< (HttpdSocket & src, std::string & in){
+        src.write(in);
+        return src;
+    }
 }

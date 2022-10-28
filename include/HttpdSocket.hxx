@@ -24,18 +24,10 @@ namespace abxhttpd{
         virtual size_t write(const std::string & _content,size_t size = 0);
         virtual int status();
         virtual const char * GetLastError();
-        ~HttpdSocket();
+        virtual ~HttpdSocket();
         static int __close_socket(int ad);
-        template <class _A>
-        friend _A & operator<< (_A & src, std::string & in){
-            src.write(in);
-            return src;
-        }
-        template <class _A>
-        friend _A & operator>> ( _A & src, std::string & is){
-            src.read(is);
-            return src;
-        }
+        friend HttpdSocket& operator<< (HttpdSocket & src, std::string & in);
+        friend HttpdSocket& operator>> (HttpdSocket& src, std::string& is);
     protected:
         char tmp[ABXHTTPD_BUFFER_SIZE];
         SocketRequest _src;

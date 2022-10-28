@@ -78,7 +78,6 @@ namespace abxhttpd{
         ModuleHTML_PAIR(_ret,"Start Arguments",Get_StartArgu());
         ModuleHTML_PAIR(_ret,"Registered Cores",ShowHttpdCoreAddressTable(','));
         ModuleHTML_PAIR(_ret,"Registered Modules",ShowModules(','));
-        //ModuleHTML_PAIR(_ret,"Multithreading",(CmdArrayIs(global_argu,'T')?"enabled":"disabled"));
         _ret<< "</table></div>" <<std::endl;
         for(module_t _i=0;_i<ModuleCount;_i++){
             _ret<< "<div class=\"sub-title\">" << _ConfData[_i]->Name <<"</div>"<<std::endl;

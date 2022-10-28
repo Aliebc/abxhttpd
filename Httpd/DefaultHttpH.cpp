@@ -19,7 +19,7 @@ namespace abxhttpd{
     HttpResponse _DefaultHttpH(HttpRequest & _src, void * _args){
         SocketRequest _ssrc =*(SocketRequest *)_args;
         HttpResponse _hresponse;
-        _hresponse.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):"close";
+        _hresponse.header("Connection")=_src.is_header("Connection")?_src.header("Connection"):" close";
         if(_src.path().at(_src.path().size()-1)=='/'){
             _src.path().insert(_src.path().size(),"index.html");
         }

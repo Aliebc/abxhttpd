@@ -99,7 +99,7 @@ namespace abxhttpd
             return st;
         }
         bool SSLSocket::close() {
-            int close_state;
+            int close_state=-1;
             if (st != 0) {
                 SSL_shutdown(ssl);
                 close_state = __close_socket(ad);
