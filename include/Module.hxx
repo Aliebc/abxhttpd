@@ -10,28 +10,26 @@
 namespace abxhttpd{
 
     typedef struct {
-        const char * name;
-        const char * info;
-    } StrKey;
-    typedef struct {
         const char * Name;
-        StrKey Conf[ABXHTTPD_MAX_MODULE];
+        struct {
+            const char * name;
+            const char * info;
+        } Conf[ABXHTTPD_MAX_MODULE];
     }ConfigureInfo;
     
     typedef unsigned int module_t;
-    //extern ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
-    //extern module_t ModuleCount;
-
-    void RegisterModule(ConfigureInfo & _info);
-    ABXHTTPD_API std::string ShowModules(char sep='\n');
-    ABXHTTPD_API std::string ShowModules_HTML(HttpRequest * _src=NULL);
 
     class ABXHTTPD_API Module
     {
     private:
-        
+        static ConfigureInfo * _ConfData[ABXHTTPD_MAX_MODULE];
+        static module_t ModuleCount;
+        void RegisterModule(ConfigureInfo * _info);
     public:
-        Module(ConfigureInfo _info);
+        static std::string ShowModules(char sep='\n');
+        static std::string ShowModules_HTML(HttpRequest * _src=NULL);
+        Module(ConfigureInfo * _info);
+        Module(ConfigureInfo * _info, void *(*dfunc)(void *), void * dta);
         ~Module();
     };
 }

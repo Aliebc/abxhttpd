@@ -1,18 +1,22 @@
 #include "include/abxhttpd.H"
+#include <string.h>
+#include <errno.h>
 
 namespace abxhttpd{
 
-    int __close_socket(int ad){
+    int HttpdSocket::__close_socket(int ad)
+    {
         if(ad<=0){
             return 0;
         }
         int st;
+        ::shutdown(ad, 2);
         #ifdef ABXHTTPD_WINDOWS
-        st=closesocket(ad);
+        st=::closesocket(ad);
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked closesocket, returning %d.",ad,st);
         #endif
         #ifdef ABXHTTPD_UNIX
-        st=close(ad);
+        st=::close(ad);
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
         if(st==0){
             ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
@@ -23,14 +27,18 @@ namespace abxhttpd{
         return st;
     }
 
-    HttpdSocket::HttpdSocket(SocketRequest & _sk_req)
+    HttpdSocket::HttpdSocket(const SocketRequest & _sk_req):HttpdSocket()
     {
-        st=1;
         _src=_sk_req;
     }
-    HttpdSocket::HttpdSocket(int sd)
+    HttpdSocket::HttpdSocket()
     {
         st=1;
+        last_err="success";
+    }
+    const SocketRequest & HttpdSocket::info()
+    {
+        return _src;
     }
     size_t HttpdSocket::read(std::string & _dst,size_t size)
     {
@@ -73,7 +81,7 @@ namespace abxhttpd{
         }
         return _recv_len;
     }
-    size_t HttpdSocket::write(std::string & _res,size_t size)
+    size_t HttpdSocket::write(const std::string & _res,size_t size)
     {
         memset(tmp,0,sizeof(tmp));
         int ad=_src._ad;
@@ -110,7 +118,7 @@ namespace abxhttpd{
     HttpdSocket::~HttpdSocket()
     {
         if(st!=0){
-            __close_socket(_src._ad);
+            close();
         }
     }
     int HttpdSocket::status()
@@ -124,5 +132,9 @@ namespace abxhttpd{
             return (__close_socket(_src._ad)==0);
         }
         return true;
+    }
+    const char * HttpdSocket::GetLastError()
+    {
+        return last_err;
     }
 }

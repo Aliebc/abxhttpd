@@ -6,35 +6,14 @@
 #include "HttpResponse.hxx"
 #include "Module.hxx"
 
-#ifdef ABXHTTPD_UNIX
-#include <unistd.h>
-#include <netinet/in.h>
-#include <sys/wait.h>
-#include <fcntl.h>
-#include <sys/socket.h>
-#include <sys/types.h>
-#include <arpa/inet.h>
-
-#define F_SEP '/'
-#endif
-
-#ifdef ABXHTTPD_WINDOWS
-#include <winsock2.h>
-#include <ws2tcpip.h>
-
-#define F_SEP '\\'
-#endif
-
-#include <map>
 #include <string>
 #include <fstream>
 #include <ostream>
 
 #define ABXHTTPD_CORE_MAX 64
+#define ABXHTTPD_CONNECT_MAX SOMAXCONN
 ABXHTTPD_API extern int verbose;
 ABXHTTPD_API extern int info_color;
-
-int HttpdInfo(int grade, const char * fmt, ...);
 
 namespace abxhttpd{
 
@@ -50,7 +29,6 @@ typedef struct {
 
 
 typedef struct _ThreadSettingList {
-    size_t Stack_size;
     int Thread_count;
     int Socket_n;
     bool Multi_thread;
@@ -94,7 +72,7 @@ typedef struct
     std::string src_in_ip;
     bool is_noblocked;
     int port_in;
-    CCore MCore;
+    const CCore * MCore;
     HttpSettingList Http_S;
 } SocketRequest;
 
@@ -107,7 +85,6 @@ extern ThreadController DefaultThreadC;
 extern IStreamFilter DefaultIFilter;
 extern OStreamFilter DefaultOFilter;
 
-
 typedef struct {
     IStreamFilter IFilter;
     OStreamFilter OFilter;
@@ -117,13 +94,7 @@ typedef struct {
     HttpHandler Handler;
 } HttpdCore;
 
-typedef struct {
-    int _sd;
-    int * _ad_list;
-} _HttpdStatus;
-
 ABXHTTPD_API extern HttpdCore DefaultHttpdCore;
-extern _HttpdStatus HttpdSatatus;
 
 typedef struct {
     const char * Symbol;

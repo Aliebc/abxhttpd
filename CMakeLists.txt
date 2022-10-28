@@ -23,6 +23,7 @@ if(DEFINED ABXHTTPD_SSL)
 	set(OPENSSL_USE_STATIC_LIBS TRUE)
 	find_package(OpenSSL REQUIRED)
 	list(APPEND ABXHTTPD_LIB OpenSSL::SSL)
+	list(APPEND SOURCE_FILES Extension/SSL.cpp)
 endif()
 
 set(ABXHTTPD_TARGET abxhttpd)

@@ -6,14 +6,12 @@
 
 typedef std::map <int, std::string> HttpCodeL;
 
-extern HttpCodeL HttpCodeList;
-
 #define ABXHTTPD_DEFAULT_HTTPCODE 200
 #define ABXHTTPD_DEFAULT_PROTOCOL "HTTP/1.1"
 #define ABXHTTPD_DEFAULT_LINE "\n"
 
 namespace abxhttpd{
-
+extern HttpCodeL HttpCodeList;
 extern const std::string & HttpCodeStatus(int _code);
 std::string HttpCodeStatusHTML(int _code);
 

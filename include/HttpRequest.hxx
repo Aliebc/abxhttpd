@@ -11,13 +11,13 @@
 #define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
     sprintf(errx,"HttpRequest Parser Error: At pointer %zu(%s).\
     \n(Debug info:at %d lines of %s)",_p,_s,__LINE__,__FILE__);\
-throw abxhttpd_error(errx);
+throw abxhttpd_error_http(400,errx);
 
 #else
 
 #define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
     sprintf(errx,"HttpRequest Parser Error: At pointer %ld(%s).",_p,_s);\
-throw abxhttpd_error(errx);
+throw abxhttpd_error_http(400,errx);
 
 #endif
 
@@ -57,7 +57,8 @@ public:
     std::string & query_string(void);
     std::string & body(void);
     std::string & protocol(void);
-    std::string & remote_addr(void);
+    const std::string & remote_addr(void);
+    void remote_addr(const std::string &);
     std::string & raw(void);
     std::string & rebuild(void);
     void clear();

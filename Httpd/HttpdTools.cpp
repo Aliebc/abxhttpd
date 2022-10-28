@@ -123,7 +123,7 @@ namespace abxhttpd{
 
     std::string ABXInfoPageHTML(HttpRequest & _req){
         std::stringstream res;
-        res<<ABXHTTPD_INFO_PAGE_1<<ShowModules_HTML(&_req)<<ABXHTTPD_INFO_PAGE_2;
+        res<<ABXHTTPD_INFO_PAGE_1<<Module::ShowModules_HTML(&_req)<<ABXHTTPD_INFO_PAGE_2;
         return res.str();
     }
 }

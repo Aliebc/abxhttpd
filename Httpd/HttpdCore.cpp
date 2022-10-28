@@ -32,7 +32,7 @@ HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX];
 
 core_t HttpdCoreAddressCount=0;
 
-HttpdCore_R MainC(DefaultHttpdCoreAddress);
+HttpdCore_R MainCore(DefaultHttpdCoreAddress);
 
 std::string ShowHttpdCoreAddressTable(char sep){
     std::stringstream _ret;

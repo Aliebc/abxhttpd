@@ -4,6 +4,7 @@
 #include <signal.h>
 #include "include/FileSocket.hxx"
 #include "include/HttpdThreadPool.hxx"
+#include "include/HttpdPoll.hxx"
 
 #ifdef ABXHTTPD_SSL
 #include "Extension/SSL.H"
@@ -11,42 +12,24 @@
 
 namespace abxhttpd {
     std::mutex io_lock;
-    typedef struct _SocketRequestWithSL
-    {
-        SocketRequest socket_r;
-        ThreadSettingList thread_s;
-        int StreamID;
-    }SocketRequestWithSL;
 
     void* _ThreadHandler(void* _ptr);
 
     void* _ThreadHandler(void* _ptr) {
         SocketRequestWithSL* SourceRequest = (SocketRequestWithSL*)_ptr;
+        HttpdSocket* SocketStream=SourceRequest->socket_p;
+        bool need_free=SourceRequest->free;
         char _time[128];
         time_t tt;
-        SocketRequest src = (SourceRequest->socket_r);
-        std::ostream* logout = SourceRequest->thread_s.abxout;
-        std::ostream* errout = SourceRequest->thread_s.abxerr;
+        SocketRequest src = (SourceRequest->socket_p->info());
+        std::ostream* logout = SourceRequest->thread_s->abxout;
+        std::ostream* errout = SourceRequest->thread_s->abxerr;
         ABXHTTPD_INFO_PRINT(4, "[Socket %d]Entered thread.", src._ad);
-        std::string& _ip = SourceRequest->socket_r.src_in_ip;
+        std::string _ip (src.src_in_ip);
         std::string SocketResponse;
         std::string SocketRequest;
-        int SocketStreamType = SourceRequest->StreamID;
-        std::unique_ptr<HttpdSocket> SocketStream;
-        switch (SocketStreamType) {
-        case ABXHTTPD_SOCK_STREAM:
-            SocketStream = std::move(std::unique_ptr<HttpdSocket>(new HttpdSocket(src)));
-            break;
-#ifdef ABXHTTPD_SSL
-        case ABXHTTPD_SSL_STREAM:
-            SocketStream = std::move(std::unique_ptr<HttpdSocket>(new SSLSocket(src)));
-            break;
-#endif
-        default:
-            break;
-        }
         bool is_keep = false;
-        do {
+        {
             SocketRequest.clear();
             SocketRequest.shrink_to_fit();
             SocketResponse.clear();
@@ -54,36 +37,30 @@ namespace abxhttpd {
             *SocketStream >> SocketRequest;
             tt = time(NULL);
             strftime(_time, 128, "[%Y-%m-%d %H:%M:%S] ", localtime(&tt));
-            if (SocketStream->status() == 0) {
-                SocketStream->close();
-                delete (SocketRequestWithSL*)_ptr;
-                return NULL;
-            }
             size_t _recv_len = SocketRequest.size();
             ABXHTTPD_INFO_PRINT(105, "[Socket %d]\n[IStream]\n%s[End IStream]\n", src._ad, SocketRequest.c_str());
             HttpRequest H_req;
             HttpResponse H_res;
             if (_recv_len > 0) {
                 try {
-                    H_req = src.MCore.IFilter(SocketRequest, _ptr);
+                    H_req = src.MCore->IFilter(SocketRequest, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked istream filiter, handled %lu size.", src._ad, SocketRequest.size());
-                    H_req.remote_addr() = _ip;
+                    H_req.remote_addr(_ip);
                     {
                         std::unique_lock<std::mutex> iock(io_lock);
                         *logout << _time << _ip << " " << H_req.method() << " " << H_req.path() << " " << H_req.header("User-Agent") << std::endl;
                     }
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Logged this request.", src._ad);
-                    H_res = src.MCore.Handler(H_req, _ptr);
+                    H_res = src.MCore->Handler(H_req, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked core handler.", src._ad);
-                    SocketResponse = src.MCore.OFilter(H_res, _ptr);
+                    SocketResponse = src.MCore->OFilter(H_res, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked ostream filiter, handled %lu size.", src._ad, SocketResponse.size());
                     is_keep = (H_res.header("Connection") == "keep-alive");
                 }
-                catch (abxhttpd_error& e) {
-                    *errout << _time << _ip << " Error:" << e.what() << std::endl;
+                catch (const abxhttpd_error_http & e) {
+                    *errout << _time << _ip << " [Error] " << e.what() << std::endl;
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]An error occured, logged this error.", src._ad);
-                    char bd[] = "HTTP/1.1 400 Bad Request";
-                    SocketResponse = bd;
+                    SocketResponse = HttpResponse(e.html(),e.code()).raw();
                 }
                 *SocketStream << SocketResponse;
                 if (H_res.need_send_from_stream) {
@@ -92,10 +69,17 @@ namespace abxhttpd {
                 }
                 ABXHTTPD_INFO_PRINT(105, "[Socket %d]\n[OStream]\n%s[End OStream]\n", src._ad, SocketResponse.c_str());
             }
-        } while (is_keep);
-        SocketStream->close();
-        delete (SocketRequestWithSL*)_ptr;
-        return NULL;
+        }
+        if((!is_keep)||SocketStream->status()==0){
+            SocketStream->close();
+            if(need_free){
+                delete SocketStream;
+                SourceRequest->socket_p=NULL;
+                delete (SocketRequestWithSL*)_ptr;
+                _ptr = NULL;
+            }
+        }
+        return _ptr;
     }
 
     void* _ThreadController(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType) {
@@ -106,13 +90,13 @@ namespace abxhttpd {
             struct sockaddr_in src_in;
             socklen_t sklen = sizeof(src_in);
             int ad = -1;
-#ifdef ABXHTTPD_UNIX
+            #ifdef ABXHTTPD_UNIX
             signal(SIGPIPE, SIG_IGN);
             ABXHTTPD_INFO_PRINT(11, "[Core][System API]Now invoke accept.");
             ad = accept(_set.Socket_n, (struct sockaddr*)&src_in, &sklen);
             ABXHTTPD_INFO_PRINT(11, "[Core][System API]Invoked accept, returning %d.", ad);
-#endif
-#ifdef ABXHTTPD_WINDOWS
+            #endif
+            #ifdef ABXHTTPD_WINDOWS
             while (ad <= 0) {
                 if (!_set.Is_running) {
                     break;
@@ -121,7 +105,7 @@ namespace abxhttpd {
                 ad = accept(_set.Socket_n, (struct sockaddr*)&src_in, &sklen);
                 ABXHTTPD_INFO_PRINT(11, "[Core][System API]Invoked accept, returning %d.", ad);
             }
-#endif
+            #endif
             if (ad < 0) {
                 continue;
             }
@@ -132,10 +116,22 @@ namespace abxhttpd {
             _src.src_in_ip = std::string(inet_ntoa(src_in.sin_addr));
             _src._sd = _set.Socket_n;
             _src.src_in = src_in;
-            _src.MCore = _core;
+            _src.MCore = &_core;
             _src.Http_S = args.Http_S;
-            SocketRequestWithSL* __src = new SocketRequestWithSL({ _src,_set });
-            __src->StreamID = StreamType;
+            HttpdSocket * SocketS;
+            switch (StreamType) {
+            case ABXHTTPD_SOCK_STREAM:
+                SocketS = new HttpdSocket(_src);
+                break;
+            #ifdef ABXHTTPD_SSL
+            case ABXHTTPD_SSL_STREAM:
+                SocketS = new SSLSocket(_src);
+                break;
+            #endif
+            default:
+                break;
+            }
+            SocketRequestWithSL* __src = new SocketRequestWithSL({&_set,SocketS,true});
             if (_set.Multi_thread) {
                 try {
                     while (!thread_pool.push(__src)) {}
@@ -153,8 +149,20 @@ namespace abxhttpd {
         return NULL;
     }
 
+    void* _ThreadController_POLL(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType){
+        HttpdSettingList args = *(HttpdSettingList*)_args;
+        ABXHTTPD_INFO_PRINT(2, "[Core]Entered main ThreadController, multi-thread status: %s", _set.Multi_thread ? "Enabled" : "Disabled");
+        HttpdPoll spoll(_set,_core,&args,StreamType);
+        spoll.run();
+        return NULL;
+    }
+
     void* __ThreadController(const ThreadSettingList& _set, const CCore& _core, void* _args) {
-        _ThreadController(_set, _core, _args, ABXHTTPD_SOCK_STREAM);
+        if(_set.Multi_thread&&_set.Thread_count>0){
+            _ThreadController(_set, _core, _args, ABXHTTPD_SOCK_STREAM);
+        }else{
+            _ThreadController_POLL(_set, _core, _args, ABXHTTPD_SOCK_STREAM);
+        }
         return NULL;
     }
 

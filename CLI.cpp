@@ -31,15 +31,11 @@ int main(int argc,char * argv[]){
     global_argu=&cmd_argu;
     signal(SIGINT,sigint_handle);
     if(CmdArrayIs((const CmdArray *)&cmd_argu,'v')){
-        try{
-            if(cmd_argu['v'].at(0)=='c'){
-                info_color=1;
-                verbose=atoi(cmd_argu['v'].c_str()+1);
-            }else{
-                verbose=std::stoi(cmd_argu['v']);
-            }
-        }catch(std::exception &e){
-            verbose=0;
+        if(cmd_argu['v'].at(0)=='c'){
+            info_color=1;
+            verbose=atoi(cmd_argu['v'].c_str()+1);
+        }else{
+            verbose=atoi(cmd_argu['v'].c_str());
         }
     }
     ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");
@@ -61,7 +57,7 @@ int main(int argc,char * argv[]){
     }
     if(CmdArrayIs((const CmdArray *)&cmd_argu,'m')){
         std::cout << "[Cores]\n"<< ShowHttpdCoreAddressTable() <<std::endl << std::endl;
-        std::cout << "[Modules]\n"<< ShowModules()<<std::endl ;
+        std::cout << "[Modules]\n"<< Module::ShowModules()<<std::endl ;
         exit(0);
     }
     if(CmdArrayIs((const CmdArray *)&cmd_argu,'c')){
@@ -82,7 +78,7 @@ int main(int argc,char * argv[]){
             si.Bind_IP=bind_ip.s_addr;
         }
         si.Port=atoi(cmd_argu['p'].c_str());
-        si.Max_connect_count=SOMAXCONN;
+        si.Max_connect_count=ABXHTTPD_CONNECT_MAX;
         HttpdSettingList hi;
         hi.Socket_S=si;
         ThreadSettingList thread_set;

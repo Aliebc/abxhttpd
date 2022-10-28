@@ -13,22 +13,19 @@
 #define ABXHTTPD_BUFFER_SIZE 2048
 
 namespace abxhttpd{
-    int __close_socket(int ad);
     class ABXHTTPD_API HttpdSocket
     {
     public:
         HttpdSocket();
-        HttpdSocket(SocketRequest &);
-        HttpdSocket(int);
-        virtual bool close();
+        HttpdSocket(const SocketRequest &);
         const SocketRequest & info();
+        virtual bool close();
         virtual size_t read(std::string & _dst,size_t size = 0 );
-        virtual size_t write(std::string & _content,size_t size = 0);
-        bool should_close();
+        virtual size_t write(const std::string & _content,size_t size = 0);
         virtual int status();
-        int & handle_count();
-        const char * GetLastError();
+        virtual const char * GetLastError();
         ~HttpdSocket();
+        static int __close_socket(int ad);
         template <class _A>
         friend _A & operator<< (_A & src, std::string & in){
             src.write(in);
@@ -44,7 +41,7 @@ namespace abxhttpd{
         SocketRequest _src;
         int st;
         int _hc;
-        char * last_err;
+        const char * last_err;
     };
 }
 

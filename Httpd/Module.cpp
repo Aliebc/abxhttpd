@@ -10,22 +10,27 @@
 #endif
 
 namespace abxhttpd{
-    ConfigureInfo _ConfData[ABXHTTPD_MAX_MODULE];
-    module_t ModuleCount=0;
+    ConfigureInfo * Module::_ConfData[ABXHTTPD_MAX_MODULE]{};
+    module_t Module::ModuleCount=0;
 
-    void RegisterModule(ConfigureInfo & _info){
+    void Module::RegisterModule(ConfigureInfo * _info){
         if(ModuleCount<ABXHTTPD_MAX_MODULE){
             _ConfData[ModuleCount]=_info;
             ModuleCount++;
         }
     }
 
-    std::string ShowModules(char sep){
+    Module::Module(ConfigureInfo * _info, void *(*dfunc)(void *), void * dta){
+        dfunc(dta);
+        RegisterModule(_info);
+    }
+
+    std::string Module::ShowModules(char sep){
         std::stringstream _ret;
         for(module_t _i=0;_i<ModuleCount-1;_i++){
-            _ret<< _ConfData[_i].Name <<sep;
+            _ret<< _ConfData[_i]->Name <<sep;
         }
-        _ret<< _ConfData[ModuleCount-1].Name;
+        _ret<< _ConfData[ModuleCount-1]->Name;
         return _ret.str();
     }
 
@@ -51,18 +56,20 @@ namespace abxhttpd{
 
     std::string Get_OS(){
         #ifdef ABXHTTPD_WINDOWS
-        char x[1024] = { 0 };
-        DWORD y = sizeof(x);
-        RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", REG_SZ, NULL, &x, &y);
-        return std::string(x);
+        char os[1024] = { 0 };
+        DWORD y = sizeof(os);
+        RegGetValueA(HKEY_LOCAL_MACHINE, "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion", "ProductName", REG_SZ, NULL, &os, &y);
+        return os;
         #else
         struct utsname x;
         uname(&x);
-        return std::string(x.sysname)+std::string(" ")+std::string(x.version)+std::string(" ")+std::string(x.machine);
+        std::stringstream uts;
+        uts <<x.sysname<<" " <<x.release <<" " << x.version << " " << x.machine;
+        return uts.str();
         #endif
     }
 
-    std::string ShowModules_HTML(HttpRequest * _src){
+    std::string Module::ShowModules_HTML(HttpRequest * _src){
         std::stringstream _ret;
         std::string arg;
         _ret<< "<div class=\"sub-title\"> core </div>"<<std::endl;
@@ -74,11 +81,11 @@ namespace abxhttpd{
         //ModuleHTML_PAIR(_ret,"Multithreading",(CmdArrayIs(global_argu,'T')?"enabled":"disabled"));
         _ret<< "</table></div>" <<std::endl;
         for(module_t _i=0;_i<ModuleCount;_i++){
-            _ret<< "<div class=\"sub-title\">" << _ConfData[_i].Name <<"</div>"<<std::endl;
+            _ret<< "<div class=\"sub-title\">" << _ConfData[_i]->Name <<"</div>"<<std::endl;
             _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
             _ret<<std::endl;
-            for(int _j=0;_ConfData[_i].Conf[_j].info!=NULL&&_j<ABXHTTPD_MAX_MODULE;_j++){
-                ModuleHTML_PAIR(_ret,_ConfData[_i].Conf[_j].name,_ConfData[_i].Conf[_j].info);
+            for(int _j=0;_ConfData[_i]->Conf[_j].info!=NULL&&_j<ABXHTTPD_MAX_MODULE;_j++){
+                ModuleHTML_PAIR(_ret,_ConfData[_i]->Conf[_j].name,_ConfData[_i]->Conf[_j].info);
             }
             _ret<< "</table></div>" <<std::endl;
         }
@@ -87,7 +94,7 @@ namespace abxhttpd{
             _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
             ModuleHTML_PAIR(_ret,"REMOTE_ADDR",_src->remote_addr());
             for(auto _i=_src->headers().begin(); _i!=_src->headers().end();_i++){
-                _ret<< "<tr><td class=\"left\">" << std::string("HTTP_")+_i->first << "</td><td class=\"right\">";
+                _ret<< "<tr><td class=\"left\">HTTP_"+_i->first << "</td><td class=\"right\">";
                 _ret<< _i->second << "</td></tr>";
                 _ret<<std::endl;
             }
@@ -97,11 +104,10 @@ namespace abxhttpd{
         return _ret.str();
     }
 
-    Module::Module(ConfigureInfo _info)
+    Module::Module(ConfigureInfo * _info)
     {
         RegisterModule(_info);
     }
     
     Module::~Module(){}
-
 }

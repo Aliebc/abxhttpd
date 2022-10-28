@@ -17,13 +17,13 @@ namespace abxhttpd{
         {".mp4","video/mp4"}
     };
 
-    bool IsMIMEExist(std::string & _src){
+    bool IsMIMEExist(const std::string & _src){
         MIMEs::iterator _f;
         _f=MIMEList.find(_src);
         return (!(_f==MIMEList.end()));
     }
 
-    std::string _GMIME(std::string & _suffix){
+    std::string _GMIME(const std::string & _suffix){
         if(IsMIMEExist(_suffix)){
             return MIMEList[_suffix];
         }

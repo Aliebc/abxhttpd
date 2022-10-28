@@ -30,7 +30,7 @@ ABXHTTPD_STR(ABXHTTPD_VERSION_LAST)
 #define ABXHTTPD_COMPILER "GCC " __VERSION__
 #define ABXHTTPD_GCC
 #elif (defined _MSC_VER)
-#define ABXHTTPD_COMPILER "MSVC (_MSC_FULL_VER " ABXHTTPD_STR(_MSC_FULL_VER) ")"
+#define ABXHTTPD_COMPILER "MSVC (FULL_VER " ABXHTTPD_STR(_MSC_FULL_VER) ")"
 #define ABXHTTPD_MSVC
 #define ssize_t long;
 #else
@@ -68,6 +68,6 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 "-l\t: Specify normal log files. Default to standard output(1).\n\t(Example: -l access.log)\n" \
 "-e\t: Specify error log files. Default to standard error(2).\n\t(Example: -e error.log)\n" \
 "-D\t: Set working directory.\n\t(Default: .(Current directory) Example: -D C:\\Users\\Administrator)\n" \
-"-T\t: Enable multi-thread mode.\n\t(Default: disabled)\n" 
+"-T\t: Enable multithreading mode.\n\t(Default: disabled)\n"
 
 #endif

@@ -10,6 +10,13 @@
 
 namespace abxhttpd{
 
+typedef struct _SocketRequestWithSL
+{
+    const ThreadSettingList * thread_s;
+    HttpdSocket * socket_p;
+    bool free;
+}SocketRequestWithSL;
+
 class HttpdThreadPool{
 private:
     int thread_count;

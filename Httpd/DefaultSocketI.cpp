@@ -71,26 +71,8 @@ int _DefaultSocketI(SocketSettingList & _setting){
 
 #endif
 
-int _close_socket(int ad, int flag=0){
-    int st;
-    #ifdef ABXHTTPD_WINDOWS
-    st=closesocket(ad);
-    ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked closesocket, returning %d.",ad,st);
-    #endif
-    #ifdef ABXHTTPD_UNIX
-    st=close(ad);
-    ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
-    if(st==0){
-        ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
-    }else{
-        ABXHTTPD_INFO_PRINT(3,"Cannot close socket %d(Error code:%d)",ad,st);
-    }
-    #endif
-    return st;
-}
-
 int _DefaultSocketD(SocketSettingList & _setting){
-    return _close_socket(_setting.allocated_socket);
+    return HttpdSocket::__close_socket(_setting.allocated_socket);
 }
 
 SocketInitializer DefaultSocketI=_DefaultSocketI;

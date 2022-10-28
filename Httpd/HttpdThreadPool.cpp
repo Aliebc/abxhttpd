@@ -15,12 +15,9 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
                 while(is_running){
                     {
                         std::unique_lock<std::mutex> tlck(thread_lock);
-                        task_count=data_queue.size();
                         while(data_queue.empty()){
-                            //thread_cv.wait(tlck);
                             thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
                         }
-                        //thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
                         if(!data_queue.empty()){
                             _ptr=data_queue.front();
                             data_queue.pop();
@@ -28,7 +25,10 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
                             continue;
                         }
                     }
-                    data_func(_ptr);
+                    void * rptr=data_func(_ptr);
+                    if(rptr!=NULL){
+                        push(rptr);
+                    }
                     {
                         std::lock_guard<std::mutex> tlck(thread_lock);
                         idle_thread++;
@@ -47,7 +47,7 @@ HttpdThreadPool::~HttpdThreadPool(){
 
 bool HttpdThreadPool::push(void * _ptr){
     {
-        if(idle_thread>0){
+        if(true){
             {
                 std::lock_guard<std::mutex> tlck(thread_lock);
                 data_queue.push(_ptr);
@@ -64,7 +64,7 @@ bool HttpdThreadPool::push(void * _ptr){
 void HttpdThreadPool::stop(){
     is_running=false;
     thread_cv.notify_all();
-    delete [] thread_list;
+    //delete [] thread_list;
 }
 
 }

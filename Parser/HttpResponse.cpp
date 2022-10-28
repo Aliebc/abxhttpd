@@ -4,28 +4,30 @@
 #include <iostream>
 using namespace abxhttpd;
 
-HttpResponse::HttpResponse(std::string & _src){
+HttpResponse::HttpResponse(){
+    header("Server",ABXHTTPD_VERSION_SERVER);
+    header("Connection", "close");
+    header("Content-Type","text/html");
+    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
+}
+
+HttpResponse::HttpResponse(const std::string & _src):HttpResponse(){
     Body=_src;
     Code=200;
-    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
-HttpResponse::HttpResponse(const char * _src,size_t _len){
+HttpResponse::HttpResponse(const std::string & _src,int code):HttpResponse(_src){
+    status(code);
+}
+
+HttpResponse::HttpResponse(const char * _src,size_t _len):HttpResponse(){
     Body=std::string(_src,_len);
     Code=200;
-    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
-HttpResponse::HttpResponse(void){
-    Body=std::string();
-    Code=200;
-    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
-}
-
-HttpResponse::HttpResponse(const char * _src){
+HttpResponse::HttpResponse(const char * _src):HttpResponse(){
     Body=std::string(_src);
     Code=200;
-    Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
 }
 
 std::string & HttpResponse::header(const std::string & _h){
@@ -50,19 +52,18 @@ void HttpResponse::header(const char * _h,std::string && _src){
 }
 
 std::string HttpResponse::raw(void){
-    Raw+=Protocol+" ";
-    Raw+=std::to_string(Code);
-    Raw+=" ";
-    Raw+=CodeInfo+"\r\n";
+    std::stringstream _rr;
+    if(header("Content-Length").size()==0){
+        header("Content-Length",std::to_string(Body.size()));
+    }
+    _rr << Protocol << " " << std::to_string(Code) << " " << CodeInfo << "\r\n";
     StrArray::iterator _hi=Headers.begin();
     while(_hi!=Headers.end()){
-        Raw+=_hi->first+":"+_hi->second+"\r\n";
+        _rr << _hi->first << ":" << _hi->second << "\r\n";
         _hi++;
     }
-    Raw+="\r\n";
-    Raw+=Body;
-    std::string _r=Raw;
-    return _r;
+    _rr << "\r\n" << Body;
+    return _rr.str();
 }
 
 bool HttpResponse::status(int _code,const std::string & _str){

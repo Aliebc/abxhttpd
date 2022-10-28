@@ -54,9 +54,6 @@
 
 #ifdef ABXHTTPD_UNIX
 
-#include <sys/stat.h>
-#include <unistd.h>
-#include <sys/utsname.h>
 #define ABXHTTPD_API
 
 #else
@@ -74,4 +71,28 @@
 #endif
 #endif
 #endif
+
+#ifdef ABXHTTPD_UNIX
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#include <unistd.h>
+#include <netinet/in.h>
+#include <sys/wait.h>
+#include <fcntl.h>
+#include <sys/socket.h>
+#include <sys/types.h>
+#include <arpa/inet.h>
+#include <poll.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/utsname.h>
+#endif
+
+#ifdef ABXHTTPD_WINDOWS
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#define poll(x,y,z) WSAPoll(x,y,z)
+#endif
+
 #endif
