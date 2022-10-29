@@ -91,7 +91,6 @@ namespace abxhttpd {
             socklen_t sklen = sizeof(src_in);
             int ad = -1;
             #ifdef ABXHTTPD_UNIX
-            signal(SIGPIPE, SIG_IGN);
             ABXHTTPD_INFO_PRINT(11, "[Core][System API]Now invoke accept.");
             ad = accept(_set.Socket_n, (struct sockaddr*)&src_in, &sklen);
             ABXHTTPD_INFO_PRINT(11, "[Core][System API]Invoked accept, returning %d.", ad);

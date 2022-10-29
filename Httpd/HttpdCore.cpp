@@ -80,6 +80,9 @@ Httpd::~Httpd(){
 
 httpd_t Httpd::start(){
     httpd_t _r=0;
+    #ifdef ABXHTTPD_UNIX
+    signal(SIGPIPE, SIG_IGN);
+    #endif
     Setting.Thread_S.Is_running=true;
     int _sk=this->Core.Initializer(this->Setting.Socket_S);
     this->Setting.Thread_S.Socket_n=_sk;
