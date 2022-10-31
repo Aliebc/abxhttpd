@@ -1,12 +1,12 @@
-# abxhttpd
+# Abxhttpd
 
 ## 项目简介
 
-abxhttpd是一个微型的，采用C++编写的http服务器，可以做到简单的http协议解析、响应功能，可以用来练习C++.
+abxhttpd是一个采用C++编写的轻量级http服务器，可以做到简单的http协议解析、响应功能，可以用来练习C++或http协议.
 
 ## 代码标准版本
 
-目前采用C++11, string、map等均使用STL
+C++11
 
 ## 支持平台
 
@@ -16,79 +16,75 @@ abxhttpd是一个微型的，采用C++编写的http服务器，可以做到简�
 
 · MacOS
 
-· Linux
-
-· Android
+· Linux(Ubuntu/CentOS/Android)
 
 支持的编译器
 
 GCC/Clang/MSVC
 
-在以下编译器已经编译测试通过:
-
-GCC 7-11
-
-Clang 13-15
-
-MSVC 19.29
-
 ## 第三方库
 
-目前无
+目前无，核心部分只使用了C++标准库
 
-## 已经实现的功能
+## 从源码编译
 
-1. 解析http请求，将对应目录下的文件返回
-2. Windows上的GB2312字符集支持（即可以访问中文路径）
-3. 后台运行（Linux/MacOS上采用fork函数实现，Windows上采用ShellExecute函数实现）
-
-## 计划中实现的功能
-
-1. 实现ini类的配置文件
-2. CGI功能
-
-   3. 代码模块化
-
-## 计划外功能
-
-1. TLS支持
-2. gzip压缩
-3. WebSocket
-4. FastCGI
-
-## 安装方式
-
-1. 从Release中下载对应平台的二进制文件
-2. 编译安装
-
-   进入目录后
-
-   UNIX
-
-   ```shell
-   g++ -O2 -std=c++11 -I. -o abxhttpd *.cpp Httpd/*.cpp Parser/*.cpp Extension/*.cpp -lpthread
-   ```
-
-   Windows
-
-   ```shell
-   x86_64-w64-mingw32-g++ -O3 -std=c++11 -I. -o abxhttpd *.cpp Httpd/*.cpp Parser/*.cpp Extension/*.cpp -lws2_32
-   ```
-
-    3. CMake
+1. 首先进入目录，然后新建一个build目录，然后生成cmake文件
 
 ```shell
+#进入源码目录
 mkdir build
+cd build
 cmake ..
-make
 ```
 
-    进入目录后，执行cmake .，生成cmake文件后执行make(UNIX)或者启动cmake生成的Microsoft Visual  Studio项目，之后执行“生成/重新生成”.
+2. 按照生成的文件进行构建
+在Windows上，默认生成VS的项目，双击打开项目，进行生成即可。
+(如果在Windows上使用MinGW构建,需要在cmake命令后添加 -G "MinGW Makefile")
+在MacOS或Linux上，默认生成Unix Makefile, 此时直接键入make命令即可构建
 
-    如果要构建附加的模块，请事先设置环境变量，如SSL支持(export ABXHTTPD_SSL=1 )，其他变量参阅文档。
+3. 安装项目
+   在Windows上，输入cmake -P "./cmake_install.cmake"进行安装;在MacOS或Linux上输入make install安装（可能需要sudo make install）
+```shell
+# On MacOS or Linux
+make
+make install
+```
+
+4. 卸载项目
+   在Windows上，输入cmake -P "./cmake_uninstall.cmake"进行卸载;在MacOS或Linux上输入make uninstall卸载（可能需要sudo make uninstall）
+如果需要
+
+5. 构建模块
+   Abxhttpd支持构建时加入其他项目，如
+   -DABXHTTPD_SHARED=1 构建动态库
+   -DABXHTTPD_STATAIC=1 构建静态库
+   -DABXHTTPD_SSL=1 构建SSL模块
+
+如果需要对应的选项，在cmake配置时输入，如
+```shell
+cmake .. -DABXHTTPD_SHARED=1 -DABXHTTPD_SSL=1
+```
 
 ## 运行方式
+   把可执行文件正确加入环境路径后，命令行中输入abxhttpd -V检查是否正确安装
+```shell
+#如果显示类似下方则代表已经正确安装
+$ abxhttpd -V
+Abxhttpd version: abxhttpd/2.0.3 (MacOS)
+Built by Apple LLVM 14.0.0 (clang-1400.0.29.102)
+Build Date: Oct 31 2022 21:00:14
+Copyright (C) 2022 The Abxhttpd Group.
+```
 
-   进入命令行运行，输入abxhttpd -h 进入帮助页面.
+## 运行示例
 
-  
+最简单的运行示例
+```shell
+abxhttpd -p 9999 -D /var/www/html
+```
+即以根目录为/var/www/html在本地的9999端口建立站点
+```shell
+abxhttpd -p 9999 -D /var/www/html -l a.log -e e.log -d
+```
+即以根目录为/var/www/html在本地的9999端口建立站点，并把日志输入a.log文件,错误日志输入e.log文件,同时挂为后台程序.
+输入abxhttpd -h 进入帮助页面或参阅文档以查看更详细的信息.
