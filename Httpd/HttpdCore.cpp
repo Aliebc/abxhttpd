@@ -78,15 +78,19 @@ Httpd::~Httpd(){
     #endif 
 }
 
-httpd_t Httpd::start(){
-    httpd_t _r=0;
+void Httpd::env(){
     #ifdef ABXHTTPD_UNIX
     signal(SIGPIPE, SIG_IGN);
     #endif
+}
+
+httpd_t Httpd::start(){
+    httpd_t _r=0;
+    env();
     Setting.Thread_S.Is_running=true;
-    int _sk=this->Core.Initializer(this->Setting.Socket_S);
+    int _sk=Core.Initializer(Setting.Socket_S);
     this->Setting.Thread_S.Socket_n=_sk;
-    this->Core.Controller(this->Setting.Thread_S,this->MCore,(void *)&this->Setting);
+    this->Core.Controller(Setting.Thread_S,MCore,(void *)&Setting);
     return _r;
 }
 

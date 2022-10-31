@@ -11,6 +11,7 @@
 
 #define ABXHTTPD_SOCK_STREAM 0
 #define ABXHTTPD_BUFFER_SIZE 2048
+#define ABXHTTPD_SOCK_CLOSED 0
 
 namespace abxhttpd{
     class ABXHTTPD_API HttpdSocket

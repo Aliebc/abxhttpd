@@ -120,9 +120,10 @@ private:
     CCore MCore;
     HttpdSettingList Setting;
     httpd_t _status;
+    static void env(); //Prepare environment
 public:
     Httpd(const HttpdCore & _core, HttpdSettingList & _set);
-    httpd_t start(void);
+    httpd_t start();
     httpd_t start(void * _arg);
     httpd_t status() const;
     httpd_t stop();

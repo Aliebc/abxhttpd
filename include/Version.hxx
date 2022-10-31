@@ -47,12 +47,12 @@ ABXHTTPD_INT_DEF(ABXHTTPD_VERSION_HEX)
 ABXHTTPD_STR_DEF(ABXHTTPD_VERSION_TEXT)
 ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 
-#define ABXHTTPD_INFO "Abxhttpd version: " ABXHTTPD_VERSION_SERVER "\n" \
+#define ABXHTTPD_INFO "Abxhttpd version: " ABXHTTPD_VERSION_SERVER " (" ABXHTTPD_PLATFORM ")\n" \
 "Built by " ABXHTTPD_COMPILER "\n" \
 "Build Date: " ABXHTTPD_COMPILE_TIME "\n" \
 "Copyright (C) 2022 The Abxhttpd Group."
 
-#define ABXHTTPD_HELP "Abxhttpd Manual\n\nUsage: [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
+#define ABXHTTPD_HELP "Abxhttpd \nUsage: abxhttpd [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
 "Options and arguments:\n" \
 "-V\t: See version and copyright information.\n" \
 "-v\t: Set detailed information grade.\n\tDetailed info of given grade will be printed to STDOUT.\n\tAdd c before grade can print colorful info\n\t(Example: -v 5/-vc11)\n" \
@@ -63,7 +63,9 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 "-g\t: Start the graphical user interface(GUI).\n" \
 "-p\t: Specify and listening port.\n\t(Example: -p 80)\n" \
 "-d\t: Start deamon.\n\t(Example: -d)\n" \
-"-b\t: Specify bind IP(Only support TCP4 now).\n\t(Example: -b 127.0.0.1(Default:0.0.0.0))\n" \
+"-b\t: Specify bind IP.\n\t(Example: -b 127.0.0.1(Default:0.0.0.0))\n" \
+"-4\t: Declare bind IP is IPv4.\n\t(Default)\n" \
+"-6\t: Declare bind IP is IPv6.\n\t(Example: -b ::1 -6)\n" \
 "-i\t: Specify the config file.\n\t(Example: -i httpd.ini)(Unrealized)\n" \
 "-l\t: Specify normal log files. Default to standard output(1).\n\t(Example: -l access.log)\n" \
 "-e\t: Specify error log files. Default to standard error(2).\n\t(Example: -e error.log)\n" \

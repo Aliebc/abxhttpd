@@ -104,8 +104,8 @@ namespace abxhttpd{
                     if(errno==0||errno==EWOULDBLOCK){
                         continue;
                     }else{
-                        break;
                         this->close();
+                        break;
                     }
                 }else{
                     this->close();

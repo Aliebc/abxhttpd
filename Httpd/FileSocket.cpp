@@ -23,28 +23,33 @@ size_t FileSocket::get_length(){
 }
 size_t FileSocket::read(std::string &dst,size_t size){
     if(size==0){size--;}
-    if(feof(fp)){
-        return 0;
-    }
     size_t _read_size=ABXHTTPD_MIN(size, length);
     size_t _read_len=0;
     size_t _read_all=0;
-    while((_read_size/sizeof(tmp))>0){
+    while(_read_size>0&&(!feof(fp))){
+        ABXHTTPD_ZERO_MEMORY(tmp);
         _read_len=fread(tmp, sizeof(char), sizeof(tmp), fp);
         dst.insert(dst.size(), tmp, _read_len);
         _read_size-=_read_len;
         _read_all+=_read_len;
-        ABXHTTPD_ZERO_MEMORY(tmp);
     }
-    _read_len=fread(tmp, sizeof(char),_read_size,fp);
-    dst.insert(dst.size(),tmp,_read_len);
-    _read_size-=_read_len;
-    _read_all+=_read_len;
     return _read_all;
 }
 
-size_t FileSocket::write(std::string &dst,size_t size){
+size_t FileSocket::write(const std::string &dst,size_t size){
     return 0;
 }
+
+HttpdSocket & operator<< (HttpdSocket & _dst, FileSocket & _src){
+    std::string tmp_s;
+    size_t _read_len=0;
+    while ((_read_len=_src.read(tmp_s,ABXHTTPD_BUFFER_SIZE))!=0
+           &&_dst.status()!=ABXHTTPD_SOCK_CLOSED) {
+        _dst.write(tmp_s,_read_len);
+        tmp_s.clear();
+    }
+    return _dst;
+}
+
 }
 

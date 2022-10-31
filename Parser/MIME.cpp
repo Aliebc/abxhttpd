@@ -1,11 +1,13 @@
 #include "include/abxhttpd.H"
-namespace abxhttpd{
 
+#define ABXHTTPD_MIME_DEFAULT "application/octet-stream"
+namespace abxhttpd{
     MIMEs MIMEList
     {
         {".pdf","application/pdf"},
         {".wasm","application/wasm"},
         {".html","text/html"},
+        {".xml","text/xml"},
         {".htm","text/html"},
         {".js","application/javascript"},
         {".css","text/css"},
@@ -18,24 +20,16 @@ namespace abxhttpd{
     };
 
     bool IsMIMEExist(const std::string & _src){
-        MIMEs::iterator _f;
-        _f=MIMEList.find(_src);
-        return (!(_f==MIMEList.end()));
+        return (!(MIMEList.find(_src)==MIMEList.end()));
     }
 
     std::string _GMIME(const std::string & _suffix){
-        if(IsMIMEExist(_suffix)){
-            return MIMEList[_suffix];
-        }
-        return "application/octet-stream";
+        return IsMIMEExist(_suffix)?MIMEList[_suffix]:ABXHTTPD_MIME_DEFAULT;
     }
 
     std::string _GMIME(const char * _suffix){
         std::string __suffix(_suffix);
-        if(IsMIMEExist(__suffix)){
-            return MIMEList[__suffix];
-        }
-        return "application/octet-stream";
+        return IsMIMEExist(__suffix)?MIMEList[__suffix]:ABXHTTPD_MIME_DEFAULT;
     }
 
 }
