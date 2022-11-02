@@ -59,6 +59,8 @@ install(
 )
 
 install(DIRECTORY include/ DESTINATION include/abxhttpd)
+install(DIRECTORY Resource/man/ TYPE MAN)
+install(DIRECTORY Resource/doc/ TYPE DOC)
 
 if(NOT TARGET uninstall)
   configure_file(

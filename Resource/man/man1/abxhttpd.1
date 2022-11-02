@@ -1,0 +1,83 @@
+.TH abxhttpd "1" "November, 2022" "Abxhttpd/2.0.3" "Abxhttpd Manual"
+
+.ds n 5
+.SH NAME
+\fBabxhttpd\fR - CLI tool of Abxhttpd
+.SH SYNOPSIS
+\fBabxhttpd -[option][value] ...\fR
+.SH DESCRIPTION
+Abxhttpd is a tiny cross-platform http server developed with C++. 
+You can use Abxhttpd to set up your own website so that everyone on Internet can access your shared resources. 
+You can also use libxhttpd, a component of Abxhttpd, as an independent http library, building your own C++ network program.
+.PP 
+When you invoke abxhttpd with command line, it normally does binding address and processing http request, 
+and it usually gives \fIno\ message\fR if it has been set successfully.
+You can control the progress by passing several options.
+.PP
+Generally, Abxhttpd accepts \fIshort\ argument\fR such as -[option][value] or -[option] [value], where option is usually a single character, 
+and we will give detailed information in the following section. Abxhttpd will support configuration file in the next version.
+.SH OPTIONS
+.PP
+Here is a summary of all the options. Explanations are in the following sections.
+.PP
+\fBOverall Options\fR
+.PP
+\fBabxhttpd -[46dghmV] [-b bind IP] [-c internal core] [-D root directory] [-e error log file] [-l log file] [-p port] [-T thread count] [-v[c] verbose grade] \fR
+.LP
+\fBIP Family\fR
+.IP -4
+Specify IP version is IPv4 (No value)
+.IP -6
+Specify IP version is IPv6 (No value)
+.IP "-b \fIIP\ Address\fR"
+Specify bind IP (Valid IP address, exp: 127.0.0.1(v4) or ::1(v6))
+.IP "-p \fIPort\fR"
+Specify bind Port (Integer: 1-65535)
+.LP
+\fBCLI Family\fR
+.IP -V
+Show version information (No value)
+.IP -m
+Show installed core and modules (No value)
+.IP -h
+Show help list (No value)
+.IP -g
+Start GUI (No value)
+.IP "-v[c] \fIVerbose\ grade\fR"
+Set verbose grade, and detailed message whose grade under it will be printed, and c option means printing colorful message (Integer: 1-500)
+.LP
+\fBControl Family\fR
+.IP "-D \fIDirectory\fR" 
+Set website root directory (Valid directory, exp: C:\\Users\\Administrator)
+.IP "-c \fICorename\fR" 
+Set internal core (Valid corename, printed by -m, exp: DefaultHttpdCore)
+.IP "-T \fIThread\ count\fR"
+Set how many threads program will use (Integer: 1-4294967296, limited by your OS)
+.IP "-l \fInormal\ log\ file\fR"
+Set normal log file (Valid file path, exp: C:\\Users\\Administrator\\logs\\access.log)
+.IP "-e \fIerror\ log\ file\fR"
+Set error log file (Valid file path, exp: C:\\Users\\Administrator\\logs\\error.log)
+.IP -d
+Start program as deamon (No value, need -l and -e arguments)
+
+
+
+.SH BUGS
+Bug report link: \fIhttps://github.com/Aliebc/abxhttpd/issues\fR
+
+.SH AUTHOR
+Please see: \fIhttps://github.com/Aliebc/abxhttpd/graphs/contributors\fR
+
+.SH FOOTNOTES
+This program is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+
+.SH COPYRIGHT
+Copyright (C) 2022 The Abxhttpd Group.
+.PP
+Permission is granted to copy, distribute and/or modify this document under the terms of the GNU Free
+Documentation License, Version 1.3 or any later version published by the Free Software Foundation. You can get the license in project directory.
+.SH ACKNOWLEDGEMENTS
+.PP
+Thank you for using abxhttpd! We know that there are many similar productions which are better than ours,
+but completing this project is helpful for us and we hope our production can help you. 
+We sincerely hope you can give us suggestions.
