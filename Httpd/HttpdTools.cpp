@@ -111,7 +111,7 @@ namespace abxhttpd{
 		return str;
 	}
 
-    std::string ABX_URLDecode(std::string & _src){
+    std::string HttpdTools::ABX_URLDecode(std::string & _src){
         std::string utf_8_c(_ABX_URLDecode(_src));
         char * gbk_c=Utf8ToGB2312(utf_8_c.c_str());
         std::string res(gbk_c);
