@@ -82,6 +82,13 @@ void Httpd::env(){
     #ifdef ABXHTTPD_UNIX
     signal(SIGPIPE, SIG_IGN);
     #endif
+    #ifdef ABXHTTPD_WINDOWS
+    WSADATA wsadata;
+    int wsa_c=WSAStartup(MAKEWORD(2,2),&wsadata);
+    if(wsa_c!=0){
+        throw abxhttpd_error("Cannot start WSA!");
+    }
+    #endif
 }
 
 httpd_t Httpd::start(){

@@ -63,25 +63,20 @@ int _DefaultSocketI6(SocketSettingList & _setting){
 #ifdef ABXHTTPD_WINDOWS
 
 int _DefaultSocketI(SocketSettingList & _setting){
-    WSADATA wsadata;
-    int wsa_c=WSAStartup(MAKEWORD(2,2),&wsadata);
-    ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked WSAStartup, returning %d",wsa_c);
-    if(wsa_c!=0){
-        throw abxhttpd_error("Cannot invoke WSAStartup");
-    }
     int _sk=socket(AF_INET,SOCK_STREAM,0);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked socket, returning %d",_sk);
-    char optval=1;
     int port = _setting.Port;
-    struct sockaddr_in _in={0};
+    struct sockaddr_in _in{0};
+    struct in_addr bind_ip;
+    if(inet_pton(AF_INET, _setting.IPStr,&bind_ip)==0){
+        throw abxhttpd_error("Cannot Bind IP(Format).");
+    }
     _in.sin_family=AF_INET;
-    _in.sin_addr.s_addr=(_setting.Bind_IP);
-    _in.sin_port=htons(port);
-    unsigned long ul=1;
-    //int _ws=ioctlsocket(_sk,FIONBIO,(unsigned long *)&ul);
+    _in.sin_addr.s_addr=bind_ip.s_addr;
+    _in.sin_port=htons(_setting.Port);
     int x1=bind(_sk,(struct sockaddr *)&_in,sizeof(_in));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
-    int x2=listen(_sk,_setting.Max_connect_count);
+    int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(x2==SOCKET_ERROR){
         if(WSAGetLastError()==WSAEADDRINUSE){
@@ -99,12 +94,6 @@ int _DefaultSocketI(SocketSettingList & _setting){
 }
 
 int _DefaultSocketI6(SocketSettingList & _setting){
-    WSADATA wsadata;
-    int wsa_c=WSAStartup(MAKEWORD(2,2),&wsadata);
-    ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked WSAStartup, returning %d",wsa_c);
-    if(wsa_c!=0){
-        throw abxhttpd_error("Cannot invoke WSAStartup");
-    }
     int _sk=socket(AF_INET,SOCK_STREAM,0);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked socket, returning %d",_sk);
     int port = _setting.Port;
@@ -118,7 +107,7 @@ int _DefaultSocketI6(SocketSettingList & _setting){
     _in6.sin6_port=htons(_setting.Port);
     int x1=bind(_sk,(struct sockaddr *)&_in6,sizeof(_in6));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
-    int x2=listen(_sk,_setting.Max_connect_count);
+    int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(x2==SOCKET_ERROR){
         if(WSAGetLastError()==WSAEADDRINUSE){
