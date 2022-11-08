@@ -87,9 +87,9 @@ void Httpd::env(){
 httpd_t Httpd::start(){
     httpd_t _r=0;
     env();
-    Setting.Thread_S.Is_running=true;
+    Setting.Thread_S.Running=true;
     int _sk=Core.Initializer(Setting.Socket_S);
-    this->Setting.Thread_S.Socket_n=_sk;
+    this->Setting.Thread_S.SocketMainID=_sk;
     this->Core.Controller(Setting.Thread_S,MCore,(void *)&Setting);
     return _r;
 }
@@ -100,7 +100,7 @@ httpd_t Httpd::status() const {
 
 httpd_t Httpd::stop(){
     int st=Core.Destructor(Setting.Socket_S);
-    Setting.Thread_S.Is_running=false;
+    Setting.Thread_S.Running=false;
     if(st==0){
         ABXHTTPD_INFO_PRINT(1,"[Core]Shutted down.");
         return 0;

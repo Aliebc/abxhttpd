@@ -4,9 +4,16 @@
 #define ABXHTTPD_MIN(a,b) (a<b?a:b)
 
 namespace abxhttpd {
-ABXHTTPD_API size_t _FileLength(std::string & _Path);
-ABXHTTPD_API std::string _FileSuffix(std::string & _Name);
-ABXHTTPD_API std::string ABX_URLDecode(std::string & _src);
+
+class HttpdTools{
+public:
+    static size_t _FileLength(std::string & _Path);
+    static std::string _FileSuffix(const std::string & _Name);
+    static std::string ABX_URLDecode(std::string & _src);
+    static std::string ABXInfoPageHTML(HttpRequest & _req);
+    HttpdTools();
+    ~HttpdTools();
+};
 ABXHTTPD_API std::string ABXInfoPageHTML(HttpRequest & _req);
 }
 #endif

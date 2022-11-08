@@ -6,7 +6,7 @@
 namespace abxhttpd{
 void* _ThreadHandler(void* _ptr);
 HttpdPoll::HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const HttpdSettingList * http_s,int StreamType){
-    MSocketID=_set.Socket_n;
+    MSocketID=_set.SocketMainID;
     thread_s=&_set;
     this->http_s=*http_s;
     running=true;

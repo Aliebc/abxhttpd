@@ -13,7 +13,7 @@ int _DefaultSocketI(SocketSettingList & _setting){
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked setsockopt.");
     struct sockaddr_in _in{0};
     struct in_addr bind_ip;
-    if(inet_pton(AF_INET, _setting.IPStr.c_str(),&bind_ip)==0){
+    if(inet_pton(AF_INET, _setting.IPStr,&bind_ip)==0){
         throw abxhttpd_error("Cannot Bind IP(Format).");
     }
     _in.sin_family=AF_INET;
@@ -21,7 +21,7 @@ int _DefaultSocketI(SocketSettingList & _setting){
     _in.sin_port=htons(_setting.Port);
     int x1=bind(_sk,(struct sockaddr *)&_in,sizeof(_in));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
-    int x2=listen(_sk,_setting.Max_connect_count);
+    int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(!(x1>=0&&x2>=0)){
         throw abxhttpd_error(std::string(strerror(errno)));
@@ -40,7 +40,7 @@ int _DefaultSocketI6(SocketSettingList & _setting){
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked setsockopt.");
     struct sockaddr_in6 _in6{0};
     struct in6_addr bind_ip;
-    if(inet_pton(AF_INET6, _setting.IPStr.c_str(),&bind_ip)==0){
+    if(inet_pton(AF_INET6, _setting.IPStr,&bind_ip)==0){
         throw abxhttpd_error("Cannot Bind IP(Format).");
     }
     _in6.sin6_family=AF_INET6;
@@ -48,13 +48,13 @@ int _DefaultSocketI6(SocketSettingList & _setting){
     _in6.sin6_port=htons(_setting.Port);
     int x1=bind(_sk,(struct sockaddr *)&_in6,sizeof(_in6));
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked bind, returning %d",x1);
-    int x2=listen(_sk,_setting.Max_connect_count);
+    int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(!(x1>=0&&x2>=0)){
         throw abxhttpd_error(std::string(strerror(errno)));
     }
     _setting.allocated_socket=_sk;
-    ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",_setting.IPStr.c_str(),_setting.Port);
+    ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",_setting.IPStr,_setting.Port);
     return _sk;
 }
 
@@ -110,7 +110,7 @@ int _DefaultSocketI6(SocketSettingList & _setting){
     int port = _setting.Port;
     struct sockaddr_in6 _in6{0};
     struct in6_addr bind_ip;
-    if(inet_pton(AF_INET6, _setting.IPStr.c_str(),&bind_ip)==0){
+    if(inet_pton(AF_INET6, _setting.IPStr,&bind_ip)==0){
         throw abxhttpd_error("Cannot Bind IP(Format).");
     }
     _in6.sin6_family=AF_INET6;
@@ -131,7 +131,7 @@ int _DefaultSocketI6(SocketSettingList & _setting){
         throw abxhttpd_error(std::string(strerror(errno)));
     }
     _setting.allocated_socket=_sk;
-    ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",_setting.IPStr.c_str(),_setting.Port);
+    ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",_setting.IPStr,_setting.Port);
     return _sk;
 }
 
