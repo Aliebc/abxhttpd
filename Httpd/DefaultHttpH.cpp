@@ -23,15 +23,15 @@ namespace abxhttpd{
         if(_src.path().at(_src.path().size()-1)=='/'){
             _src.path().insert(_src.path().size(),"index.html");
         }
-        std::string _path(_ssrc.Http_S.Path+ABX_URLDecode(_src.path()));
-        std::string _suffix(_FileSuffix(_src.path()));
+        std::string _path(_ssrc.Http_S.Path+HttpdTools::ABX_URLDecode(_src.path()));
+        std::string _suffix(HttpdTools::_FileSuffix(_src.path()));
         _hresponse.status(200);
         if(_src.path()=="/abxhttpd"){
             _hresponse.body(ABXInfoPageHTML(_src));
         }else{
             try{
                 _hresponse.header("Content-Type",_GMIME(_suffix));
-                _hresponse.header("Content-Length",std::to_string(_FileLength(_path)));
+                _hresponse.header("Content-Length",std::to_string(HttpdTools::_FileLength(_path)));
                 _hresponse.need_send_from_stream=true;
                 _hresponse.need_send_from_stream_src=(_path);
             }catch (const abxhttpd_error_http & _e){

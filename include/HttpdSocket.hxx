@@ -3,6 +3,7 @@
 
 #include "abxhttpd.H"
 #include "Httpd.hxx"
+#include "include/BasicStream.hxx"
 #ifdef ABXHTTPD_WINDOWS
 
 #define MSG_DONTWAIT 0x0
@@ -14,7 +15,7 @@
 #define ABXHTTPD_SOCK_CLOSED 0
 
 namespace abxhttpd{
-    class ABXHTTPD_API HttpdSocket
+    class ABXHTTPD_API HttpdSocket:public BasicStream
     {
     public:
         HttpdSocket();
@@ -30,9 +31,7 @@ namespace abxhttpd{
         friend HttpdSocket& operator<< (HttpdSocket & src, std::string & in);
         friend HttpdSocket& operator>> (HttpdSocket& src, std::string& is);
     protected:
-        char tmp[ABXHTTPD_BUFFER_SIZE];
         SocketRequest _src;
-        int st;
         int _hc;
         const char * last_err;
     };

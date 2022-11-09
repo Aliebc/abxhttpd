@@ -66,19 +66,19 @@ int main(int argc,char ** argv){
             }else{
                 MainSetting.Socket_S.IPVer=4;
             }
-            MainSetting.Socket_S.IPStr=cmd_argu['b'];
+            MainSetting.Socket_S.IPStr=cmd_argu['b'].c_str();
         }else{
             MainSetting.Socket_S.IPVer=4;
             MainSetting.Socket_S.IPStr="0.0.0.0";
         }
         MainSetting.Socket_S.Port=atoi(cmd_argu['p'].c_str())%65535;
-        MainSetting.Socket_S.Max_connect_count=ABXHTTPD_CONNECT_MAX;
+        MainSetting.Socket_S.MaxConnect=ABXHTTPD_CONNECT_MAX;
         if(CmdArrayIs(&cmd_argu,'T')){
-            MainSetting.Thread_S.Multi_thread=true;
-            MainSetting.Thread_S.Thread_count=atoi(cmd_argu['T'].c_str());
+            MainSetting.Thread_S.Multithreading=true;
+            MainSetting.Thread_S.ThreadCount=atoi(cmd_argu['T'].c_str());
         }else{
-            MainSetting.Thread_S.Multi_thread=false;
-            MainSetting.Thread_S.Thread_count=0;
+            MainSetting.Thread_S.Multithreading=false;
+            MainSetting.Thread_S.ThreadCount=0;
         }
         std::ofstream out_log;
         std::ofstream out_err;
@@ -100,7 +100,7 @@ int main(int argc,char ** argv){
                 ABXHTTPD_CLI_ERR("Cannot open file %s.",cmd_argu['e'].c_str());
             }
         }
-        MainSetting.Http_S.Path=CmdArrayIs(&cmd_argu,'D')?cmd_argu['D']:".";
+        MainSetting.Http_S.Path=CmdArrayIs(&cmd_argu,'D')?cmd_argu['D'].c_str():".";
         if(CmdArrayIs(&cmd_argu,'d')){
             if(!(CmdArrayIs(&cmd_argu,'l')&&CmdArrayIs(&cmd_argu,'e'))){
                 ABXHTTPD_CLI_ERR("You should specify log file and error log file in deamon mode.");

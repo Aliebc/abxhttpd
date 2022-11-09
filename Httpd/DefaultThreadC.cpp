@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include <signal.h>
-#include "include/FileSocket.hxx"
+#include "include/FileStream.hxx"
 #include "include/HttpdThreadPool.hxx"
 #include "include/HttpdPoll.hxx"
 
@@ -64,7 +64,7 @@ namespace abxhttpd {
                 }
                 *SocketStream << SocketResponse;
                 if (H_res.need_send_from_stream) {
-                    FileSocket FileToSend(H_res.need_send_from_stream_src.c_str());
+                    FileStream FileToSend(H_res.need_send_from_stream_src.c_str());
                     *SocketStream << FileToSend;
                 }
                 ABXHTTPD_INFO_PRINT(105, "[Socket %d]\n[OStream]\n%s[End OStream]\n", src._ad, SocketResponse.c_str());
@@ -84,36 +84,23 @@ namespace abxhttpd {
 
     void* _ThreadController(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType) {
         HttpdSettingList args = *(HttpdSettingList*)_args;
-        ABXHTTPD_INFO_PRINT(2, "[Core]Entered main ThreadController, multi-thread status: %s", _set.Multi_thread ? "Enabled" : "Disabled");
-        HttpdThreadPool thread_pool(_set.Thread_count, _ThreadHandler);
-        while (_set.Is_running) {
+        ABXHTTPD_INFO_PRINT(2, "[Core]Entered main ThreadController, multi-thread status: %s", _set.Multithreading ? "Enabled" : "Disabled");
+        HttpdThreadPool thread_pool(_set.ThreadCount, _ThreadHandler);
+        while (_set.Running) {
             struct sockaddr_in src_in;
             socklen_t sklen = sizeof(src_in);
             int ad = -1;
-            #ifdef ABXHTTPD_UNIX
-            ABXHTTPD_INFO_PRINT(11, "[Core][System API]Now invoke accept.");
-            ad = accept(_set.Socket_n, (struct sockaddr*)&src_in, &sklen);
-            ABXHTTPD_INFO_PRINT(11, "[Core][System API]Invoked accept, returning %d.", ad);
-            #endif
-            #ifdef ABXHTTPD_WINDOWS
-            while (ad <= 0) {
-                if (!_set.Is_running) {
-                    break;
-                }
+            while (ad<=0) {
                 ABXHTTPD_INFO_PRINT(11, "[Core][System API]Now invoke accept.");
-                ad = accept(_set.Socket_n, (struct sockaddr*)&src_in, &sklen);
+                ad = accept(_set.SocketMainID, (struct sockaddr*)&src_in, &sklen);
                 ABXHTTPD_INFO_PRINT(11, "[Core][System API]Invoked accept, returning %d.", ad);
-            }
-            #endif
-            if (ad < 0) {
-                continue;
             }
             ABXHTTPD_INFO_PRINT(3, "[Core]Accepted connect request from %s, allocated socket ID %d.", inet_ntoa(src_in.sin_addr), ad);
             SocketRequest _src;
             _src._ad = ad;
             _src.is_noblocked = true;
             _src.src_in_ip = std::string(inet_ntoa(src_in.sin_addr));
-            _src._sd = _set.Socket_n;
+            _src._sd = _set.SocketMainID;
             _src.src_in = src_in;
             _src.MCore = &_core;
             _src.Http_S = args.Http_S;
@@ -131,7 +118,7 @@ namespace abxhttpd {
                 break;
             }
             SocketRequestWithSL* __src = new SocketRequestWithSL({&_set,SocketS,true});
-            if (_set.Multi_thread) {
+            if (_set.Multithreading) {
                 try {
                     while (!thread_pool.push(__src)) {}
                     ABXHTTPD_INFO_PRINT(4, "[Core]Allocated thread for socket %d.", ad);
@@ -150,14 +137,14 @@ namespace abxhttpd {
 
     void* _ThreadController_POLL(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType){
         HttpdSettingList args = *(HttpdSettingList*)_args;
-        ABXHTTPD_INFO_PRINT(2, "[Core]Entered main ThreadController, multi-thread status: %s", _set.Multi_thread ? "Enabled" : "Disabled");
+        ABXHTTPD_INFO_PRINT(2, "[Core]Entered main ThreadController, multi-thread status: %s", _set.Multithreading ? "Enabled" : "Disabled");
         HttpdPoll spoll(_set,_core,&args,StreamType);
         spoll.run();
         return NULL;
     }
 
     void* __ThreadController(const ThreadSettingList& _set, const CCore& _core, void* _args) {
-        if(_set.Multi_thread&&_set.Thread_count>0){
+        if(_set.Multithreading&&_set.ThreadCount>0){
             _ThreadController(_set, _core, _args, ABXHTTPD_SOCK_STREAM);
         }else{
             _ThreadController_POLL(_set, _core, _args, ABXHTTPD_SOCK_STREAM);

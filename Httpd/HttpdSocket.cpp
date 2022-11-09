@@ -33,7 +33,7 @@ namespace abxhttpd{
     }
     HttpdSocket::HttpdSocket()
     {
-        st=1;
+        status_id|=(ABXHTTPD_STREAM_READABLE|ABXHTTPD_STREAM_WRITEABLE);
         last_err="success";
     }
     const SocketRequest & HttpdSocket::info()
@@ -42,7 +42,7 @@ namespace abxhttpd{
     }
     size_t HttpdSocket::read(std::string & _dst,size_t size)
     {
-        memset(tmp,0,sizeof(tmp));
+        clear_tmp();
         int ad=_src._ad;
         long int _recv_s=0;
         size_t _recv_len=0;
@@ -52,13 +52,13 @@ namespace abxhttpd{
         if(size){
             while(size>0){
                 ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke recv.",ad);
-                _recv_s=recv(ad,tmp,ABXHTTPD_MIN(sizeof(tmp),size),0);
+                _recv_s=recv(ad,buffer_tmp,ABXHTTPD_MIN(buffer_size(),size),0);
                 ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked recv, returning %ld.",ad,_recv_s);
                 if(_recv_s>0){
                     _recv_len+=_recv_s;
-                    _dst.insert(_dst.size(),tmp,_recv_s);
+                    _dst.insert(_dst.size(),buffer_tmp,_recv_s);
                     ABXHTTPD_INFO_PRINT(3,"[Socket %d]Received %ld bytes.",ad,_recv_s);
-                    memset(tmp,0,sizeof(tmp));
+                    clear_tmp();
                     size-=_recv_s;
                     if(_src.is_noblocked){
                         break;
@@ -83,7 +83,7 @@ namespace abxhttpd{
     }
     size_t HttpdSocket::write(const std::string & _res,size_t size)
     {
-        memset(tmp,0,sizeof(tmp));
+        clear_tmp();
         int ad=_src._ad;
         size_t _send_len=0;
         long int _send_lv=-1;
@@ -117,18 +117,18 @@ namespace abxhttpd{
     }
     HttpdSocket::~HttpdSocket()
     {
-        if(st!=0){
+        if(status_id!=0){
             close();
         }
     }
     int HttpdSocket::status()
     {
-        return st;
+        return status_id;
     }
     bool HttpdSocket::close()
     {
-        if(st!=0){
-            st=0;
+        if(status_id!=0){
+            status_id=0;
             return (__close_socket(_src._ad)==0);
         }
         return true;

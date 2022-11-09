@@ -18,29 +18,27 @@ ABXHTTPD_API extern int info_color;
 namespace abxhttpd{
 
 typedef struct {
-    int Port;
-    int Bind_IP;
-    long Bind_IP6;
-    std::string IPStr;
     int IPVer;
+    const char * IPStr;
+    int Port;
+    int MaxConnect;
     int allocated_socket;
-    int Max_connect_count;
     void * Args;
 }SocketSettingList;
 
 
 typedef struct _ThreadSettingList {
-    int Thread_count;
-    int Socket_n;
-    bool Multi_thread;
-    bool Is_block;
-    bool Is_running;
+    int ThreadCount;
+    int SocketMainID;
+    bool Multithreading;
+    bool Running;
     std::ostream * abxout;
     std::ostream * abxerr;
+    void * Args;
 } ThreadSettingList;
 
 typedef struct {
-    std::string Path;
+    const char * Path;
     void * Args;
 }HttpSettingList;
 

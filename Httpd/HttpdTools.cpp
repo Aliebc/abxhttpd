@@ -33,7 +33,10 @@ namespace abxhttpd{
         return ret;
     }
 
-    size_t _FileLength(std::string & _Path){
+    HttpdTools::HttpdTools()=default;
+    HttpdTools::~HttpdTools()=default;
+
+    size_t HttpdTools::_FileLength(std::string & _Path){
         #ifdef ABXHTTPD_UNIX
         struct stat _ft;
         int st=stat(_Path.c_str(),&_ft);
@@ -57,7 +60,7 @@ namespace abxhttpd{
         #endif
     }
 
-    std::string _FileSuffix(std::string & _Name){
+    std::string HttpdTools::_FileSuffix(const std::string & _Name){
         size_t _Dot=_Name.find_last_of('.');
         size_t _Len=_Name.size();
         if(std::string::npos==_Dot){
@@ -108,7 +111,7 @@ namespace abxhttpd{
 		return str;
 	}
 
-    std::string ABX_URLDecode(std::string & _src){
+    std::string HttpdTools::ABX_URLDecode(std::string & _src){
         std::string utf_8_c(_ABX_URLDecode(_src));
         char * gbk_c=Utf8ToGB2312(utf_8_c.c_str());
         std::string res(gbk_c);
@@ -116,7 +119,7 @@ namespace abxhttpd{
         return res;
     }
     #else
-    std::string ABX_URLDecode(std::string & _src){
+    std::string HttpdTools::ABX_URLDecode(std::string & _src){
         return _ABX_URLDecode(_src);
     }
     #endif
