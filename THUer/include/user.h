@@ -4,7 +4,7 @@ enum Rank{peasent = 1, elite, crazy, admin};
 
 class User{
 private:
-    Rank;
+    int Grade;
 
     static bool CheckIfAlready(const string & Username);
 public:
