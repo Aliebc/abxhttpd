@@ -38,6 +38,10 @@ int BasicStream::status() const{
     return status_id;
 }
 
+size_t BasicStream::buffer_size(){
+    return __buffer_size;
+}
+
 const char * BasicStream::GetLastError() const{
     return err_str;
 }
@@ -46,8 +50,27 @@ BasicStream & operator>> ( BasicStream & src, std::string & is){
     src.read(is);
     return src;
 }
+
 BasicStream & operator<< (BasicStream & src, std::string & in){
     src.write(in);
     return src;
+}
+
+BasicStream & operator<< (BasicStream & to, BasicStream & from){
+    std::string tmp_s;
+    size_t _read_len=0;
+    while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
+        to.write(tmp_s,_read_len);
+        tmp_s.clear();
+        if(!(from.status()&ABXHTTPD_STREAM_READABLE)){
+            break;
+        }
+    }
+    return to;
+}
+
+BasicStream & operator>> (BasicStream & from, BasicStream & to){
+    to<<from;
+    return from;
 }
 }

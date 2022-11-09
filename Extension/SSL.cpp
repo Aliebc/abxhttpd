@@ -54,16 +54,16 @@ namespace abxhttpd
             }
         }
         size_t SSLSocket::read(std::string& _dst, size_t size) {
-            ABXHTTPD_ZERO_MEMORY(tmp);
+            clear_tmp();
             size_t _recv_s = 0;
             int _revc_l = 0;
             while (ssl!=NULL) {
-                _revc_l = SSL_read(ssl, tmp, sizeof(tmp));
+                _revc_l = SSL_read(ssl, buffer_tmp, buffer_size());
                 ABXHTTPD_INFO_PRINT(11, "[Socket %d][OpenSSL API]Invoked SSL_read, returning %d.", ad, _revc_l);
                 if (_revc_l > 0) {
-                    _dst.insert(_dst.size(), tmp, _revc_l);
+                    _dst.insert(_dst.size(), buffer_tmp, _revc_l);
                     _recv_s += _revc_l;
-                    if (_recv_s == sizeof(tmp)) {
+                    if (_recv_s == buffer_size()) {
                         continue;
                     }
                     else {
@@ -78,6 +78,7 @@ namespace abxhttpd
             return _recv_s;
         }
         size_t SSLSocket::write(const std::string& _res, size_t size) {
+            clear_tmp();
             size_t _send_len = 0;
             int _send_lv = -1;
             while (true) {
@@ -95,12 +96,9 @@ namespace abxhttpd
             }
             return _send_len;
         }
-        int SSLSocket::status() {
-            return st;
-        }
         bool SSLSocket::close() {
             int close_state=-1;
-            if (st != 0) {
+            if (status_id != 0) {
                 SSL_shutdown(ssl);
                 close_state = __close_socket(ad);
                 SSL_free(ssl);
@@ -108,12 +106,12 @@ namespace abxhttpd
                 SSL_CTX_free(ctx);
                 ctx = NULL;
             }
-            st = 0;
+            status_id = 0;
             ABXHTTPD_INFO_PRINT(11, "[Socket %d][OpenSSL API]Free SSL context", ad);
             return (close_state == 0);
         }
         SSLSocket::~SSLSocket() {
-            if (st != 0) {
+            if (status_id != 0) {
                 close();
             }
         }
@@ -123,7 +121,7 @@ namespace abxhttpd
     void* _ThreadController_POLL(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType);
 
     void* __SSLThreadController(const ThreadSettingList& _set, const CCore& _core, void* _args) {
-        if(_set.Multi_thread&&_set.Thread_count>0){
+        if(_set.Multithreading&&_set.ThreadCount>0){
             _ThreadController(_set, _core, _args, ABXHTTPD_SSL_STREAM);
         }else{
             _ThreadController_POLL(_set, _core, _args, ABXHTTPD_SSL_STREAM);

@@ -19,10 +19,9 @@ namespace abxhttpd
         int ad;
     public:
         SSLSocket(SocketRequest& src);
-        size_t read(std::string& _dst, size_t size = 0);
-        size_t write(const std::string& _res, size_t size = 0);
-        int status();
-        bool close();
+        size_t read(std::string& _dst, size_t size = 0) override;
+        size_t write(const std::string& _res, size_t size = 0) override;
+        bool close() override;
         ~SSLSocket();
     };
 

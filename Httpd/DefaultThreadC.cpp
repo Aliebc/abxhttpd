@@ -2,7 +2,7 @@
 #include <iostream>
 #include <ctime>
 #include <signal.h>
-#include "include/FileSocket.hxx"
+#include "include/FileStream.hxx"
 #include "include/HttpdThreadPool.hxx"
 #include "include/HttpdPoll.hxx"
 
@@ -64,7 +64,7 @@ namespace abxhttpd {
                 }
                 *SocketStream << SocketResponse;
                 if (H_res.need_send_from_stream) {
-                    FileSocket FileToSend(H_res.need_send_from_stream_src.c_str());
+                    FileStream FileToSend(H_res.need_send_from_stream_src.c_str());
                     *SocketStream << FileToSend;
                 }
                 ABXHTTPD_INFO_PRINT(105, "[Socket %d]\n[OStream]\n%s[End OStream]\n", src._ad, SocketResponse.c_str());
