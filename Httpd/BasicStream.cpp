@@ -42,8 +42,16 @@ size_t BasicStream::buffer_size(){
     return __buffer_size;
 }
 
-const char * BasicStream::GetLastError() const{
-    return err_str;
+const char * BasicStream::GetLastError(){
+    status_id^=ABXHTTPD_STREAM_EXCEPT;
+    const char * resp=err_str;
+    err_str="success";
+    return resp;
+}
+
+void BasicStream::SetLastError(const char * err){
+    status_id|=ABXHTTPD_STREAM_EXCEPT;
+    err_str=err;
 }
 
 BasicStream & operator>> ( BasicStream & src, std::string & is){
@@ -52,6 +60,11 @@ BasicStream & operator>> ( BasicStream & src, std::string & is){
 }
 
 BasicStream & operator<< (BasicStream & src, std::string & in){
+    src.write(in);
+    return src;
+}
+
+BasicStream & operator<< (BasicStream & src, const char * in){
     src.write(in);
     return src;
 }
@@ -73,4 +86,5 @@ BasicStream & operator>> (BasicStream & from, BasicStream & to){
     to<<from;
     return from;
 }
+
 }
