@@ -4,11 +4,11 @@
 namespace abxhttpd{
 
 void BasicStream::clear_tmp(){
-    memset(buffer_tmp, 0, ABXHTTPD_BASICSTREAM_BUFFER);
+    memset(buffer_tmp, 0, __buffer_size);
 }
 
 BasicStream::BasicStream(){
-    buffer_tmp = new char [ABXHTTPD_BASICSTREAM_BUFFER];
+    buffer_tmp = new char [__buffer_size];
     clear_tmp();
     status_id=0;
     err_str="success";
@@ -43,14 +43,14 @@ size_t BasicStream::buffer_size(){
 }
 
 const char * BasicStream::GetLastError(){
-    status_id^=ABXHTTPD_STREAM_EXCEPT;
+    status_id^=EXCEPTION;
     const char * resp=err_str;
     err_str="success";
     return resp;
 }
 
 void BasicStream::SetLastError(const char * err){
-    status_id|=ABXHTTPD_STREAM_EXCEPT;
+    status_id|=EXCEPTION;
     err_str=err;
 }
 
@@ -59,7 +59,7 @@ BasicStream & operator>> ( BasicStream & src, std::string & is){
     return src;
 }
 
-BasicStream & operator<< (BasicStream & src, std::string & in){
+BasicStream & operator<< (BasicStream & src, const std::string & in){
     src.write(in);
     return src;
 }
@@ -75,7 +75,7 @@ BasicStream & operator<< (BasicStream & to, BasicStream & from){
     while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
         to.write(tmp_s,_read_len);
         tmp_s.clear();
-        if(!(from.status()&ABXHTTPD_STREAM_READABLE)){
+        if(!(from.status()&BasicStream::FLAG::READABLE)){
             break;
         }
     }

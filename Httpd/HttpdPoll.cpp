@@ -33,7 +33,6 @@ bool HttpdPoll::accept(){
     }
     SocketRequest _src;
     _src._ad = st;
-    _src.is_noblocked=true;
     _src.src_in_ip = inet_ntoa(src_in.sin_addr);
     _src._sd = MSocketID;
     _src.MCore = _core;

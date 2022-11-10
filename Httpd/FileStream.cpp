@@ -3,7 +3,10 @@
 #include <errno.h>
 #include <string.h>
 
+#define I_MIN(a,b) (a<b?a:b)
+
 namespace abxhttpd{
+
 FileStream::FileStream(const char * path,int method):BasicStream(){
     if(!(method>0&&method<16)){
         throw abxhttpd_error("No method");
@@ -17,33 +20,33 @@ FileStream::FileStream(const char * path,int method):BasicStream(){
             }
         }
     }
-    if(ABXHTTPD_FILE_READ&method){
-        status_id|=(ABXHTTPD_STREAM_READABLE);
+    if(FILE_FLAG::READ&method){
+        status_id|=(READABLE);
         get_file_length();
     }
-    if(ABXHTTPD_FILE_WRITE&method){
-        status_id|=(ABXHTTPD_STREAM_WRITEABLE);
+    if(FILE_FLAG::WRITE&method){
+        status_id|=(BasicStream::FLAG::WRITEABLE);
         length=0;
     }
     clear_tmp();
 }
 
 FileStream::FileStream(const char * path):
-FileStream(path,ABXHTTPD_FILE_READ|ABXHTTPD_FILE_BINARY){}
+FileStream(path,FILE_FLAG::READ|FILE_FLAG::BINARY){}
 
 FileStream::FileStream(int fd){
     switch (fd) {
-        case ABXHTTPD_FILE_STDIN:
+        case FILE_FLAG::STDIN:
             fp=stdin;
-            status_id|=ABXHTTPD_FILE_READ;
+            status_id|=FILE_FLAG::READ;
             break;
-        case ABXHTTPD_FILE_STDOUT:
+        case FILE_FLAG::STDOUT:
             fp=stdout;
-            status_id|=ABXHTTPD_FILE_WRITE;
+            status_id|=FILE_FLAG::WRITE;
             break;
-        case ABXHTTPD_FILE_STDERR:
+        case FILE_FLAG::STDERR:
             fp=stderr;
-            status_id|=ABXHTTPD_FILE_WRITE;
+            status_id|=FILE_FLAG::WRITE;
             break;
         default:
             throw abxhttpd_error("Not a valid fd");
@@ -52,7 +55,7 @@ FileStream::FileStream(int fd){
 }
 
 FileStream::~FileStream(){
-    status_id=ABXHTTPD_STREAM_CLOSED;
+    status_id=CLOSED;
     fclose(fp);
 }
 void FileStream::get_file_length(){
@@ -64,12 +67,12 @@ size_t FileStream::get_length() const{
     return length;
 }
 size_t FileStream::read(std::string &dst,size_t size){
-    if(!(status_id&ABXHTTPD_STREAM_READABLE)){
+    if(!(status_id&READABLE)){
         SetLastError("Cannot read file now");
         return 0;
     }
     if(size==0){size--;}
-    size_t _read_size=ABXHTTPD_MIN(size, length);
+    size_t _read_size=I_MIN(size, length);
     size_t _read_len=0;
     size_t _read_all=0;
     while(_read_size>0&&(!feof(fp))){
@@ -83,12 +86,12 @@ size_t FileStream::read(std::string &dst,size_t size){
 }
 
 size_t FileStream::write(const std::string &dst,size_t size){
-    if(!(status_id&ABXHTTPD_STREAM_WRITEABLE)){
+    if(!(status_id&BasicStream::FLAG::WRITEABLE)){
         SetLastError("File is read-only");
         return 0;
     }
     if(size==0){size--;}
-    size_t _write_size=ABXHTTPD_MIN(size, dst.size());
+    size_t _write_size=I_MIN(size, dst.size());
     size_t _write_len=0;
     _write_len+=fwrite(dst.c_str(), sizeof(char), _write_size, fp);
     return _write_len;
@@ -96,26 +99,22 @@ size_t FileStream::write(const std::string &dst,size_t size){
 
 const char * FileStream::open_method[]={
     NULL, // 0
-    "r", //ABXHTTPD_FILE_READ 1
-    "w", //ABXHTTPD_FILE_WRITE 2
-    "r+", //ABXHTTPD_FILE_READ|ABXHTTPD_FILE_WRITE 3
-    "b", //ABXHTTPD_FILE_BINARY 4
-    "rb", //ABXHTTPD_FILE_BINARY|ABXHTTPD_FILE_READ 5
-    "wb", //ABXHTTPD_FILE_BINARY|ABXHTTPD_FILE_WRITE 6
-    "rb+", //ABXHTTPD_FILE_BINARY|ABXHTTPD_FILE_READ|ABXHTTPD_FILE_WRITE 7
+    "r", //I_FLAG::READ 1
+    "w", //I_FLAG::WRITE 2
+    "r+", //I_FLAG::READ|I_FLAG::WRITE 3
+    "b", //I_FLAG::BINARY 4
+    "rb", //I_FLAG::BINARY|I_FLAG::READ 5
+    "wb", //I_FLAG::BINARY|I_FLAG::WRITE 6
+    "rb+", //I_FLAG::BINARY|I_FLAG::READ|I_FLAG::WRITE 7
     NULL, //8
     NULL, //9
-    "a", //ABXHTTPD_FILE_ADD 10
-    "a+", //ABXHTTPD_FILE_ADD|ABXHTTPD_FILE_READ 11
+    "a", //I_FLAG::ADD 10
+    "a+", //I_FLAG::ADD|I_FLAG::READ 11
     NULL, //12
     NULL, //13
-    "ab", //ABXHTTPD_FILE_BINARY|ABXHTTPD_FILE_ADD 14
-    "ab+" //ABXHTTPD_FILE_BINARY|ABXHTTPD_FILE_ADD|ABXHTTPD_FILE_READ 15
+    "ab", //I_FLAG::BINARY|I_FLAG::ADD 14
+    "ab+" //I_FLAG::BINARY|I_FLAG::ADD|I_FLAG::READ 15
 };
-
-FileStream fs_stdin(ABXHTTPD_FILE_STDIN);
-FileStream fs_stdout(ABXHTTPD_FILE_STDOUT);
-FileStream fs_stderr(ABXHTTPD_FILE_STDERR);
 
 }
 

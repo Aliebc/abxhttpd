@@ -63,16 +63,20 @@ typedef struct {
 
 using std::ostream;
 
+/**
+ * @brief 套接字（TCP）请求
+ *
+ * 此结构体代表一次有效的TCP请求
+ */
 typedef struct 
 {
-    int _ad;
-    int _sd;
-    struct sockaddr_in src_in;
-    std::string src_in_ip;
-    bool is_noblocked;
-    int port_in;
-    const CCore * MCore;
-    HttpSettingList Http_S;
+    int _ad; ///< 子套接字描述符
+    int _sd; ///< 监听套接字描述符
+    struct sockaddr_in src_in; ///< 未转换的源IP
+    std::string src_in_ip; ///< 经转换的的源IP
+    int port_in; ///< 源端口
+    const CCore * MCore; ///< 核心处理
+    HttpSettingList Http_S; ///< Httpd设置
 } SocketRequest;
 
 typedef void * (* ThreadController) (const ThreadSettingList &, const CCore &, void *);
