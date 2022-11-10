@@ -5,13 +5,14 @@
 #include "include/FileStream.hxx"
 #include "include/HttpdThreadPool.hxx"
 #include "include/HttpdPoll.hxx"
+#include "include/Logger.hxx"
 
 #ifdef ABXHTTPD_SSL
 #include "Extension/SSL.H"
 #endif
 
 namespace abxhttpd {
-    std::mutex io_lock;
+    Logger logtest(1);
 
     void* _ThreadHandler(void* _ptr);
 
@@ -31,9 +32,7 @@ namespace abxhttpd {
         bool is_keep = false;
         {
             SocketRequest.clear();
-            SocketRequest.shrink_to_fit();
             SocketResponse.clear();
-            SocketResponse.shrink_to_fit();
             *SocketStream >> SocketRequest;
             tt = time(NULL);
             strftime(_time, 128, "[%Y-%m-%d %H:%M:%S] ", localtime(&tt));
@@ -46,10 +45,7 @@ namespace abxhttpd {
                     H_req = src.MCore->IFilter(SocketRequest, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked istream filiter, handled %lu size.", src._ad, SocketRequest.size());
                     H_req.remote_addr(_ip);
-                    {
-                        std::unique_lock<std::mutex> iock(io_lock);
-                        *logout << _time << _ip << " " << H_req.method() << " " << H_req.path() << " " << H_req.header("User-Agent") << std::endl;
-                    }
+                    //logtest.write(_ip + " " + H_req.method() + " " + H_req.path() + " " + H_req.header("User-Agent"));
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Logged this request.", src._ad);
                     H_res = src.MCore->Handler(H_req, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked core handler.", src._ad);
