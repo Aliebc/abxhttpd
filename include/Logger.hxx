@@ -12,6 +12,11 @@
 
 namespace abxhttpd{
 
+/**
+ * @brief 日志流
+ *
+ * 日志流，实现线程安全的日志系统
+ */
 class Logger:public FileStream{
 private:
     time_t now;

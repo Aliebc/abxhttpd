@@ -4,10 +4,10 @@
 namespace abxhttpd{
     
 Logger::Logger(const char *path)
-:FileStream(path,ABXHTTPD_FILE_ADD|ABXHTTPD_FILE_BINARY){}
+:FileStream(path,FILE_FLAG::ADD|FILE_FLAG::BINARY){}
 
 Logger::Logger(int fd):FileStream(fd){
-    if(status_id^ABXHTTPD_STREAM_WRITEABLE){
+    if(status_id^BasicStream::FLAG::WRITEABLE){
         throw abxhttpd_error("Cannot write to logger target");
     }
 }

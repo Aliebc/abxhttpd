@@ -1,8 +1,11 @@
-#include "include/abxhttpd.H"
+#include "include/HttpdSocket.hxx"
 #include <string.h>
 #include <errno.h>
 
 namespace abxhttpd{
+    int internal_close(int ad){
+        return close(ad);
+    }
 
     int HttpdSocket::__close_socket(int ad)
     {
@@ -16,7 +19,7 @@ namespace abxhttpd{
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked closesocket, returning %d.",ad,st);
         #endif
         #ifdef ABXHTTPD_UNIX
-        st=::close(ad);
+        st=internal_close(ad);
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked close, returning %d.",ad,st);
         if(st==0){
             ABXHTTPD_INFO_PRINT(3,"[Socket %d]Closed.",ad);
@@ -33,10 +36,9 @@ namespace abxhttpd{
     }
     HttpdSocket::HttpdSocket()
     {
-        status_id|=(ABXHTTPD_STREAM_READABLE|ABXHTTPD_STREAM_WRITEABLE);
-        last_err="success";
+        status_id|=(READABLE|FLAG::WRITEABLE);
     }
-    const SocketRequest & HttpdSocket::info()
+    const SocketRequest & HttpdSocket::info() const
     {
         return _src;
     }
@@ -60,16 +62,16 @@ namespace abxhttpd{
                     ABXHTTPD_INFO_PRINT(3,"[Socket %d]Received %ld bytes.",ad,_recv_s);
                     clear_tmp();
                     size-=_recv_s;
-                    if(_src.is_noblocked){
+                    if(_recv_s<buffer_size()){
                         break;
                     }
                 }else if(_recv_s==0){
-                    last_err=strerror(errno);
+                    SetLastError(strerror(errno));
                     this->close();
                     return 0;
                 }else if(_recv_s<0){
-                    last_err=strerror(errno);
-                    ABXHTTPD_INFO_PRINT(11, "[Socket %d][System API]Error:%s.", ad, last_err);
+                    SetLastError(strerror(errno));
+                    ABXHTTPD_INFO_PRINT(11, "[Socket %d][System API]Error:%s.", ad, GetLastError());
                     if(errno==EWOULDBLOCK||errno==EAGAIN){
                         continue;
                     }else{
@@ -99,18 +101,13 @@ namespace abxhttpd{
             if(_send_lv>0){
                 _send_len+=_send_lv;
             }else if(_send_lv<=0){
-                last_err=strerror(errno);
-                if(_src.is_noblocked){
+                SetLastError(strerror(errno));
                     if(errno==0||errno==EWOULDBLOCK){
                         continue;
                     }else{
                         this->close();
                         break;
                     }
-                }else{
-                    this->close();
-                    break;
-                }
             }
         }
         return _send_len;
@@ -121,10 +118,6 @@ namespace abxhttpd{
             close();
         }
     }
-    int HttpdSocket::status()
-    {
-        return status_id;
-    }
     bool HttpdSocket::close()
     {
         if(status_id!=0){
@@ -132,17 +125,5 @@ namespace abxhttpd{
             return (__close_socket(_src._ad)==0);
         }
         return true;
-    }
-    const char * HttpdSocket::GetLastError()
-    {
-        return last_err;
-    }
-    HttpdSocket & operator>> ( HttpdSocket & src, std::string & is){
-        src.read(is);
-        return src;
-    }
-    HttpdSocket & operator<< (HttpdSocket & src, std::string & in){
-        src.write(in);
-        return src;
     }
 }

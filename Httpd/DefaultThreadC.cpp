@@ -94,7 +94,6 @@ namespace abxhttpd {
             ABXHTTPD_INFO_PRINT(3, "[Core]Accepted connect request from %s, allocated socket ID %d.", inet_ntoa(src_in.sin_addr), ad);
             SocketRequest _src;
             _src._ad = ad;
-            _src.is_noblocked = true;
             _src.src_in_ip = std::string(inet_ntoa(src_in.sin_addr));
             _src._sd = _set.SocketMainID;
             _src.src_in = src_in;
