@@ -1,6 +1,6 @@
 #ifndef _THREAD_POOL_H
 #define _THREAD_POOL_H
-#include "abxhttpd.H"
+#include "HttpdSocket.hxx"
 
 #include <thread>
 #include <condition_variable>
@@ -34,6 +34,8 @@ public:
     bool push(void *);
     void stop();
     ~HttpdThreadPool();
+    HttpdThreadPool(const HttpdThreadPool &)=delete;
+    void operator= (const HttpdThreadPool &)=delete;
 };
 }
 

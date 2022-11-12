@@ -4,23 +4,25 @@
 #include <stdio.h>
 #include <string>
 #include <map>
+#include <utility>
 #include "BasicStream.hxx"
+#include "abxerror.hxx"
 
-enum HttpInternalStatus
-{
-    ABXHTTPD_HTTP_CLOSED=0,
-    ABXHTTPD_HTTP_CONTINUE_RECV=1<<0,
-    ABXHTTPD_HTTP_CONTINUE_WRITE=1<<1,
-    ABXHTTPD_HTTP_FINISHED_RECV=1<<2,
-    ABXHTTPD_HTTP_FINISHED_WRITE=1<<3,
-    ABXHTTPD_HTTP_HANDLING=1<<4,
-    ABXHTTPD_HTTP_KEEP_ALIVE=1<<5
-};
+#ifdef ABXHTTPD_WINDOWS
+#define strcasecmp _stricmp
+#endif
 
 namespace abxhttpd{
-typedef std::map <std::string, std::string> HttpHeaders;
 
-class BasicHttpException{
+struct Casecmp{
+    bool operator()(const std::string & s1, const std::string & s2) const{
+        return strcasecmp(s1.c_str(), s2.c_str())<0;
+    }
+};
+typedef std::map <std::string, std::string, Casecmp> HttpHeaders;
+typedef std::map<std::string,std::string> SSMap;
+
+class ABXHTTPD_API BasicHttpException{
 protected:
     int except_id;
     const char * err_msg;
@@ -28,29 +30,35 @@ public:
     BasicHttpException(int);
     BasicHttpException(int,const char *);
     ~BasicHttpException();
-    int id() const;
-    const char * what () const;
+    int code() const;
+    const char * what () const noexcept;
 };
 
-class BasicHttp{
+class ABXHTTPD_API BasicHttp{
+private:
 protected:
     int status_id;
     size_t Length;
+    std::string null_str;
     HttpHeaders Headers;
     std::string Buffer;
     std::string protocol;
 public:
+    enum S_ID{
+        NOT_FINISHED=1,
+        UNKNOWN_PROTOCOL,
+        INVALID_HEADER,
+        INVALID_FORMAT
+    };
     BasicHttp();
     virtual ~BasicHttp();
-    //virtual
-    bool is_header(const char *) const;
+    void append(const std::string & source);
     bool is_header(const std::string &) const;
     const std::string & header(const std::string &) const;
-    const std::string & header(const char *) const;
+    void header(const std::string &,const std::string &&);
     void header(const std::string &,const std::string &);
-    void header(const char *,const std::string &);
+    const HttpHeaders & headers() const;
     int status() const;
-    int status(int);
 };
 
 class HttpResponse;
@@ -60,9 +68,13 @@ class BasicHttpFilter:BasicFilter{
 protected:
     HttpRequest * Request;
     HttpResponse * Response;
+    BasicStream * tmp_stream;
+    std::string head_tmp;
+    //virtual size_t HttpHandler();
+    virtual size_t StreamFilter(BasicStream &, BasicStream &, size_t) override;
 public:
-    BasicHttpFilter();
-    virtual size_t exec(size_t);
+    BasicHttpFilter(BasicStream & src, BasicStream & dst);
+    //virtual size_t exec(size_t);
 };
 
 }

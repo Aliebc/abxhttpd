@@ -5,7 +5,7 @@
 
 namespace abxhttpd{
 void* _ThreadHandler(void* _ptr);
-HttpdPoll::HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const HttpdSettingList * http_s,int StreamType){
+HttpdPoll::HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const HttpdSettingList * http_s,int StreamType):npfd(0){
     MSocketID=_set.SocketMainID;
     thread_s=&_set;
     this->http_s=*http_s;
@@ -16,7 +16,7 @@ HttpdPoll::HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const Htt
     SocketList=(struct pollfd *)::malloc(ABXHTTPD_POLL_INIT*sizeof(struct pollfd));
     SLsize=ABXHTTPD_POLL_INIT;
     if(SocketList==NULL){
-        throw abxhttpd_error("Cannot assign memory for pollfd");
+        throw BasicException("Cannot assign memory for pollfd");
     }
     SocketList[0].fd=MSocketID;
     SocketList[0].events=POLLIN;
@@ -63,7 +63,7 @@ bool HttpdPoll::accept(){
 bool HttpdPoll::alloc_poll(){
     npfd=SocketMap.size();
     if(SLsize<=npfd){
-        SocketList=(struct pollfd *)::realloc((void*)SocketList, 2*npfd*sizeof(struct pollfd));
+        SocketList=(struct pollfd *)::realloc(static_cast<void*>(SocketList), 2*npfd*sizeof(struct pollfd));
         SLsize=2*npfd;
         if(SocketList==NULL){
             last_err=strerror(errno);
@@ -108,7 +108,7 @@ bool HttpdPoll::shutdown(){
     return true;
 }
 
-const char * HttpdPoll::GetLastError(){
+const char * HttpdPoll::GetLastError() noexcept{
     return last_err;
 }
 

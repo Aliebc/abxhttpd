@@ -48,11 +48,11 @@ typedef struct {
     HttpSettingList Http_S;
 } HttpdSettingList;
 
-typedef HttpRequest (* IStreamFilter) (std::string &, void *);
-typedef HttpResponse (* HttpHandler) (HttpRequest &, void *);
+typedef HttpRequest (* IStreamFilter) (const std::string &, void *);
+typedef void (* HttpHandler) (HttpResponse&, HttpRequest &, void *);
 typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 typedef int (* SocketInitializer) (SocketSettingList &);
-typedef int (* SocketDestructor) (SocketSettingList &);
+typedef int (* SocketDestructor) (const SocketSettingList &);
 
 
 typedef struct {
@@ -81,12 +81,12 @@ typedef struct
 
 typedef void * (* ThreadController) (const ThreadSettingList &, const CCore &, void *);
 
-extern HttpHandler DefaultHttpH;
-extern SocketInitializer DefaultSocketI;
-extern SocketDestructor DefaultSocketD;
-extern ThreadController DefaultThreadC;
-extern IStreamFilter DefaultIFilter;
-extern OStreamFilter DefaultOFilter;
+ABXHTTPD_API extern HttpHandler DefaultHttpH;
+ABXHTTPD_API extern SocketInitializer DefaultSocketI;
+ABXHTTPD_API extern SocketDestructor DefaultSocketD;
+ABXHTTPD_API extern ThreadController DefaultThreadC;
+ABXHTTPD_API extern IStreamFilter DefaultIFilter;
+ABXHTTPD_API extern OStreamFilter DefaultOFilter;
 
 typedef struct {
     IStreamFilter IFilter;
@@ -136,7 +136,7 @@ public:
 class HttpdCore_R 
 {
 public:
-    HttpdCore_R(HttpdCoreAddress);
+    explicit HttpdCore_R(const HttpdCoreAddress &);
     ~HttpdCore_R();
 };
 

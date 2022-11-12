@@ -1,4 +1,4 @@
-#include "include/abxhttpd.H"
+#include "include/HttpRequest.hxx"
 #include <cstring>
 #include <algorithm>
 #ifndef ULONG_MAX
@@ -19,7 +19,7 @@ void HttpRequest::parse(void){
     state=false;
     Length=_src.size();
     HttpRequest_Parser_Assert(Length > 5,0LU,"Http request too short.");
-    HttpRequest_Parser_Assert(Length < ULONG_MAX,0LU,"Http request too long.");
+    //throw BasicHttpException(BasicHttpException::S_ID::NOT_FINISHED);
     size_t _p1=0;
     size_t _p2=0;
     _p1=_src.find_first_of(' ');
@@ -33,7 +33,7 @@ void HttpRequest::parse(void){
         Path=_src.substr(0L,_p1);
     }else{
         Path=_src.substr(0L,_p2);
-        Query_string=_src.substr(_p2+1,_p1-(_p2+1));
+        Query_String=_src.substr(_p2+1,_p1-(_p2+1));
     }
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of('\n');
@@ -47,11 +47,10 @@ void HttpRequest::parse(void){
         _p2=_src.find_first_of(':');
         HttpRequest_Parser_Assert(_p2<_p1,_p1,"Header format error.");
         std::string _h=_src.substr(0L,_p2);
-        std::transform(_h.begin(),_h.end(),_h.begin(),(int(*)(int))toupper_s);
         std::string _rh=_src.substr(_p2+1,_p1-(_p2+1));
         size_t _p3=_rh.find_first_of('\r');
         size_t _p4=_rh.find_first_of(' ');
-        Headers[_h]=_rh.substr(_p4+1,_p3-(_p4+1));
+        header(_h,_rh.substr(_p4+1,_p3-(_p4+1)));
         _src.erase(0L,_p1+1);
         if(_src[0]=='\n' || (_src[0]=='\r' && _src[1]=='\n')){
             _src.erase(0L,2L);
@@ -60,6 +59,22 @@ void HttpRequest::parse(void){
     }
     Body=_src;
     state=true;
+    HttpdTools::ParseQueryString(GET, Query_String);
+    REQUEST=GET;
+    if(Method=="POST"){
+        if(header("Content-Type")=="application/x-www-form-urlencoded"){
+            HttpdTools::ParseQueryString(POST, Body);
+            for(auto _i=POST.begin();_i!=POST.end();++_i){
+                REQUEST[_i->first]=_i->second;
+            }
+        }
+    }
+    HttpdTools::ParseCookie(COOKIE, header("Cookie"));
+    if(cookie(ABXHTTPD_SESSION_STR).size()==0){
+        SESSION =  &HttpdSession::get(HttpdSession::allocate());
+    }else{
+        SESSION = &HttpdSession::get(cookie(ABXHTTPD_SESSION_STR));
+    }
 }
 
 HttpRequest::HttpRequest(const std::string & _src){
@@ -81,16 +96,16 @@ HttpRequest::HttpRequest(const char * _src){
     Raw.append(_src);
 }
 
-std::string & HttpRequest::method(void){
+const std::string & HttpRequest::method(void) const{
     return Method;
 };
 
 const std::string & HttpRequest::remote_addr(void){
-    return Remote_addr;
+    return RemoteAddr;
 };
 
 void HttpRequest::remote_addr(const std::string & _ip){
-    Remote_addr=std::move(_ip);
+    RemoteAddr=std::move(_ip);
 }
 
 std::string & HttpRequest::path(void){
@@ -98,32 +113,32 @@ std::string & HttpRequest::path(void){
 };
 
 std::string & HttpRequest::query_string(void){
-    return Query_string;
+    return Query_String;
 };
 
 std::string & HttpRequest::body(void){
     return Body;
 };
 
-std::string & HttpRequest::header(const char * _header){
-    std::string _h(_header);
-    std::transform(_h.begin(),_h.end(),_h.begin(),(int(*)(int))toupper_s);
-    return Headers[_h];
-}
-
-std::string & HttpRequest::header(const std::string & _header){
-    std::string _h(_header);
-    std::transform(_h.begin(),_h.end(),_h.begin(),(int(*)(int))toupper_s);
-    return Headers[_h];
-}
-
 HttpRequest::HttpRequest(HttpRequest const & SS) {
     Raw = SS.Raw;
     parse();
 }
 
-StrArray & HttpRequest::headers(void){
-    return Headers;
+const std::string & HttpRequest::request(const std::string && _key) const{
+    auto _f=REQUEST.find(_key);
+    if(_f!=REQUEST.end()){
+        return _f->second;
+    }
+    return null_str;
+}
+
+const std::string & HttpRequest::cookie(const std::string && _key) const{
+    auto _f=COOKIE.find(_key);
+    if(_f!=COOKIE.end()){
+        return _f->second;
+    }
+    return null_str;
 }
 
 std::string & HttpRequest::raw(void){
@@ -135,10 +150,14 @@ void HttpRequest::clear(){
     
 }
 
-bool HttpRequest::is_header(const char * _header){
-    return (header(_header).size()!=0);
+SessionPtr * HttpRequest::session(const std::string && _key){
+    if(SESSION==NULL){
+        return NULL;
+    }
+    return &(*SESSION)[_key];
 }
 
-HttpRequest::~HttpRequest(){};
+HttpRequest::~HttpRequest(){
+};
 
 }

@@ -27,15 +27,12 @@ if(!(_assert)){HttpResponse_Parser_Error(_position,_error_string)};
 
 namespace abxhttpd{
 
-typedef std::map <std::string, std::string> StrArray;
-
-class HttpResponse
+class ABXHTTPD_API HttpResponse:public BasicHttp
 {
 private:
     int Code;
     std::string CodeInfo;
     std::string Protocol;
-    StrArray Headers;
     std::string Body;
     std::string Raw;
     const char * begin;
@@ -43,19 +40,24 @@ public:
     bool need_send_from_stream=false;
     std::string need_send_from_stream_src;
     HttpResponse(const char * _src,size_t _len);
-    HttpResponse(const char * _src);
-    HttpResponse(const std::string & _src);
+    explicit HttpResponse(const char * _src);
+    explicit HttpResponse(const std::string & _src);
     HttpResponse(const std::string & _src,int code);
+    HttpResponse(const std::string & _src,int code,HttpHeaders headers);
+    void change(const std::string & _src);
     HttpResponse();
     friend HttpResponse operator<< (const HttpResponse & _dest, std::string & _src);
     bool status(int _code,const std::string & _str);
     bool status(int _code);
-    std::string & header(const char * _h);
-    void header(const char * _h,std::string && _src);
-    std::string & header(const std::string & _h);
     std::string & body(void);
     void body(const std::string && _src);
     std::string raw(void);
+    void set_cookie(const std::string & key,
+                    const std::string & value,
+                    long expires=-1,
+                    const std::string & path="/"
+                    );
+    void location(std::string && _loc);
     ~HttpResponse();
 };
 

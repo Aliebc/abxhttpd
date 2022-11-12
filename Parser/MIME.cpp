@@ -1,4 +1,4 @@
-#include "include/abxhttpd.H"
+#include "include/mimes.hxx"
 
 #define ABXHTTPD_MIME_DEFAULT "application/octet-stream"
 namespace abxhttpd{
