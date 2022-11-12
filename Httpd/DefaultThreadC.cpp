@@ -1,4 +1,3 @@
-#include "include/abxhttpd.H"
 #include <iostream>
 #include <ctime>
 #include <signal.h>
@@ -6,6 +5,7 @@
 #include "include/HttpdThreadPool.hxx"
 #include "include/HttpdPoll.hxx"
 #include "include/Logger.hxx"
+#include "include/HttpdSession.hxx"
 
 #ifdef ABXHTTPD_SSL
 #include "Extension/SSL.H"
@@ -17,7 +17,7 @@ namespace abxhttpd {
     void* _ThreadHandler(void* _ptr);
 
     void* _ThreadHandler(void* _ptr) {
-        SocketRequestWithSL* SourceRequest = (SocketRequestWithSL*)_ptr;
+        SocketRequestWithSL* SourceRequest = static_cast<SocketRequestWithSL*>(_ptr);
         HttpdSocket* SocketStream=SourceRequest->socket_p;
         bool need_free=SourceRequest->free;
         char _time[128];
@@ -47,16 +47,32 @@ namespace abxhttpd {
                     H_req.remote_addr(_ip);
                     //logtest.write(_ip + " " + H_req.method() + " " + H_req.path() + " " + H_req.header("User-Agent"));
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Logged this request.", src._ad);
-                    H_res = src.MCore->Handler(H_req, &src);
+                    
+                    
+                    if(H_req.header("Connection")=="keep-alive"){
+                        H_res.header("Connection","keep-alive");
+                    }else{
+                        H_res.header("Connection","close");
+                    }
+                    
+                    if(H_req.cookie(ABXHTTPD_SESSION_STR).size()==0){
+                        H_res.set_cookie(ABXHTTPD_SESSION_STR, HttpdSession::allocate());
+                    }
+                    src.MCore->Handler(H_res,H_req, &src);
+                    
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked core handler.", src._ad);
                     SocketResponse = src.MCore->OFilter(H_res, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked ostream filiter, handled %lu size.", src._ad, SocketResponse.size());
                     is_keep = (H_res.header("Connection") == "keep-alive");
                 }
-                catch (const abxhttpd_error_http & e) {
-                    *errout << _time << _ip << " [Error] " << e.what() << std::endl;
+                catch (const HttpException & e) {
+                    *errout << _time << _ip << " [Except] " << e.what() << std::endl;
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]An error occured, logged this error.", src._ad);
-                    SocketResponse = HttpResponse(e.html(),e.code()).raw();
+                    HttpResponse except_page(e.html(),e.code());
+                    if(e.code()==301||e.code()==302){
+                        except_page.header("Location", e.what());
+                    }
+                    SocketResponse = except_page.raw();
                 }
                 *SocketStream << SocketResponse;
                 if (H_res.need_send_from_stream) {
@@ -71,7 +87,7 @@ namespace abxhttpd {
             if(need_free){
                 delete SocketStream;
                 SourceRequest->socket_p=NULL;
-                delete (SocketRequestWithSL*)_ptr;
+                delete static_cast<SocketRequestWithSL*>(_ptr);
                 _ptr = NULL;
             }
         }
@@ -118,7 +134,7 @@ namespace abxhttpd {
                     while (!thread_pool.push(__src)) {}
                     ABXHTTPD_INFO_PRINT(4, "[Core]Allocated thread for socket %d.", ad);
                 }
-                catch (std::exception e) {
+                catch (const std::exception & e) {
                     ABXHTTPD_INFO_PRINT(1, "[Core]Cannot create thread for socket %d:%s.", ad, e.what());
                     *_set.abxerr << "THREAD ERROR:" << e.what() << std::endl;
                 }

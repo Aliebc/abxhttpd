@@ -33,12 +33,12 @@ namespace abxhttpd{
          * @attention 此函数会深拷贝SocketRequest，可以放心释放请求元素
          *
          */
-        HttpdSocket(const SocketRequest & Request);
+        explicit HttpdSocket(const SocketRequest & Request);
         /// 查看内部的请求信息
         const SocketRequest & info() const;
-        virtual bool close();
-        virtual size_t read(std::string & _dst,size_t size = 0 );
-        virtual size_t write(const std::string & _content,size_t size = 0);
+        virtual bool close() override;
+        virtual size_t read(std::string & _dst,size_t size = 0 ) override;
+        virtual size_t write(const std::string & _content,size_t size = 0) override;
         /// 析构函数
         virtual ~HttpdSocket();
         /// 跨平台的关闭套接字函数

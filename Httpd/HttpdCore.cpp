@@ -1,5 +1,6 @@
 #include "include/Httpd.hxx"
-#include "include/abxhttpd.H"
+#include "include/config.hxx"
+#include "include/MacroFunctions.hxx"
 #include <cstring>
 #include <string>
 
@@ -22,10 +23,6 @@ HttpdCore DefaultHttpdCore={
 
 HttpdCoreAddress DefaultHttpdCoreAddress={
     "DefaultHttpdCore","Abxhttpd's standard built-in core.",&DefaultHttpdCore
-};
-
-HttpdCoreAddress PHPCGICore={
-    "PHPCGICore","Call php by CGI.",NULL
 };
 
 HttpdCoreAddress HttpdCoreAddressTable[ABXHTTPD_CORE_MAX];
@@ -55,11 +52,10 @@ const HttpdCore * FindHttpdCore(const char * _src){
 
 void RegisterHttpdCore(HttpdCoreAddress _core){
         memcpy((void *)&HttpdCoreAddressTable[HttpdCoreAddressCount],(void *)&_core,sizeof(HttpdCoreAddress));
-        ABXHTTPD_DEBUG_PRINTF("[Main]Registered Core: %s\n",_core.Symbol);
         HttpdCoreAddressCount++;
 }
 
-HttpdCore_R::HttpdCore_R(HttpdCoreAddress src){
+HttpdCore_R::HttpdCore_R(const HttpdCoreAddress & src){
     RegisterHttpdCore(src);
 }
 HttpdCore_R::~HttpdCore_R(){}
@@ -86,7 +82,7 @@ void Httpd::env(){
     WSADATA wsadata;
     int wsa_c=WSAStartup(MAKEWORD(2,2),&wsadata);
     if(wsa_c!=0){
-        throw abxhttpd_error("Cannot start WSA!");
+        throw BasicException("Cannot start WSA!");
     }
     #endif
 }

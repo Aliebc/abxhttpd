@@ -2,13 +2,13 @@
 #include <ctime>
 
 namespace abxhttpd{
-    
-Logger::Logger(const char *path)
-:FileStream(path,FILE_FLAG::ADD|FILE_FLAG::BINARY){}
 
-Logger::Logger(int fd):FileStream(fd){
+Logger::Logger(const char *path)
+:FileStream(path,FILE_FLAG::ADD|FILE_FLAG::BINARY),now(0){}
+
+Logger::Logger(int fd):FileStream(fd),now(0){
     if(status_id^BasicStream::FLAG::WRITEABLE){
-        throw abxhttpd_error("Cannot write to logger target");
+        throw BasicException("Cannot write to logger target");
     }
 }
 

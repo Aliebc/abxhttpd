@@ -1,5 +1,6 @@
 #ifdef ABXHTTPD_SSL
-#include "include/abxhttpd.H"
+#include "include/HttpdSocket.hxx"
+#include "include/config.hxx"
 #include <openssl/ssl.h>
 #include <openssl/err.h>
 
@@ -12,13 +13,18 @@ void configure_context(SSL_CTX* ctx);
 namespace abxhttpd
 {
     extern HttpdCoreAddress SSLHttpdCoreAddress;
+    /**
+     *@brief SSL流
+     *
+     *SSL流，用于安全的流传输，其可以通过TLS的方式建立安全通道，保证信息不被窃取或篡改
+     */
     class SSLSocket :public HttpdSocket {
     private:
-        SSL_CTX* ctx;
-        SSL* ssl;
-        int ad;
+        SSL_CTX* ctx; ///< SSL上下文
+        SSL* ssl; ///< SSL通道
+        int ad; ///< 套接字描述符
     public:
-        SSLSocket(SocketRequest& src);
+        SSLSocket(SocketRequest& src);///< 构造函数，同基类的构造方式一样
         size_t read(std::string& _dst, size_t size = 0) override;
         size_t write(const std::string& _res, size_t size = 0) override;
         bool close() override;

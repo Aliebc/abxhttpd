@@ -112,7 +112,7 @@ int main(int argc,char ** argv){
         try{
             ABXHTTPD_INFO_PRINT(5,"[Main]Start Core at %p.",_HttpdCore);
             httpd_main.start();
-        }catch (const abxhttpd_error & e){
+        }catch (const BasicException & e){
             ABXHTTPD_CLI_ERR("Start failed: %s",e.what());
         }
     }else{

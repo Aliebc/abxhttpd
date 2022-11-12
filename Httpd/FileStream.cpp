@@ -1,4 +1,3 @@
-#include "include/HttpdSocket.hxx"
 #include "include/FileStream.hxx"
 #include <errno.h>
 #include <string.h>
@@ -8,15 +7,16 @@
 namespace abxhttpd{
 
 FileStream::FileStream(const char * path,int method):BasicStream(){
+    length=0;
     if(!(method>0&&method<16)){
-        throw abxhttpd_error("No method");
+        throw BasicException("No method");
     }else{
         if(open_method[method]==NULL){
-            throw abxhttpd_error("No method");
+            throw BasicException("No method");
         }else{
             fp=fopen(path, open_method[method]);
             if(fp==NULL){
-                throw abxhttpd_error(strerror(errno));
+                throw BasicException(strerror(errno));
             }
         }
     }
@@ -35,6 +35,7 @@ FileStream::FileStream(const char * path):
 FileStream(path,FILE_FLAG::READ|FILE_FLAG::BINARY){}
 
 FileStream::FileStream(int fd){
+    length=0;
     switch (fd) {
         case FILE_FLAG::STDIN:
             fp=stdin;
@@ -49,7 +50,7 @@ FileStream::FileStream(int fd){
             status_id|=FILE_FLAG::WRITE;
             break;
         default:
-            throw abxhttpd_error("Not a valid fd");
+            throw BasicException("Not a valid fd");
             break;
     }
 }
@@ -58,14 +59,26 @@ FileStream::~FileStream(){
     status_id=CLOSED;
     fclose(fp);
 }
+
 void FileStream::get_file_length(){
     fseek(fp, 0, SEEK_END);
     length=ftell(fp);
     rewind(fp);
 }
+
+bool FileStream::SetOffset(size_t offset){
+    int op=fseek(fp, offset, SEEK_SET);
+    if(op!=0){
+        SetLastError(strerror(errno));
+        return false;
+    }
+    return true;
+}
+
 size_t FileStream::get_length() const{
     return length;
 }
+
 size_t FileStream::read(std::string &dst,size_t size){
     if(!(status_id&READABLE)){
         SetLastError("Cannot read file now");
@@ -73,9 +86,9 @@ size_t FileStream::read(std::string &dst,size_t size){
     }
     if(size==0){size--;}
     size_t _read_size=I_MIN(size, length);
-    size_t _read_len=0;
     size_t _read_all=0;
     while(_read_size>0&&(!feof(fp))){
+        size_t _read_len=0;
         clear_tmp();
         _read_len=fread(buffer_tmp, sizeof(char), buffer_size(), fp);
         dst.insert(dst.size(), buffer_tmp, _read_len);
@@ -95,6 +108,16 @@ size_t FileStream::write(const std::string &dst,size_t size){
     size_t _write_len=0;
     _write_len+=fwrite(dst.c_str(), sizeof(char), _write_size, fp);
     return _write_len;
+}
+
+bool FileStream::close(){
+    if(status_id!=CLOSED){
+        status_id=CLOSED;
+        if(fclose(fp)!=0){
+            return false;
+        }
+    }
+    return true;
 }
 
 const char * FileStream::open_method[]={

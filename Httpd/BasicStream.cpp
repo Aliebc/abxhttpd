@@ -87,4 +87,50 @@ BasicStream & operator>> (BasicStream & from, BasicStream & to){
     return from;
 }
 
+BasicFilter::BasicFilter(BasicStream & src,BasicStream & dst):
+source(src),destination(dst){
+    status_id=B_FLAG::SUCCESS;
+}
+
+size_t BasicFilter::exec(size_t s){
+    if(s==0){s--;}
+    return StreamFilter(source, destination, s);
+}
+
+int BasicFilter::status(int which) const{
+    int sid;
+    switch (which) {
+        case WHICH::FROM:
+            sid=source.status();
+            break;
+        case WHICH::TO:
+            sid=destination.status();
+            break;
+        default:
+            sid=0;
+            break;
+    }
+    
+    return sid;
+}
+
+
+size_t BasicFilter::StreamFilter(BasicStream & f,BasicStream & t,size_t size){
+    size_t r_size;
+    tmp.clear();
+    f.read(tmp,size);
+    r_size=t.write(tmp,size);
+    tmp.clear();
+    tmp.shrink_to_fit();
+    return r_size;
+}
+
+size_t BasicFilter::length() const{
+    return handled_length;
+}
+
+const char * BasicFilter::GetLastError() const noexcept{
+    return err_msg;
+}
+
 }

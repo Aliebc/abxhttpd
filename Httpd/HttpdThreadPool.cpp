@@ -2,7 +2,8 @@
 
 namespace abxhttpd{
 
-HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
+HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)):
+task_count(0){
     if(count>0){
         is_running=true;
         thread_count=count;
@@ -11,19 +12,15 @@ HttpdThreadPool::HttpdThreadPool(int count, void *(*d_func)(void *)){
         thread_list=new std::thread[thread_count];
         for(int _i=0;_i<thread_count;_i++){
             std::thread tmp([&](){
-                void * _ptr;
                 while(is_running){
+                    void * _ptr;
                     {
                         std::unique_lock<std::mutex> tlck(thread_lock);
                         while(data_queue.empty()){
                             thread_cv.wait_for(tlck,std::chrono::milliseconds(500));
                         }
-                        if(!data_queue.empty()){
-                            _ptr=data_queue.front();
-                            data_queue.pop();
-                        }else{
-                            continue;
-                        }
+                        _ptr=data_queue.front();
+                        data_queue.pop();
                     }
                     void * rptr=data_func(_ptr);
                     if(rptr!=NULL){

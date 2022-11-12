@@ -2,7 +2,7 @@
 #define FILE_SOCKET_H
 
 #include <stdio.h>
-#include "HttpdSocket.hxx"
+#include "BasicStream.hxx"
 
 #define ABXHTTPD_FILE_STDIN 0
 #define ABXHTTPD_FILE_STDOUT 1
@@ -10,7 +10,7 @@
 
 namespace abxhttpd {
 /**
- * @brief 文件流类
+ * @brief 文件流
  *
  * 文件流类，封装了C API对文件的操作。
  * 不采用C++的文件流是因为C++的fstream无法和socket API很好的同步
@@ -55,14 +55,14 @@ public:
      * @param[in] path 文件路径
      * @warning 如果文件无法打开，会抛出异常abxhttpd_error
      */
-    FileStream(const char * path);
+    explicit FileStream(const char * path);
     /**
      * @brief 构造函数（文件描述符）
      *
      * @param[in] fd 文件描述符（只接受STDIN/STDOUT/STDERR）
      * @warning 如果文件无法打开，会抛出异常abxhttpd_error
      */
-    FileStream(int fd);
+    explicit FileStream(int fd);
     size_t read(std::string & dst,size_t size=0) override;
     size_t write(const std::string & dst,size_t size=0) override;
     /**
@@ -70,6 +70,12 @@ public:
      * @return 文件长度
      */
     size_t get_length() const;
+    /// 设置文件指针偏移
+    /// @param offset 偏移量
+    /// @return 是否设置成功
+    bool SetOffset(size_t offset);
+    /// 关闭文件流
+    bool close() override;
     ///析构函数，释放文件指针
     ~FileStream();
 };
