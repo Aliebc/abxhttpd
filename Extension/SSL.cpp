@@ -1,5 +1,4 @@
 #ifdef ABXHTTPD_SSL
-#include "include/abxhttpd.H"
 #include "Extension/SSL.H"
 #include <openssl/ssl.h>
 #include <openssl/err.h>

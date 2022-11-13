@@ -4,11 +4,11 @@
 namespace abxhttpd{
 
 void BasicStream::clear_tmp(){
-    memset(buffer_tmp, 0, ABXHTTPD_BASICSTREAM_BUFFER);
+    memset(buffer_tmp, 0, __buffer_size);
 }
 
 BasicStream::BasicStream(){
-    buffer_tmp = new char [ABXHTTPD_BASICSTREAM_BUFFER];
+    buffer_tmp = new char [__buffer_size];
     clear_tmp();
     status_id=0;
     err_str="success";
@@ -42,8 +42,16 @@ size_t BasicStream::buffer_size(){
     return __buffer_size;
 }
 
-const char * BasicStream::GetLastError() const{
-    return err_str;
+const char * BasicStream::GetLastError(){
+    status_id^=EXCEPTION;
+    const char * resp=err_str;
+    err_str="success";
+    return resp;
+}
+
+void BasicStream::SetLastError(const char * err){
+    status_id|=EXCEPTION;
+    err_str=err;
 }
 
 BasicStream & operator>> ( BasicStream & src, std::string & is){
@@ -51,7 +59,12 @@ BasicStream & operator>> ( BasicStream & src, std::string & is){
     return src;
 }
 
-BasicStream & operator<< (BasicStream & src, std::string & in){
+BasicStream & operator<< (BasicStream & src, const std::string & in){
+    src.write(in);
+    return src;
+}
+
+BasicStream & operator<< (BasicStream & src, const char * in){
     src.write(in);
     return src;
 }
@@ -62,7 +75,7 @@ BasicStream & operator<< (BasicStream & to, BasicStream & from){
     while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
         to.write(tmp_s,_read_len);
         tmp_s.clear();
-        if(!(from.status()&ABXHTTPD_STREAM_READABLE)){
+        if(!(from.status()&BasicStream::FLAG::READABLE)){
             break;
         }
     }
@@ -73,4 +86,51 @@ BasicStream & operator>> (BasicStream & from, BasicStream & to){
     to<<from;
     return from;
 }
+
+BasicFilter::BasicFilter(BasicStream & src,BasicStream & dst):
+source(src),destination(dst){
+    status_id=B_FLAG::SUCCESS;
+}
+
+size_t BasicFilter::exec(size_t s){
+    if(s==0){s--;}
+    return StreamFilter(source, destination, s);
+}
+
+int BasicFilter::status(int which) const{
+    int sid;
+    switch (which) {
+        case WHICH::FROM:
+            sid=source.status();
+            break;
+        case WHICH::TO:
+            sid=destination.status();
+            break;
+        default:
+            sid=0;
+            break;
+    }
+    
+    return sid;
+}
+
+
+size_t BasicFilter::StreamFilter(BasicStream & f,BasicStream & t,size_t size){
+    size_t r_size;
+    tmp.clear();
+    f.read(tmp,size);
+    r_size=t.write(tmp,size);
+    tmp.clear();
+    tmp.shrink_to_fit();
+    return r_size;
+}
+
+size_t BasicFilter::length() const{
+    return handled_length;
+}
+
+const char * BasicFilter::GetLastError() const noexcept{
+    return err_msg;
+}
+
 }

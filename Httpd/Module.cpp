@@ -71,7 +71,6 @@ namespace abxhttpd{
 
     std::string Module::ShowModules_HTML(HttpRequest * _src){
         std::stringstream _ret;
-        std::string arg;
         _ret<< "<div class=\"sub-title\"> core </div>"<<std::endl;
         _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
         ModuleHTML_PAIR(_ret,"Current OS",Get_OS());
@@ -83,7 +82,7 @@ namespace abxhttpd{
             _ret<< "<div class=\"sub-title\">" << _ConfData[_i]->Name <<"</div>"<<std::endl;
             _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
             _ret<<std::endl;
-            for(int _j=0;_ConfData[_i]->Conf[_j].info!=NULL&&_j<ABXHTTPD_MAX_MODULE;_j++){
+            for(int _j=0;_j<ABXHTTPD_MAX_MODULE&&_ConfData[_i]->Conf[_j].info!=NULL;_j++){
                 ModuleHTML_PAIR(_ret,_ConfData[_i]->Conf[_j].name,_ConfData[_i]->Conf[_j].info);
             }
             _ret<< "</table></div>" <<std::endl;

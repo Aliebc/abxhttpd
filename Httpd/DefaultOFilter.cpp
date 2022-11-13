@@ -1,4 +1,5 @@
-#include "include/abxhttpd.H"
+#include "include/Httpd.hxx"
+#include "include/HttpResponse.hxx"
 
 namespace abxhttpd
 {

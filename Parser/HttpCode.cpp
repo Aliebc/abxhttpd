@@ -4,14 +4,22 @@ namespace abxhttpd{
 
 HttpCodeL HttpCodeList = {
     {200,"OK"},
+    {301,"Permanently Moved"},
+    {302,"Temporarily Moved"},
     {400,"Bad Request"},
+    {401,"Unauthorized"},
     {403,"Forbidden"},
     {404,"Not Found"},
+    {405,"Method Not Allowed"},
+    {406,"Not Acceptable"},
     {500,"Internal Error"},
 };
 
 const std::string & HttpCodeStatus(int _code){
-    return HttpCodeList[_code];
+    if(HttpCodeList.find(_code)==HttpCodeList.end()){
+        return HttpCodeList.at(400);
+    }
+    return HttpCodeList.at(_code);
 }
 
 std::string HttpCodeStatusHTML(int _code){

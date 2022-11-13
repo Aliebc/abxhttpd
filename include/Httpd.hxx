@@ -48,11 +48,11 @@ typedef struct {
     HttpSettingList Http_S;
 } HttpdSettingList;
 
-typedef HttpRequest (* IStreamFilter) (std::string &, void *);
-typedef HttpResponse (* HttpHandler) (HttpRequest &, void *);
+typedef HttpRequest (* IStreamFilter) (const std::string &, void *);
+typedef void (* HttpHandler) (HttpResponse&, HttpRequest &, void *);
 typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 typedef int (* SocketInitializer) (SocketSettingList &);
-typedef int (* SocketDestructor) (SocketSettingList &);
+typedef int (* SocketDestructor) (const SocketSettingList &);
 
 
 typedef struct {
@@ -63,26 +63,30 @@ typedef struct {
 
 using std::ostream;
 
+/**
+ * @brief 套接字（TCP）请求
+ *
+ * 此结构体代表一次有效的TCP请求
+ */
 typedef struct 
 {
-    int _ad;
-    int _sd;
-    struct sockaddr_in src_in;
-    std::string src_in_ip;
-    bool is_noblocked;
-    int port_in;
-    const CCore * MCore;
-    HttpSettingList Http_S;
+    int _ad; ///< 子套接字描述符
+    int _sd; ///< 监听套接字描述符
+    struct sockaddr_in src_in; ///< 未转换的源IP
+    std::string src_in_ip; ///< 经转换的的源IP
+    int port_in; ///< 源端口
+    const CCore * MCore; ///< 核心处理
+    HttpSettingList Http_S; ///< Httpd设置
 } SocketRequest;
 
 typedef void * (* ThreadController) (const ThreadSettingList &, const CCore &, void *);
 
-extern HttpHandler DefaultHttpH;
-extern SocketInitializer DefaultSocketI;
-extern SocketDestructor DefaultSocketD;
-extern ThreadController DefaultThreadC;
-extern IStreamFilter DefaultIFilter;
-extern OStreamFilter DefaultOFilter;
+ABXHTTPD_API extern HttpHandler DefaultHttpH;
+ABXHTTPD_API extern SocketInitializer DefaultSocketI;
+ABXHTTPD_API extern SocketDestructor DefaultSocketD;
+ABXHTTPD_API extern ThreadController DefaultThreadC;
+ABXHTTPD_API extern IStreamFilter DefaultIFilter;
+ABXHTTPD_API extern OStreamFilter DefaultOFilter;
 
 typedef struct {
     IStreamFilter IFilter;
@@ -132,7 +136,7 @@ public:
 class HttpdCore_R 
 {
 public:
-    HttpdCore_R(HttpdCoreAddress);
+    explicit HttpdCore_R(const HttpdCoreAddress &);
     ~HttpdCore_R();
 };
 

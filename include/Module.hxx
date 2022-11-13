@@ -28,7 +28,7 @@ namespace abxhttpd{
     public:
         static std::string ShowModules(char sep='\n');
         static std::string ShowModules_HTML(HttpRequest * _src=NULL);
-        Module(ConfigureInfo * _info);
+        explicit Module(ConfigureInfo * _info);
         Module(ConfigureInfo * _info, void *(*dfunc)(void *), void * dta);
         ~Module();
     };
