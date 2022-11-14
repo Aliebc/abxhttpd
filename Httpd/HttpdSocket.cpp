@@ -39,8 +39,8 @@ bool HttpdSocket::__set_socket_timeout(int ad,int second){
 #else
     int timout=second*1000;
 #endif
-    st1=setsockopt(ad, SOL_SOCKET, SO_RCVTIMEO, (&timout), sizeof(timout));
-    st2=setsockopt(ad, SOL_SOCKET, SO_SNDTIMEO, (&timout), sizeof(timout));
+    st1=setsockopt(ad, SOL_SOCKET, SO_RCVTIMEO, (const char *)(&timout), sizeof(timout));
+    st2=setsockopt(ad, SOL_SOCKET, SO_SNDTIMEO, (const char *)(&timout), sizeof(timout));
     if((st1&st2)==0){
         return true;
     }
