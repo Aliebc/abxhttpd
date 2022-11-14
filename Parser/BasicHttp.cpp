@@ -35,9 +35,6 @@ bool BasicHttp::is_header(const std::string & _h) const{
 
 const std::string & BasicHttp::header(const std::string & _h) const{
     if(is_header(_h)){
-        if(*headers().at(_h).begin()==' '){
-            
-        }
         return headers().at(_h);
     }else{
         return null_str;

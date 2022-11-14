@@ -4,7 +4,7 @@
 #include <string>
 #include <map>
 
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 #include "BasicHttp.hxx"
 #include "HttpdTools.hxx"
 #include "HttpdSession.hxx"
@@ -45,30 +45,33 @@ private:
     SSMap COOKIE;
     SVMap * SESSION;
     std::string Body;
-    std::string Raw;
 public:
     HttpRequest(const char * _src,size_t _len);
     explicit HttpRequest(const std::string & _src);
     explicit HttpRequest(const char * _src);
     HttpRequest();
     HttpRequest(const HttpRequest & _src);
-    void parse(void);
-    bool state;
+    int parse(void);
     const std::string & method(void) const;
     const std::string & request(const std::string &&) const;
     const std::string & cookie(const std::string &&) const;
-    SessionPtr * session(const std::string &&);
+    SessionPtr * session(const std::string &&) const;
+    SessionPtr * global(const std::string &&) const;
     template <class Tp>
-    Tp & sessionA(const std::string && _key){
+    inline Tp & sessionA(const std::string && _key) const{
         return session(std::move(_key))->cast<Tp>();
     }
-    std::string & path(void);
+    template <class Tp>
+    inline Tp & globalA(const std::string && _key) const{
+        return global(std::move(_key))->cast<Tp>();
+    }
+    const std::string & path(void) const;
     std::string & query_string(void);
-    std::string & body(void);
+    const std::string & body(void) const;
     std::string & protocol(void);
-    const std::string & remote_addr(void);
+    const std::string & remote_addr(void) const;
     void remote_addr(const std::string &);
-    std::string & raw(void);
+    const std::string & raw(void) const;
     std::string & rebuild(void);
     void clear();
     ~HttpRequest();

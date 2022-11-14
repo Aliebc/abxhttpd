@@ -21,7 +21,7 @@ int main(int argc,char ** argv){
     global_argv=(const char **)argv;
     CmdArray cmd_argu=CmdParse(argc,(const char **)argv);
     global_argu=&cmd_argu;
-    HttpdSettingList MainSetting;
+    HttpdSettingList MainSetting{};
     if(CmdArrayIs(&cmd_argu,'v')){
         if(cmd_argu['v'].at(0)=='c'){
             info_color=1;
@@ -76,29 +76,12 @@ int main(int argc,char ** argv){
         if(CmdArrayIs(&cmd_argu,'T')){
             MainSetting.Thread_S.Multithreading=true;
             MainSetting.Thread_S.ThreadCount=atoi(cmd_argu['T'].c_str());
-        }else{
-            MainSetting.Thread_S.Multithreading=false;
-            MainSetting.Thread_S.ThreadCount=0;
         }
-        std::ofstream out_log;
-        std::ofstream out_err;
-        MainSetting.Thread_S.abxout=&std::cout;
-        MainSetting.Thread_S.abxerr=&std::cerr;
         if(CmdArrayIs(&cmd_argu,'l')){
-            out_log.open(cmd_argu['l'],std::ios::app);
-            if(out_log.is_open()){
-                MainSetting.Thread_S.abxout=&out_log;
-            }else{
-                ABXHTTPD_CLI_ERR("Cannot open file %s.",cmd_argu['l'].c_str());
-            }
+            MainSetting.Thread_S.abxout=cmd_argu['l'].c_str();
         }
         if(CmdArrayIs(&cmd_argu,'e')){
-            out_err.open(cmd_argu['e'],std::ios::app);
-            if(out_err.is_open()){
-                MainSetting.Thread_S.abxerr=&out_err;
-            }else{
-                ABXHTTPD_CLI_ERR("Cannot open file %s.",cmd_argu['e'].c_str());
-            }
+            MainSetting.Thread_S.abxout=cmd_argu['e'].c_str();
         }
         MainSetting.Http_S.Path=CmdArrayIs(&cmd_argu,'D')?cmd_argu['D'].c_str():".";
         if(CmdArrayIs(&cmd_argu,'d')){
@@ -107,13 +90,18 @@ int main(int argc,char ** argv){
             }
             abxhttpd_fork(argc,(const char **)argv);
         }
-        Httpd httpd_main(*_HttpdCore,MainSetting);
-        CMain=&httpd_main;
+        if(cmd_argu['c']=="SSLHttpdCore"){
+            Httpd::SetExtraSetting("SSL","TRUE");
+            Httpd::SetExtraSetting("SSL_CRETIFICATE", cmd_argu['K'].c_str());
+            Httpd::SetExtraSetting("SSL_KEY",cmd_argu['k'].c_str());
+        }
         try{
+            Httpd httpd_main(*_HttpdCore,MainSetting);
+            CMain=&httpd_main;
             ABXHTTPD_INFO_PRINT(5,"[Main]Start Core at %p.",_HttpdCore);
             httpd_main.start();
         }catch (const BasicException & e){
-            ABXHTTPD_CLI_ERR("Start failed: %s",e.what());
+            ABXHTTPD_CLI_ERR("Caught Exception: %s",e.what());
         }
     }else{
         std::cout << ABXHTTPD_HELP <<std::endl;

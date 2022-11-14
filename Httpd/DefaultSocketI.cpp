@@ -26,7 +26,7 @@ int _DefaultSocketI(SocketSettingList & _setting){
     int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(!(x1>=0&&x2>=0)){
-        throw BasicException(std::string(strerror(errno)));
+        throw BasicException(std::string(_setting.IPStr)+":"+std::to_string(_setting.Port)+": "+strerror(errno));
     }
     _setting.allocated_socket=_sk;
     ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",inet_ntoa(_in.sin_addr),_setting.Port);
@@ -52,7 +52,7 @@ int _DefaultSocketI6(SocketSettingList & _setting){
     int x2=listen(_sk,_setting.MaxConnect);
     ABXHTTPD_INFO_PRINT(11,"[Core][System API]Invoked listen, returning %d",x2);
     if(!(x1>=0&&x2>=0)){
-        throw BasicException(std::string(strerror(errno)));
+        throw BasicException(std::string(_setting.IPStr)+":"+std::to_string(_setting.Port)+": "+strerror(errno));
     }
     _setting.allocated_socket=_sk;
     ABXHTTPD_INFO_PRINT(1,"[Core]Start listening on %s:%d",_setting.IPStr,_setting.Port);
@@ -130,7 +130,7 @@ int _DefaultSocketD(const SocketSettingList & _setting){
     return HttpdSocket::__close_socket(_setting.allocated_socket);
 }
 
-ConfigureInfo Socket6A{"ipv6",{{"Support","enabled"}}};
+ModuleConfigure Socket6A{"ipv6",{{"Support","enabled"}}};
 Module Socket6(&Socket6A);
 
 int __DefaultSocketI(SocketSettingList & _setting){
