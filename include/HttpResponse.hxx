@@ -51,6 +51,11 @@ public:
     bool status(int _code);
     std::string & body(void);
     void body(const std::string && _src);
+    void write(const std::string && _src);
+    template <class Tp>
+    void writeA(Tp && _src){
+        this->write(std::to_string(_src));
+    }
     std::string raw(void);
     void set_cookie(const std::string & key,
                     const std::string & value,
@@ -60,6 +65,14 @@ public:
     void location(std::string && _loc);
     ~HttpResponse();
 };
+
+
+typedef HttpRequest (* IStreamFilter) (const std::string &, void *);
+typedef void (* HttpHandler) (HttpResponse&,const HttpRequest &, void *);
+typedef std::string (* OStreamFilter) (HttpResponse &, void *);
+typedef HttpRequest (* IStreamFilter) (const std::string &, void *);
+typedef void (* HttpHandler) (HttpResponse&,const HttpRequest &, void *);
+typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 
 }
 

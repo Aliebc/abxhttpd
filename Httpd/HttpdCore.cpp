@@ -60,12 +60,36 @@ HttpdCore_R::HttpdCore_R(const HttpdCoreAddress & src){
 }
 HttpdCore_R::~HttpdCore_R(){}
 
-Httpd::Httpd(const HttpdCore & _core, HttpdSettingList & _set){
+Logger * Httpd::success_logger = NULL;
+Logger * Httpd::except_logger = NULL;
+
+Httpd::Httpd(const HttpdCore & _core, const HttpdSettingList & _set){
     this->Core=_core;
     this->MCore.Handler=this->Core.Handler;
     this->MCore.IFilter=this->Core.IFilter;
     this->MCore.OFilter=this->Core.OFilter;
     this->Setting=_set;
+    if(Setting.Thread_S.abxout!=NULL){
+        success_logger=new Logger(_set.Thread_S.abxout);
+    }else{
+        success_logger=new Logger(Logger::FILE_FLAG::STDOUT);
+    }
+    if(Setting.Thread_S.abxerr!=NULL){
+        except_logger=new Logger(_set.Thread_S.abxerr);
+    }else{
+        except_logger=new Logger(Logger::FILE_FLAG::STDERR);
+    }
+    if(Setting.Socket_S.IPVer!=4&&Setting.Socket_S.IPVer!=6){
+        Setting.Socket_S.IPVer=4;
+    }
+    if(Setting.Socket_S.IPVer==4&&Setting.Socket_S.IPStr==NULL){
+        Setting.Socket_S.IPStr="0.0.0.0";
+    }else if(Setting.Socket_S.IPVer==6&&Setting.Socket_S.IPStr==NULL){
+        Setting.Socket_S.IPStr="::";
+    }
+    if(Setting.Socket_S.MaxConnect<=0){
+        Setting.Socket_S.MaxConnect=ABXHTTPD_CONNECT_MAX;
+    }
 }
 
 Httpd::~Httpd(){
@@ -90,6 +114,7 @@ void Httpd::env(){
 httpd_t Httpd::start(){
     httpd_t _r=0;
     env();
+    Module::init();
     Setting.Thread_S.Running=true;
     int _sk=Core.Initializer(Setting.Socket_S);
     this->Setting.Thread_S.SocketMainID=_sk;
@@ -110,6 +135,19 @@ httpd_t Httpd::stop(){
     }else{
         return 1;
     }
+}
+
+SSMap Httpd::ExtraSettingList;
+
+void Httpd::SetExtraSetting(const char * _key, const char * _value){
+    ExtraSettingList[_key]=_value;
+}
+
+const char * Httpd::GetExtraSetting(const char * _key){
+    if(ExtraSettingList.find(_key)!=ExtraSettingList.end()){
+        return ExtraSettingList[_key].c_str();
+    }
+    return NULL;
 }
 
 }

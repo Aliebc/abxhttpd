@@ -10,19 +10,22 @@
 #endif
 
 namespace abxhttpd{
-    ConfigureInfo * Module::_ConfData[ABXHTTPD_MAX_MODULE]{};
+    ModuleConfigure * Module::_ConfData[ABXHTTPD_MAX_MODULE]{};
     module_t Module::ModuleCount=0;
 
-    void Module::RegisterModule(ConfigureInfo * _info){
+    void Module::RegisterModule(ModuleConfigure * _info){
         if(ModuleCount<ABXHTTPD_MAX_MODULE){
             _ConfData[ModuleCount]=_info;
             ModuleCount++;
         }
     }
 
-    Module::Module(ConfigureInfo * _info, void *(*dfunc)(void *), void * dta){
-        dfunc(dta);
-        RegisterModule(_info);
+    void Module::init(){
+        for(module_t _i=0;_i<ModuleCount;_i++){
+            if(_ConfData[_i]->dfunc!=NULL){
+                _ConfData[_i]->dfunc(_ConfData[_i]->data);
+            }
+        }
     }
 
     std::string Module::ShowModules(char sep){
@@ -69,7 +72,7 @@ namespace abxhttpd{
         #endif
     }
 
-    std::string Module::ShowModules_HTML(HttpRequest * _src){
+    std::string Module::ShowModules_HTML(const HttpRequest * _src){
         std::stringstream _ret;
         _ret<< "<div class=\"sub-title\"> core </div>"<<std::endl;
         _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
@@ -90,11 +93,8 @@ namespace abxhttpd{
         if(_src!=NULL){
             _ret<< "<div class=\"sub-title\"> Abxhttpd Variables </div>"<<std::endl;
             _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
-            ModuleHTML_PAIR(_ret,"REMOTE_ADDR",_src->remote_addr());
-            for(auto _i=_src->headers().begin(); _i!=_src->headers().end();_i++){
-                _ret<< "<tr><td class=\"left\">HTTP_"+_i->first << "</td><td class=\"right\">";
-                _ret<< _i->second << "</td></tr>";
-                _ret<<std::endl;
+            for(auto _i=_src->variables().begin(); _i!=_src->variables().end();++_i){
+                ModuleHTML_PAIR(_ret,_i->first,_i->second);
             }
             _ret<< "</table></div>" <<std::endl;
             _ret<<std::endl;
@@ -102,7 +102,7 @@ namespace abxhttpd{
         return _ret.str();
     }
 
-    Module::Module(ConfigureInfo * _info)
+    Module::Module(ModuleConfigure * _info)
     {
         RegisterModule(_info);
     }

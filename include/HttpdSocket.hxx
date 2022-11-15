@@ -11,6 +11,7 @@
 #endif
 
 #define ABXHTTPD_SOCK_STREAM 0
+#define ABXHTTPD_SOCKET_TIMEOUT 2
 
 namespace abxhttpd{
     /**
@@ -46,6 +47,12 @@ namespace abxhttpd{
         /// @retval 0 成功关闭
         /// @retval 其他 无法成功关闭
         static int __close_socket(int ad);
+        /// 跨平台的设置套接字超时
+        /// @param ad 套接字描述符
+        /// @param second 超时秒数
+        /// @retval true 成功设置
+        /// @retval false 无法成功设置
+        static bool __set_socket_timeout(int ad,int second);
     protected:
         /// 内部套接字请求信息
         SocketRequest _src;

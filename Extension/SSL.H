@@ -6,10 +6,6 @@
 
 #define ABXHTTPD_SSL_STREAM 1
 
-SSL_CTX* create_context();
-
-void configure_context(SSL_CTX* ctx);
-
 namespace abxhttpd
 {
     extern HttpdCoreAddress SSLHttpdCoreAddress;
@@ -20,14 +16,17 @@ namespace abxhttpd
      */
     class SSLSocket :public HttpdSocket {
     private:
-        SSL_CTX* ctx; ///< SSL上下文
         SSL* ssl; ///< SSL通道
         int ad; ///< 套接字描述符
+        static void configure_context(SSL_CTX* ctx);
+        static SSL_CTX* create_context();
+        static SSL_CTX * global_ctx; ///< SSL上下文
     public:
-        SSLSocket(SocketRequest& src);///< 构造函数，同基类的构造方式一样
+        SSLSocket(const SocketRequest& src);///< 构造函数，同基类的构造方式一样
         size_t read(std::string& _dst, size_t size = 0) override;
         size_t write(const std::string& _res, size_t size = 0) override;
         bool close() override;
+        static void * init_ssl(void *);
         ~SSLSocket();
     };
 

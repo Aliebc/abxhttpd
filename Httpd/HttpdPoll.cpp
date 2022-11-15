@@ -34,6 +34,7 @@ bool HttpdPoll::accept(){
     SocketRequest _src;
     _src._ad = st;
     _src.src_in_ip = inet_ntoa(src_in.sin_addr);
+    _src.port_in=htons(src_in.sin_port);
     _src._sd = MSocketID;
     _src.MCore = _core;
     _src.Http_S=http_s.Http_S;

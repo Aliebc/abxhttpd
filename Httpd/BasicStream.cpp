@@ -75,7 +75,7 @@ BasicStream & operator<< (BasicStream & to, BasicStream & from){
     while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
         to.write(tmp_s,_read_len);
         tmp_s.clear();
-        if(!(from.status()&BasicStream::FLAG::READABLE)){
+        if(!(from.status()&BasicStream::FLAG::READABLE)||!(to.status()&BasicStream::FLAG::WRITEABLE)){
             break;
         }
     }

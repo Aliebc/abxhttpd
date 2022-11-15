@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 
 namespace abxhttpd{
 

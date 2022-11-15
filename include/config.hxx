@@ -15,7 +15,7 @@ namespace abxhttpd{
 
 ABXHTTPD_API CmdArray CmdParse(int argc, const char * argv[]);
 
-static bool CmdArrayIs(const CmdArray * _src,char _find){
+inline bool CmdArrayIs(const CmdArray * _src,char _find){
     auto _i=_src->find(_find);
     return !(_i==_src->end());
 }

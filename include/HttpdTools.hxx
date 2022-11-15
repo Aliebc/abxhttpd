@@ -4,7 +4,7 @@
 #define ABXHTTPD_MIN(a,b) (a<b?a:b)
 
 #include "HttpRequest.hxx"
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 
 namespace abxhttpd {
 /**
@@ -28,12 +28,12 @@ public:
      @brief URL解码
      @param _src 源URL
      */
-    static std::string ABX_URLDecode(std::string & _src);
+    static std::string ABX_URLDecode(const std::string & _src);
     /**
      @brief 输出信息页面
      @param _req 源请求
      */
-    static std::string ABXInfoPageHTML(HttpRequest & _req);
+    static std::string ABXInfoPageHTML(const HttpRequest & _req);
     static void ParseQueryString(SSMap & ssm, const std::string & _src);
     static void ParseCookie(SSMap & ssm, const std::string & _src);
     /// 默认构造函数

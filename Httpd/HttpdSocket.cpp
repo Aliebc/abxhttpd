@@ -32,8 +32,24 @@ int HttpdSocket::__close_socket(int ad)
     return st;
 }
 
+bool HttpdSocket::__set_socket_timeout(int ad,int second){
+    int st1=-1,st2=-1;
+#ifdef ABXHTTPD_UNIX
+    struct timeval timout{second,0};
+#else
+    int timout=second*1000;
+#endif
+    st1=setsockopt(ad, SOL_SOCKET, SO_RCVTIMEO, (const char *)(&timout), sizeof(timout));
+    st2=setsockopt(ad, SOL_SOCKET, SO_SNDTIMEO, (const char *)(&timout), sizeof(timout));
+    if((st1&st2)==0){
+        return true;
+    }
+    return false;
+}
+
 HttpdSocket::HttpdSocket(const SocketRequest & _sk_req):HttpdSocket()
 {
+    __set_socket_timeout(_sk_req._ad, ABXHTTPD_SOCKET_TIMEOUT);
     _src=_sk_req;
 }
 HttpdSocket::HttpdSocket():_src{}

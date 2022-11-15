@@ -2,9 +2,11 @@
 #define HTTPD_H
 
 #include "Platform.hxx"
+#include "BasicHttp.hxx"
 #include "HttpRequest.hxx"
 #include "HttpResponse.hxx"
 #include "Module.hxx"
+#include "Logger.hxx"
 
 #include <string>
 #include <fstream>
@@ -32,8 +34,8 @@ typedef struct _ThreadSettingList {
     int SocketMainID;
     bool Multithreading;
     bool Running;
-    std::ostream * abxout;
-    std::ostream * abxerr;
+    const char * abxout;
+    const char * abxerr;
     void * Args;
 } ThreadSettingList;
 
@@ -48,9 +50,6 @@ typedef struct {
     HttpSettingList Http_S;
 } HttpdSettingList;
 
-typedef HttpRequest (* IStreamFilter) (const std::string &, void *);
-typedef void (* HttpHandler) (HttpResponse&, HttpRequest &, void *);
-typedef std::string (* OStreamFilter) (HttpResponse &, void *);
 typedef int (* SocketInitializer) (SocketSettingList &);
 typedef int (* SocketDestructor) (const SocketSettingList &);
 
@@ -105,8 +104,6 @@ typedef struct {
     const HttpdCore *Core;
 } HttpdCoreAddress;
 
-//extern HttpdCoreAddress DefaultHttpdCoreAddress;
-//extern HttpdCoreAddress HttpdCoreAddressTable[64];
 typedef unsigned short int core_t;
 extern core_t HttpdCoreAddressCount;
 ABXHTTPD_API std::string ShowHttpdCoreAddressTable(char sep='\n');
@@ -122,14 +119,19 @@ private:
     CCore MCore;
     HttpdSettingList Setting;
     httpd_t _status;
-    static void env(); //Prepare environment
+    static void env(); ///< Prepare environment
+    static SSMap ExtraSettingList;
 public:
-    Httpd(const HttpdCore & _core, HttpdSettingList & _set);
+    Httpd(const HttpdCore & _core,const HttpdSettingList & _set);
     httpd_t start();
     httpd_t start(void * _arg);
     httpd_t status() const;
     httpd_t stop();
     httpd_t stop(int _signal);
+    static const char * GetExtraSetting(const char *);
+    static void SetExtraSetting(const char *, const char *);
+    static Logger * success_logger;
+    static Logger * except_logger;
     ~Httpd();
 };
 

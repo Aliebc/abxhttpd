@@ -6,10 +6,12 @@
 #include <map>
 #include <utility>
 #include "BasicStream.hxx"
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 
 #ifdef ABXHTTPD_WINDOWS
 #define strcasecmp _stricmp
+#else
+#include <strings.h>
 #endif
 
 namespace abxhttpd{
@@ -68,6 +70,7 @@ class BasicHttpFilter:BasicFilter{
 protected:
     HttpRequest * Request;
     HttpResponse * Response;
+    //HttpHandler Handler;
     BasicStream * tmp_stream;
     std::string head_tmp;
     //virtual size_t HttpHandler();
