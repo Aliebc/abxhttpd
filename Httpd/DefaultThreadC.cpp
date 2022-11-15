@@ -24,7 +24,7 @@ namespace abxhttpd {
         time_t tt;
         SocketRequest src = (SourceRequest->socket_p->info());
         ABXHTTPD_INFO_PRINT(4, "[Socket %d]Entered thread.", src._ad);
-        std::string _ip (src.src_in_ip);
+        std::string & _ip(src.src_in_ip);
         std::string SocketResponse;
         std::string SocketRequest;
         bool is_keep = false;
@@ -42,8 +42,9 @@ namespace abxhttpd {
                 try {
                     H_req = src.MCore->IFilter(SocketRequest, &src);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Invoked istream filiter, handled %lu size.", src._ad, SocketRequest.size());
-                    H_req.remote_addr(_ip);
                     ABXHTTPD_INFO_PRINT(4, "[Socket %d]Logged this request.", src._ad);
+                    H_req.variables("REMOTE_ADDR", _ip);
+                    H_req.variables("REMOTE_PORT", std::to_string(src.port_in));
                     if(H_req.header("Connection")=="keep-alive"){
                         H_res.header("Connection","keep-alive");
                     }else{
@@ -107,6 +108,7 @@ namespace abxhttpd {
             _src.src_in_ip = std::string(inet_ntoa(src_in.sin_addr));
             _src._sd = _set.SocketMainID;
             _src.src_in = src_in;
+            _src.port_in=htons(src_in.sin_port);
             _src.MCore = &_core;
             _src.Http_S = args.Http_S;
             HttpdSocket * SocketS;

@@ -93,11 +93,8 @@ namespace abxhttpd{
         if(_src!=NULL){
             _ret<< "<div class=\"sub-title\"> Abxhttpd Variables </div>"<<std::endl;
             _ret<< "<div class=\"all-w\"><table class=\"main\">"<<std::endl;
-            ModuleHTML_PAIR(_ret,"REMOTE_ADDR",_src->remote_addr());
-            for(auto _i=_src->headers().begin(); _i!=_src->headers().end();_i++){
-                _ret<< "<tr><td class=\"left\">HTTP_"+_i->first << "</td><td class=\"right\">";
-                _ret<< _i->second << "</td></tr>";
-                _ret<<std::endl;
+            for(auto _i=_src->variables().begin(); _i!=_src->variables().end();++_i){
+                ModuleHTML_PAIR(_ret,_i->first,_i->second);
             }
             _ret<< "</table></div>" <<std::endl;
             _ret<<std::endl;

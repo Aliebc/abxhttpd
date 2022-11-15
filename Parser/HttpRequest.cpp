@@ -46,11 +46,14 @@ int HttpRequest::parse(void){
         HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
         _p2=_src.find_first_of(':');
         HttpRequest_Parser_Assert(_p2<_p1,_p1,"Header format error.");
-        std::string _h=_src.substr(0L,_p2);
+        std::string _h(_src.substr(0L,_p2));
         std::string _rh=_src.substr(_p2+1,_p1-(_p2+1));
         size_t _p3=_rh.find_first_of('\r');
         size_t _p4=_rh.find_first_of(' ');
         header(_h,_rh.substr(_p4+1,_p3-(_p4+1)));
+        std::transform(_h.begin(), _h.end(), _h.begin(), toupper_s);
+        _h.insert(0, "HTTP_");
+        ServerVariables[_h]=_rh.substr(_p4+1,_p3-(_p4+1));
         _src.erase(0L,_p1+1);
         if(_src[0]=='\n' || (_src[0]=='\r' && _src[1]=='\n')){
             _src.erase(0L,2L);
@@ -96,14 +99,6 @@ const std::string & HttpRequest::method(void) const{
     return Method;
 };
 
-const std::string & HttpRequest::remote_addr(void) const{
-    return RemoteAddr;
-};
-
-void HttpRequest::remote_addr(const std::string & _ip){
-    RemoteAddr=std::move(_ip);
-}
-
 const std::string & HttpRequest::path(void) const{
     return Path;
 };
@@ -135,6 +130,26 @@ const std::string & HttpRequest::cookie(const std::string && _key) const{
         return _f->second;
     }
     return null_str;
+}
+
+void HttpRequest::variables(const std::string & _key,const std::string & _val){
+    ServerVariables[_key]=_val;
+}
+
+void HttpRequest::variables(const std::string & _key,const std::string && _val){
+    ServerVariables[_key]=_val;
+}
+
+const std::string & HttpRequest::variables(const std::string && _key) const{
+    auto _f=ServerVariables.find(_key);
+    if(_f!=ServerVariables.end()){
+        return _f->second;
+    }
+    return null_str;
+}
+
+const SSMap & HttpRequest::variables() const{
+    return ServerVariables;
 }
 
 const std::string & HttpRequest::raw(void) const{

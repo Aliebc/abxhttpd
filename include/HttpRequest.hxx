@@ -38,10 +38,10 @@ private:
     std::string Path;
     std::string Query_String;
     std::string Protocol;
-    std::string RemoteAddr;
     SSMap GET;
     SSMap POST;
     SSMap REQUEST;
+    SSMap ServerVariables;
     SSMap COOKIE;
     SVMap * SESSION;
     std::string Body;
@@ -55,8 +55,19 @@ public:
     const std::string & method(void) const;
     const std::string & request(const std::string &&) const;
     const std::string & cookie(const std::string &&) const;
+    void variables(const std::string & _key,const std::string & _val);
+    void variables(const std::string & _key,const std::string && _val);
+    const std::string & variables(const std::string &&) const;
+    const SSMap & variables() const;
     SessionPtr * session(const std::string &&) const;
     SessionPtr * global(const std::string &&) const;
+    const std::string & path(void) const;
+    std::string & query_string(void);
+    const std::string & body(void) const;
+    std::string & protocol(void);
+    const std::string & raw(void) const;
+    std::string & rebuild(void);
+    void clear();
     template <class Tp>
     inline Tp & sessionA(const std::string && _key) const{
         return session(std::move(_key))->cast<Tp>();
@@ -65,15 +76,6 @@ public:
     inline Tp & globalA(const std::string && _key) const{
         return global(std::move(_key))->cast<Tp>();
     }
-    const std::string & path(void) const;
-    std::string & query_string(void);
-    const std::string & body(void) const;
-    std::string & protocol(void);
-    const std::string & remote_addr(void) const;
-    void remote_addr(const std::string &);
-    const std::string & raw(void) const;
-    std::string & rebuild(void);
-    void clear();
     ~HttpRequest();
 };
 }
