@@ -78,10 +78,10 @@ int main(int argc,char ** argv){
             MainSetting.Thread_S.ThreadCount=atoi(cmd_argu['T'].c_str());
         }
         if(CmdArrayIs(&cmd_argu,'l')){
-            MainSetting.Thread_S.abxout=cmd_argu['l'].c_str();
+            MainSetting.Thread_S.Log=cmd_argu['l'].c_str();
         }
         if(CmdArrayIs(&cmd_argu,'e')){
-            MainSetting.Thread_S.abxout=cmd_argu['e'].c_str();
+            MainSetting.Thread_S.Error=cmd_argu['e'].c_str();
         }
         MainSetting.Http_S.Path=CmdArrayIs(&cmd_argu,'D')?cmd_argu['D'].c_str():".";
         if(CmdArrayIs(&cmd_argu,'d')){
