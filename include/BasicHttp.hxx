@@ -21,17 +21,20 @@ struct Casecmp{
         return strcasecmp(s1.c_str(), s2.c_str())<0;
     }
 };
+
+/// HttpHeaders 专用(比较函数不分大小写)
 typedef std::map <std::string, std::string, Casecmp> HttpHeaders;
+/// string->string 的映射
 typedef std::map<std::string,std::string> SSMap;
 
-class ABXHTTPD_API BasicHttpException{
+class ABXHTTPD_API HttpParserException{
 protected:
     int except_id;
     const char * err_msg;
 public:
-    BasicHttpException(int);
-    BasicHttpException(int,const char *);
-    ~BasicHttpException();
+    HttpParserException(int);
+    HttpParserException(int,const char *);
+    ~HttpParserException();
     int code() const;
     const char * what () const noexcept;
 };

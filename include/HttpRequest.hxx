@@ -51,8 +51,9 @@ public:
     explicit HttpRequest(const char * _src);
     HttpRequest();
     HttpRequest(const HttpRequest & _src);
-    int parse(void);
-    const std::string & method(void) const;
+    int parse_header();
+    int parse_body();
+    const std::string & method() const;
     const std::string & request(const std::string &&) const;
     SSMap & cookies();
     const std::string & cookie(const std::string &&) const;
@@ -62,12 +63,12 @@ public:
     const SSMap & variables() const;
     SessionPtr * session(const std::string &&) const;
     SessionPtr * global(const std::string &&) const;
-    const std::string & path(void) const;
-    std::string & query_string(void);
-    const std::string & body(void) const;
-    std::string & protocol(void);
-    const std::string & raw(void) const;
-    std::string & rebuild(void);
+    const std::string & path() const;
+    std::string & query_string();
+    const std::string & body() const;
+    std::string & protocol();
+    const std::string & raw() const;
+    std::string & rebuild();
     void clear();
     template <class Tp>
     inline Tp & sessionA(const std::string && _key) const{

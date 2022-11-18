@@ -14,20 +14,29 @@ int toupper_s(int _s){
     return toupper(_s);
 }
 
-int HttpRequest::parse(void){
+int HttpRequest::parse_header(){
+    status_id=S_ID::NOT_FINISHED;
     std::string _src(Buffer);
     Length=_src.size();
     HttpRequest_Parser_Assert(Length > 5,0LU,"Http request too short.");
-    //throw BasicHttpException(BasicHttpException::S_ID::NOT_FINISHED);
+    if(Length<6){
+        throw HttpParserException(S_ID::NOT_FINISHED);
+    }
     size_t _p1=0;
     size_t _p2=0;
     _p1=_src.find_first_of(' ');
     HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
+    if(_p1>=Length){
+        throw HttpParserException(S_ID::NOT_FINISHED);
+    }
     Method=_src.substr(0L,_p1);
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of(' ');
     _p2=_src.find_first_of('?');
     HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
+    if(_p1>=Length){
+        throw HttpParserException(S_ID::NOT_FINISHED);
+    }
     if(_p1<=_p2){
         Path=_src.substr(0L,_p1);
     }else{
@@ -37,15 +46,29 @@ int HttpRequest::parse(void){
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of('\n');
     HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
+    if(_p1>=Length){
+        throw HttpParserException(S_ID::NOT_FINISHED);
+    }
     Protocol=_src.substr(0L,_p1);
     HttpRequest_Parser_Assert(!strncmp(Protocol.c_str(),"HTTP/",5),_p1,"Unknown protocol.");
+    if(strncmp(Protocol.c_str(),"HTTP/",5)!=0){
+        throw HttpParserException(S_ID::UNKNOWN_PROTOCOL);
+    }
+    if(_p1>=Length){
+        throw HttpParserException(S_ID::NOT_FINISHED);
+    }
     _src.erase(0L,_p1+1);
-    status_id=S_ID::NOT_FINISHED;
     while(true){
         _p1=_src.find_first_of('\n');
         HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
+        if(_p1>=Length){
+            throw HttpParserException(S_ID::NOT_FINISHED);
+        }
         _p2=_src.find_first_of(':');
         HttpRequest_Parser_Assert(_p2<_p1,_p1,"Header format error.");
+        if(_p2>=_p1){
+            throw HttpParserException(S_ID::INVALID_FORMAT);
+        }
         std::string _h(_src.substr(0L,_p2));
         std::string _rh=_src.substr(_p2+1,_p1-(_p2+1));
         size_t _p3=_rh.find_first_of('\r');
@@ -61,6 +84,12 @@ int HttpRequest::parse(void){
         }
     }
     Body=_src;
+    
+    status_id=0;
+    return 0;
+}
+
+int HttpRequest::parse_body(){
     HttpdTools::ParseQueryString(GET, Query_String);
     REQUEST=GET;
     if(Method=="POST"){
@@ -113,7 +142,7 @@ const std::string & HttpRequest::body(void) const{
 
 HttpRequest::HttpRequest(HttpRequest const & SS) {
     Buffer = SS.Buffer;
-    parse();
+    parse_header();
 }
 
 const std::string & HttpRequest::request(const std::string && _key) const{

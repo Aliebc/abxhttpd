@@ -34,8 +34,8 @@ public:
      @param _req 源请求
      */
     static std::string ABXInfoPageHTML(const HttpRequest & _req);
-    static void ParseQueryString(SSMap & ssm, const std::string & _src);
-    static void ParseCookie(SSMap & ssm, const std::string & _src);
+    static void ParseQueryString(SSMap & ssm, const std::string & _src) noexcept;
+    static void ParseCookie(SSMap & ssm, const std::string & _src) noexcept;
     /// 默认构造函数
     HttpdTools();
     /// 默认析构函数

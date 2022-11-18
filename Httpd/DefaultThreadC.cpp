@@ -63,6 +63,11 @@ namespace abxhttpd {
                         except_page.header("Location", e.what());
                     }
                     SocketResponse = except_page.raw();
+                }catch (const BasicException &e){
+                    Httpd::except_logger->write(_ip + " [Except][500]  " + e.what());
+                    HttpException except_info(500);
+                    HttpResponse except_page(except_info.html(),except_info.code());
+                    SocketResponse = except_page.raw();
                 }
                 *SocketStream << SocketResponse;
                 if (H_res.need_send_from_stream) {
