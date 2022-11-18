@@ -56,13 +56,4 @@ int BasicHttp::status() const{
 const HttpHeaders & BasicHttp::headers() const{
     return Headers;
 }
-
-BasicHttpFilter::BasicHttpFilter(BasicStream & src, BasicStream & dst)
-:BasicFilter(src, dst){}
-
-size_t BasicHttpFilter::StreamFilter(BasicStream & f, BasicStream & t, size_t size){
-    return 0;
-}
-
-
 }

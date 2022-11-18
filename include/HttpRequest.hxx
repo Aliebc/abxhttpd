@@ -54,6 +54,7 @@ public:
     int parse(void);
     const std::string & method(void) const;
     const std::string & request(const std::string &&) const;
+    SSMap & cookies();
     const std::string & cookie(const std::string &&) const;
     void variables(const std::string & _key,const std::string & _val);
     void variables(const std::string & _key,const std::string && _val);

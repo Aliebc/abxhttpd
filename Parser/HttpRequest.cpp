@@ -124,6 +124,10 @@ const std::string & HttpRequest::request(const std::string && _key) const{
     return null_str;
 }
 
+SSMap & HttpRequest::cookies(){
+    return COOKIE;
+}
+
 const std::string & HttpRequest::cookie(const std::string && _key) const{
     auto _f=COOKIE.find(_key);
     if(_f!=COOKIE.end()){

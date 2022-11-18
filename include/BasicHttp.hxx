@@ -66,19 +66,7 @@ public:
 class HttpResponse;
 class HttpRequest;
 
-class BasicHttpFilter:BasicFilter{
-protected:
-    HttpRequest * Request;
-    HttpResponse * Response;
-    //HttpHandler Handler;
-    BasicStream * tmp_stream;
-    std::string head_tmp;
-    //virtual size_t HttpHandler();
-    virtual size_t StreamFilter(BasicStream &, BasicStream &, size_t) override;
-public:
-    BasicHttpFilter(BasicStream & src, BasicStream & dst);
-    //virtual size_t exec(size_t);
-};
+
 
 }
 

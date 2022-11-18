@@ -191,6 +191,7 @@ public:
     BasicFilter(const BasicFilter &) = default;
     virtual size_t exec(size_t);
     int status(int which) const;
+    int status() const;
     size_t length() const;
     const char * GetLastError() const noexcept;
 };
