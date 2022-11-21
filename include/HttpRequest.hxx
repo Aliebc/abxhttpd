@@ -13,14 +13,14 @@
 #ifdef DEBUG
 
 #define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
-sprintf(errx,"HttpRequest Parser Error: At pointer %zu(%s).\
+snprintf(errx,1024,"HttpRequest Parser Error: At pointer %zu(%s).\
 \n(Debug info:at %d lines of %s)",_p,_s,__LINE__,__FILE__);\
 throw HttpException(400,errx);
 
 #else
 
 #define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
-sprintf(errx,"HttpRequest Parser Error: At pointer %ld(%s).",_p,_s);\
+snprintf(errx,1024,"HttpRequest Parser Error: At pointer %ld(%s).",_p,_s);\
 throw HttpException(400,errx);
 
 #endif
