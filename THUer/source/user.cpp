@@ -1,4 +1,5 @@
 #include "../include/user.h"
+#include "../include/database.h"
 #include <iostream>
 #include <cstdio>
 #include <cstring>
@@ -17,7 +18,7 @@ string hash_a(const string & _src){
     SHA256_Update(&tmp,_src.c_str(),_src.size());
     SHA256_Final(tmpc,&tmp);
     for(int j=0;j<sizeof(tmpc);++j){
-        sprintf(_dst,"%02x",tmpc[j]);
+        snprintf(_dst,3,"%02x",tmpc[j]);
         _dst+=2;
     }
     return (string)dst;
@@ -32,28 +33,41 @@ FILE* OpenFile(const string & fileName, const char * method)
 
 bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
 {
-    FILE* f = OpenFile(UserName, "rb");
-    if (f == NULL)
+    sqlite_3 dta("./thuer.db");
+    std::unique_ptr<sqlite_3_stmt> dta_usr(dta.prepare(
+        "SELECT USERNAME,PASSWORD,DOWNLOAD,UPLOAD,COIN,RANK FROM U_INFO WHERE USERNAME = ?"
+        ));
+    dta_usr->bind(1,UserName.c_str());
+    if(dta_usr->step()==SQLITE_ROW){
+        strcpy(CurUser->UserName,(const char *)dta_usr->row(0));
+        strcpy(CurUser->Password,(const char *)dta_usr->row(1));
+        dta_usr->row(2,&CurUser->UserDownloads);
+        dta_usr->row(3,&CurUser->UserUploads);
+        dta_usr->row(4,&CurUser->UserCoins);
+        dta_usr->row(5,&CurUser->UserRank);
+        if(CurUser->UserDownloads!=0){
+            CurUser->UserShareRate=CurUser->UserUploads/CurUser->UserDownloads;
+        }
+        return true;
+    }else{
         return false;
-    
-    fread((void*)CurUser, sizeof(char), sizeof(UserListStruct), f);
-    fclose(f);
-    return true;
+    }
 }
 
 bool User::writeFile(const string & UserName, struct UserListStruct *CurUser)
 {
-    FILE* f = OpenFile(UserName, "wb+");
-    if (f == NULL)
-    {
-        cerr << strerror(errno);
-        return false;
-    } 
-    else
-    {
-        fwrite((void*)CurUser, sizeof(char), sizeof(UserListStruct), f);
-        fclose(f);
+    sqlite_3 dta("./thuer.db");
+    std::unique_ptr<sqlite_3_stmt> dta_usr(dta.prepare(
+        "INSERT INTO U_INFO (USERNAME,PASSWORD) VALUES (?,?) ON CONFLICT(USERNAME) DO \
+        UPDATE SET PASSWORD=?"
+    ));
+    dta_usr->bind(1,CurUser->UserName);
+    dta_usr->bind(2,CurUser->Password);
+    dta_usr->bind(3,CurUser->Password);
+    if(dta_usr->step()==SQLITE_DONE){
         return true;
+    }else{
+        return false;
     }
 }
 
@@ -123,7 +137,6 @@ User::User(const string & name)
     UserShareRate = CurUser.UserShareRate;
     UserPassword = CurUser.Password;
     UserName = (string)CurUser.UserName;
-    cout << "成功创建了一个用户" << endl;
 }
 
 bool User::Login(const string & Username, const string & Password)
@@ -181,7 +194,7 @@ bool User::ChangePassword(const string & OldPassword, const string & NewPassword
 
 int main()
 {
-    if (User::Login("TTDiang", "123456"))
+    /*if (User::Login("TTDiang", "123456"))
        cout << "登录成功" << endl;
     else
        cout << "登录失败" << endl;
@@ -197,7 +210,15 @@ int main()
        cout << "登录成功" << endl;
     else
        cout << "登录失败" << endl;
-
-
+    */
+    if (User::Login("xiang", "xiang")){
+        User x("xiang");
+        cout << "登录成功" << endl;
+    }else{
+        cout << "登录失败" << endl;
+    }
+    //User::RegisterNewUser("TTDiang", "123456");
+    
+    cout << ((User::RegisterNewUser("TTDiang2", "1234567"))?"True":"False")<<endl;
     return 0; 
 }
