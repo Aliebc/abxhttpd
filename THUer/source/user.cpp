@@ -1,5 +1,7 @@
 #include "../include/user.h"
 #include <iostream>
+#include <cstdio>
+#include <cstring>
 using namespace std;
 
 /**************************
@@ -7,92 +9,81 @@ using namespace std;
 ***************************/
 
 
-int User::ReportError(string ErrorType)
-{
-    cout << endl << "ERROR: " << ErrorType << endl;
-    return 0;
-}
-
-int User::ReportInfo(string Info)
-{
-    cout << endl << Info << endl;
-    return 0;
-}
-
-int User::FindWritable()
-{
-    int i = 0;
-    while (true)
-    {
-        if (i >= MAXN)
-            break;              ///< 超出用户数上限就停下
-        if (!UserList[i].ValidUser)
-            break;              ///< 找到第一个不合法用户的位置
-        i++;
+string hash_a(const string & _src){
+    char dst[65], *_dst = dst;
+    SHA256_CTX tmp;
+    unsigned char tmpc[32]={0};
+    SHA256_Init(&tmp);
+    SHA256_Update(&tmp,_src.c_str(),_src.size());
+    SHA256_Final(tmpc,&tmp);
+    for(int j=0;j<sizeof(tmpc);++j){
+        sprintf(_dst,"%02x",tmpc[j]);
+        _dst+=2;
     }
-    if (i == MAXN)
-        ReportError("UserNum exceeded");
-    return i;
+    return (string)dst;
 }
 
-int User::FindUser(const string & Username)
+FILE* OpenFile(const string & fileName, const char * method)
 {
-    ///< 【暂用】复杂度为O(n)的查找
-    int i = -1;
-    while (true)
-    {
-        i++;
-        if (i >= MAXN)
-            break;              ///< 超出用户数上限就停下
-        if (!UserList[i].ValidUser)
-            continue;           ///< 跳过不合法用户
-        if (UserList[i].UserName == Username)
-            break;              ///< 找到对应用户就停下       
-    }
-    return i;
+    char path[64];
+    snprintf(path, sizeof(path), "./data/user/%s", hash_a(fileName).c_str());
+    return fopen(path, method);
 }
 
+bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
+{
+    FILE* f = OpenFile(UserName, "rb");
+    if (f == NULL)
+        return false;
+    
+    fread((void*)CurUser, sizeof(char), sizeof(UserListStruct), f);
+    fclose(f);
+    return true;
+}
+
+bool User::writeFile(const string & UserName, struct UserListStruct *CurUser)
+{
+    FILE* f = OpenFile(UserName, "wb+");
+    if (f == NULL)
+    {
+        cerr << strerror(errno);
+        return false;
+    } 
+    else
+    {
+        fwrite((void*)CurUser, sizeof(char), sizeof(UserListStruct), f);
+        fclose(f);
+        return true;
+    }
+}
 
 bool User::Verify(const string & Username, const string & Password)
 {
-    int pos = FindUser(Username);
-    if (pos == MAXN)
-    {
-        ReportInfo("No such user");
+    UserListStruct CurUser;
+    if (!readFile(Username, &CurUser))
         return false;
-    }
-    return UserList[pos].Password == Password;
+    return (strcmp(CurUser.Password, hash_a(Password).c_str()) == 0);
 }
 
-bool User::Verify(const string & Password)
-{
-    return UserList[UserPos].Password == Password;
-}
-
-void User::ReadUserInfo()
-{
-    UserRank = UserList[UserPos].UserRank;
-    UserName = UserList[UserPos].UserName;
-    UserDownloads = UserList[UserPos].UserDownloads;
-    UserUploads = UserList[UserPos].UserUploads;
-    UserShareRate = UserList[UserPos].UserShareRate;
-    UserCoins = UserList[UserPos].UserCoins;
-}
 
 bool User::CreateUser(const string & Username, const string & Password)
 {
-    int Pos = FindWritable();
-    if (Pos == MAXN)
+    UserListStruct CurUser;
+    bool if_exist = readFile(Username, &CurUser);
+    if (if_exist)
         return false;
-    UserList[Pos].ValidUser = true;          ///< 修改为合法账号
-    UserList[Pos].UserRank = peasent;        ///< 初始等级
-    UserList[Pos].UserName = Username;
-    UserList[Pos].Password = Password;
-    UserList[Pos].UserDownloads = 0;          ///< 初始用户下载量
-    UserList[Pos].UserUploads = 0;            ///< 初始用户上传量
-    UserList[Pos].UserShareRate = 0;          ///< 初始用户分享率
-    UserList[Pos].UserCoins = 0;              ///< 初始用户硬币数量
-    return true;
+    else
+    {
+        CurUser.UserCoins = 0;
+        snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", hash_a(Password).c_str());
+        CurUser.UserDownloads = 0;
+        CurUser.UserUploads = 0;
+        snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", Username.c_str());
+        CurUser.UserRank = 0;
+        CurUser.UserShareRate = 0;
+        writeFile(Username, &CurUser);
+        return true;
+    }
 }
 
 double User::UpdateShareRate()
@@ -104,112 +95,89 @@ double User::UpdateShareRate()
     return UserShareRate;
 }
 
-void User::ResetPassWord(const string &NewPassword)
-{
-    UserList[UserPos].Password = NewPassword;
-}
 
 /**************************
 // (2) public函数的实现
 ***************************/
 
-bool User::CheckIfAlreadyExist(const string & Username)
-{
-    int pos = FindUser(Username);
-    return !(pos == MAXN);  
-}
-
-bool User::Login(const string & Username, string & Password)//这里要返回位置而不是成功
-{
-    bool success = Verify(Username, Password);
-    if (success)
-        ReportInfo("登录成功！");
-    else
-    {
-        ReportInfo("密码或用户名错误");
-        string ErrorReport = "wrong username or wrong password";
-        throw ErrorReport;
-    } 
-        
-    return success;
-}
-
-bool User::RegisterNewUser(const string & Username, string & Password)
-{
-    bool success = CreateUser(Username, Password);
-    if (success)
-        ReportInfo("注册成功！");
-    else 
-        ReportInfo("注册失败！");
-    return success;
-}
-
 User::User(const string & name)
 {
-    UserPos = FindUser(name);
-    ReadUserInfo();
+    UserListStruct *CurUser;
+    readFile(name, CurUser);
+    UserRank = (Rank) CurUser->UserRank;
+    UserCoins = CurUser->UserCoins;
+    UserDownloads = CurUser->UserDownloads;
+    UserUploads = CurUser->UserUploads;
+    UserShareRate = CurUser->UserShareRate;
+    UserPassword = CurUser->Password;
+    UserName = (string)CurUser->UserName;
     cout << "成功创建了一个用户" << endl;
-}///<【暂用】
-
-bool User::ChangeUserPassword(const string & NewPassword, string & Password)
-{
-    if (!Verify(Password))
-    {
-        ReportInfo("原密码错误!");
-        return false;
-    }
-    ResetPassWord(NewPassword);
-    return true;
 }
 
+bool User::Login(const string & Username, const string & Password)//这里要返回位置而不是成功
+{
+    return Verify(Username, Password);
+}
+
+bool User::RegisterNewUser(const string & Username, const string & Password)
+{
+    return CreateUser(Username, Password);
+}
+
+void User::Logout()
+{
+    UserListStruct CurUser;
+    CurUser.UserCoins = UserCoins;
+    snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", UserPassword.c_str());
+    CurUser.UserDownloads = UserDownloads;
+    CurUser.UserUploads = UserUploads;
+    snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", UserName.c_str());
+    CurUser.UserRank = UserRank;
+    CurUser.UserShareRate = UserShareRate;
+    writeFile(UserName, &CurUser);
+}
+
+long int User::UpdateDownloads(int const DeltaD)
+{
+    if (UserDownloads + DeltaD >= 0)
+        UserDownloads += DeltaD;
+    else
+        UserDownloads = 0;
+    UpdateShareRate();
+    return UserDownloads;
+}
+
+long int User::UpdateUploads(int const DeltaU)
+{
+    if (UserUploads + DeltaU >= 0)
+        UserUploads += DeltaU;
+    else
+        UserUploads = 0;
+    UpdateShareRate();
+    return UserUploads; 
+}
+
+int User::UpdateCoins(int const DeltaC)
+{
+    if (UserCoins + DeltaC >= 0)
+        UserCoins += DeltaC;
+    else
+        UserCoins = 0;
+    return UserCoins;
+}
 
 int main()
 {
-    cout << "按下对应的数字键选择操作\n1：登录\t2：注册" << endl;
-    int command;
-    cin >> command;
-    string name, password;
-    if (command == 1)
-    {
-        cout << "请输入用户名" << endl;
-        cin >> name;
-        cout << "请输入密码" << endl;
-        cin >> password;
-        try
-        {
-            User::Login(name, password);
-        } 
-        catch (string &e)
-        {
-            cerr << "Error: " << e << endl;
-        }
-         
-    }
-    else if (command == 2)
-    {
-        string password1, password2;
-        cout << "请输入用户名" << endl;
-        cin >> name;
-        while (User::CheckIfAlreadyExist(name))
-        {
-            cout << "用户名已存在，请换一个" << endl;
-            cin >> name;
-        }
-        while (true)
-        {
-            cout << "请输入密码" << endl;
-            cin >> password1;
-            cout << "请再次输入密码" << endl;
-            cin >> password2;
-            if (password1 == password2)
-                break;
-            cout << "两次输入不一致，请重新输入" << endl;
-        }   
-        User::RegisterNewUser(name, password1);
-    }
+    if (User::Login("TTDiang", "123456"))
+       cout << "登录成功" << endl;
     else
-    {
-        cout << "错误输入" << endl;
-    }
+       cout << "登录失败" << endl;
+    User::RegisterNewUser("TTDiang", "123456");
+    if (User::Login("TTDiang", "123456"))
+       cout << "登录成功" << endl;
+    else
+       cout << "登录失败" << endl;
+
+
     return 0; 
 }
