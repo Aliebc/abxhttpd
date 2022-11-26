@@ -24,13 +24,6 @@ string hash_a(const string & _src){
     return (string)dst;
 }
 
-FILE* OpenFile(const string & fileName, const char * method)
-{
-    char path[64];
-    snprintf(path, sizeof(path), "./data/user/%s", hash_a(fileName).c_str());
-    return fopen(path, method);
-}
-
 bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
 {
     sqlite_3 dta("./thuer.db");
@@ -76,7 +69,7 @@ bool User::Verify(const string & Username, const string & Password)
     UserListStruct CurUser;
     if (!readFile(Username, &CurUser))
         return false;
-    return (strcmp(CurUser.Password, hash_a(Password).c_str()) == 0);
+    return (strcmp(CurUser.Password, hash_a(Username+Password).c_str()) == 0);
 }
 
 
@@ -89,7 +82,7 @@ bool User::CreateUser(const string & Username, const string & Password)
     else
     {
         CurUser.UserCoins = 0;
-        snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", hash_a(Password).c_str());
+        snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", hash_a(Username+Password).c_str());
         CurUser.UserDownloads = 0;
         CurUser.UserUploads = 0;
         snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", Username.c_str());
@@ -190,35 +183,4 @@ bool User::ChangePassword(const string & OldPassword, const string & NewPassword
     UserPassword = hash_a(NewPassword);
     SaveUser();
     return true;
-}
-
-int main()
-{
-    /*if (User::Login("TTDiang", "123456"))
-       cout << "登录成功" << endl;
-    else
-       cout << "登录失败" << endl;
-    User::RegisterNewUser("TTDiang", "123456");
-    if (User::Login("TTDiang", "12345"))
-       cout << "登录成功" << endl;
-    else
-       cout << "登录失败" << endl;
-    string name = "TTDiang";
-    User TTDiang(name);
-    TTDiang.ChangePassword("123456", "12345");
-    if (User::Login("TTDiang", "12345"))
-       cout << "登录成功" << endl;
-    else
-       cout << "登录失败" << endl;
-    */
-    if (User::Login("xiang", "xiang")){
-        User x("xiang");
-        cout << "登录成功" << endl;
-    }else{
-        cout << "登录失败" << endl;
-    }
-    //User::RegisterNewUser("TTDiang", "123456");
-    
-    cout << ((User::RegisterNewUser("TTDiang2", "1234567"))?"True":"False")<<endl;
-    return 0; 
 }

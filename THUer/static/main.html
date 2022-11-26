@@ -1,0 +1,138 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>清华人-首页</title>
+        <script src="jquery.min.js"></script>
+        <style>
+            body{
+                background: #006633;
+                font-family: sans-serif;
+            }
+            .main-block{
+                padding:10px;
+                background: #55aa55;
+                border: black 1px solid;
+                width: 90%;
+                position: relative;
+                left: 5%;
+            }
+            .main-block-tab{
+                border: none;
+            }
+            .main-table{
+                border-collapse:collapse;
+            }
+            .nav-ul{
+                cursor: pointer;
+                margin: 0;
+            }
+            .nav-ul li{
+                display: inline;
+            }
+            a:visited{
+                text-decoration-line: overline;
+                color: black;
+            }
+            .nav-ul li a{
+                display: inline;
+                background-color: #00aa00;
+                border-color: green green #00aa00;
+                border-style: solid;
+                border-width: 1px;
+                margin-right: 1px;
+                padding: 3px 7px;
+                text-decoration: none;
+                font-style: normal;
+                font-weight: bold;
+                font-family: verdana;
+                font-variant: normal;
+                text-align: center;
+                display: inline-block;
+            }
+            .nav-ul li a:hover{
+                background-color: #00ff00;
+            }
+            #nav{
+                border: none;
+            }
+            .info-line{
+                position: relative;
+                width: 100%;
+                height: 60px;
+                border: none;
+                background-color: #c6e3c6;
+            }
+            .footer{
+                width: 100%;
+                position: relative;
+                text-align: center;
+            }
+        </style>
+        <script>
+            u_info=new Object();
+            $(document).ready(function(){
+                try{
+                    $.get("/info",function(e){
+                    u_info=e;
+                    if(!u_info["status"]){
+                        window.location.href="/";
+                    }
+                    $("#u_info_user").html(u_info["username"]);
+                })
+                }catch(err){
+                }
+            });
+        </script>
+    </head>
+    <body>
+            <h2 style="text-align: center;color: #c6e3c6;">
+                THUer 清华人
+            </h2>
+            <hr>
+            <div class="main-block">
+            <table class="main-table main-block-tab">
+                <tbody>
+                    <tr>
+                        <td>
+                            <div id="nav">
+                                <ul class="nav-ul">
+                                    <li>
+                                        <a>主页</a>
+                                    </li>
+                                    <li>
+                                        <a>资源</a>
+                                    </li>
+                                    <li>
+                                        <a>发布</a>
+                                    </li>
+                                    <li>
+                                        <a>求资源</a>
+                                    </li>
+                                    <li>
+                                        <a>控制中心</a>
+                                    </li>
+                                    <li>
+                                        <a>规则</a>
+                                    </li>
+                                    <li>
+                                        <a>常见问题</a>
+                                    </li>
+                                </ul>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <table class="main-block-tab info-line">
+                <tr>
+                    <td class="">
+                        欢迎,<span id="u_info_user"></span> 【<a href="/quit">退出</a>】 分享率: 上传量: 下载量:
+                    </td>
+                </tr>
+            </table>
+            <div class="footer">
+                <p>Powered by <a href="/abxhttpd" target="_blank">Abxhttpd</a> 用于C++大作业</p>
+            </div>
+    </body>
+</html>

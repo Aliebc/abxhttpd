@@ -12,8 +12,8 @@ public:
     sqlite_3_stmt(sqlite3_stmt *);
     ~sqlite_3_stmt();
     int step();
-    int bind(int,int);
-    int bind(int,float);
+    void bind(int,int);
+    void bind(int,long);
     void bind(int,const char *);
     const unsigned char * row(int);
     int row(int,int *);
@@ -25,6 +25,18 @@ public:
 
 inline sqlite_3_stmt::sqlite_3_stmt(sqlite3_stmt * pstmt){
     stmt=pstmt;
+}
+
+inline void sqlite_3_stmt::reset(){
+    sqlite3_reset(stmt);
+}
+
+inline void sqlite_3_stmt::bind(int r,int src){
+    sqlite3_bind_int(stmt, r, src);
+}
+
+inline void sqlite_3_stmt::bind(int r,long src){
+    sqlite3_bind_int64(stmt, r, src);
 }
 
 inline void sqlite_3_stmt::bind(int r,const char * src){
