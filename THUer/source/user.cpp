@@ -95,6 +95,18 @@ double User::UpdateShareRate()
     return UserShareRate;
 }
 
+void User::SaveUser()
+{
+    UserListStruct CurUser;
+    CurUser.UserCoins = UserCoins;
+    snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", UserPassword.c_str());
+    CurUser.UserDownloads = UserDownloads;
+    CurUser.UserUploads = UserUploads;
+    snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", UserName.c_str());
+    CurUser.UserRank = UserRank;
+    CurUser.UserShareRate = UserShareRate;
+    writeFile(UserName, &CurUser);
+}
 
 /**************************
 // (2) public函数的实现
@@ -102,19 +114,19 @@ double User::UpdateShareRate()
 
 User::User(const string & name)
 {
-    UserListStruct *CurUser;
-    readFile(name, CurUser);
-    UserRank = (Rank) CurUser->UserRank;
-    UserCoins = CurUser->UserCoins;
-    UserDownloads = CurUser->UserDownloads;
-    UserUploads = CurUser->UserUploads;
-    UserShareRate = CurUser->UserShareRate;
-    UserPassword = CurUser->Password;
-    UserName = (string)CurUser->UserName;
+    UserListStruct CurUser;
+    readFile(name, &CurUser);
+    UserRank = (Rank) CurUser.UserRank;
+    UserCoins = CurUser.UserCoins;
+    UserDownloads = CurUser.UserDownloads;
+    UserUploads = CurUser.UserUploads;
+    UserShareRate = CurUser.UserShareRate;
+    UserPassword = CurUser.Password;
+    UserName = (string)CurUser.UserName;
     cout << "成功创建了一个用户" << endl;
 }
 
-bool User::Login(const string & Username, const string & Password)//这里要返回位置而不是成功
+bool User::Login(const string & Username, const string & Password)
 {
     return Verify(Username, Password);
 }
@@ -126,15 +138,7 @@ bool User::RegisterNewUser(const string & Username, const string & Password)
 
 void User::Logout()
 {
-    UserListStruct CurUser;
-    CurUser.UserCoins = UserCoins;
-    snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", UserPassword.c_str());
-    CurUser.UserDownloads = UserDownloads;
-    CurUser.UserUploads = UserUploads;
-    snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", UserName.c_str());
-    CurUser.UserRank = UserRank;
-    CurUser.UserShareRate = UserShareRate;
-    writeFile(UserName, &CurUser);
+    SaveUser();
 }
 
 long int User::UpdateDownloads(int const DeltaD)
@@ -166,6 +170,15 @@ int User::UpdateCoins(int const DeltaC)
     return UserCoins;
 }
 
+bool User::ChangePassword(const string & OldPassword, const string & NewPassword)
+{
+    if (hash_a(OldPassword) != UserPassword)
+        return false;
+    UserPassword = hash_a(NewPassword);
+    SaveUser();
+    return true;
+}
+
 int main()
 {
     if (User::Login("TTDiang", "123456"))
@@ -173,7 +186,14 @@ int main()
     else
        cout << "登录失败" << endl;
     User::RegisterNewUser("TTDiang", "123456");
-    if (User::Login("TTDiang", "123456"))
+    if (User::Login("TTDiang", "12345"))
+       cout << "登录成功" << endl;
+    else
+       cout << "登录失败" << endl;
+    string name = "TTDiang";
+    User TTDiang(name);
+    TTDiang.ChangePassword("123456", "12345");
+    if (User::Login("TTDiang", "12345"))
        cout << "登录成功" << endl;
     else
        cout << "登录失败" << endl;
