@@ -1,29 +1,28 @@
 #include "include/BasicHttp.hxx"
 
 namespace abxhttpd{
-BasicHttpException::BasicHttpException(int sid):
+HttpParserException::HttpParserException(int sid):
 except_id(sid){}
 
-BasicHttpException::BasicHttpException(int sid,const char * msg)
+HttpParserException::HttpParserException(int sid,const char * msg)
+:HttpParserException(sid)
 {
     err_msg=msg;
 }
 
-const char * BasicHttpException::what() const noexcept{
+const char * HttpParserException::what() const noexcept{
     return err_msg;
 }
 
-int BasicHttpException::code() const{
+int HttpParserException::code() const{
     return except_id;
 }
 
-BasicHttp::BasicHttp(){
-    
-}
+HttpParserException::~HttpParserException()=default;
 
-BasicHttp::~BasicHttp(){
+BasicHttp::BasicHttp()=default;
 
-}
+BasicHttp::~BasicHttp()=default;
 
 void BasicHttp::append(const std::string &source){
     Buffer.append(source);
@@ -35,13 +34,14 @@ bool BasicHttp::is_header(const std::string & _h) const{
 
 const std::string & BasicHttp::header(const std::string & _h) const{
     if(is_header(_h)){
-        if(*headers().at(_h).begin()==' '){
-            
-        }
         return headers().at(_h);
     }else{
         return null_str;
     }
+}
+
+size_t BasicHttp::length() const{
+    return Length;
 }
 
 void BasicHttp::header(const std::string & _h,const std::string && _v){
@@ -59,13 +59,4 @@ int BasicHttp::status() const{
 const HttpHeaders & BasicHttp::headers() const{
     return Headers;
 }
-
-BasicHttpFilter::BasicHttpFilter(BasicStream & src, BasicStream & dst)
-:BasicFilter(src, dst){}
-
-size_t BasicHttpFilter::StreamFilter(BasicStream & f, BasicStream & t, size_t size){
-    return 0;
-}
-
-
 }

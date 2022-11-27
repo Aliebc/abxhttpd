@@ -6,10 +6,12 @@
 #include <map>
 #include <utility>
 #include "BasicStream.hxx"
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 
 #ifdef ABXHTTPD_WINDOWS
 #define strcasecmp _stricmp
+#else
+#include <strings.h>
 #endif
 
 namespace abxhttpd{
@@ -19,17 +21,20 @@ struct Casecmp{
         return strcasecmp(s1.c_str(), s2.c_str())<0;
     }
 };
+
+/// HttpHeaders 专用(比较函数不分大小写)
 typedef std::map <std::string, std::string, Casecmp> HttpHeaders;
+/// string->string 的映射
 typedef std::map<std::string,std::string> SSMap;
 
-class ABXHTTPD_API BasicHttpException{
+class ABXHTTPD_API HttpParserException{
 protected:
     int except_id;
     const char * err_msg;
 public:
-    BasicHttpException(int);
-    BasicHttpException(int,const char *);
-    ~BasicHttpException();
+    HttpParserException(int);
+    HttpParserException(int,const char *);
+    ~HttpParserException();
     int code() const;
     const char * what () const noexcept;
 };
@@ -54,6 +59,7 @@ public:
     virtual ~BasicHttp();
     void append(const std::string & source);
     bool is_header(const std::string &) const;
+    size_t length() const;
     const std::string & header(const std::string &) const;
     void header(const std::string &,const std::string &&);
     void header(const std::string &,const std::string &);
@@ -64,18 +70,7 @@ public:
 class HttpResponse;
 class HttpRequest;
 
-class BasicHttpFilter:BasicFilter{
-protected:
-    HttpRequest * Request;
-    HttpResponse * Response;
-    BasicStream * tmp_stream;
-    std::string head_tmp;
-    //virtual size_t HttpHandler();
-    virtual size_t StreamFilter(BasicStream &, BasicStream &, size_t) override;
-public:
-    BasicHttpFilter(BasicStream & src, BasicStream & dst);
-    //virtual size_t exec(size_t);
-};
+
 
 }
 

@@ -6,8 +6,10 @@
 #include <random>
 #include <ctime>
 
+#include "BasicException.hxx"
+
 #define ABXHTTPD_SESSION_STR "ABXHTTPD-SESSIONID"
-#define ABXHTTPD_SESSION_IDLEN 48
+#define ABXHTTPD_SESSION_IDLEN 32
 #define ABXHTTPD_SESSION_DEAD 600
 #define ABXHTTPD_SESSION_UNIQUE false
 
@@ -70,6 +72,9 @@ public:
     }
     template <class Ty>
     Ty & cast(){
+        if(null()){
+            throw BasicException("Trying to cast null ptr.");
+        }
         return *static_cast<Ty*>(address);
     }
     void destory_unique(){
@@ -97,12 +102,13 @@ private:
     static int dead;
     static int all_id;
     static std::map <std::string,SessionStruct> sm_sheet;
-    static void check_expire();
+    static bool check_expire(const SessionStruct &);
 public:
     HttpdSession();
     ~HttpdSession();
     static std::string allocate();
     static void set_expire(int);
+    static SVMap global;
     static bool can_get(const std::string & _key);
     static SVMap & get(const std::string & _key);
     static void del(const std::string & _key);

@@ -29,8 +29,24 @@ if(DEFINED ABXHTTPD_SSL)
 	set(OPENSSL_USE_STATIC_LIBS TRUE)
 	find_package(OpenSSL REQUIRED)
 	list(APPEND ABXHTTPD_LIB OpenSSL::SSL)
-	list(APPEND SOURCE_FILES Extension/SSL.cpp)
+	list(APPEND SOURCE_FILES Extension/SSL.cpp Extension/Hash.cpp)
+	install(FILES include/hash.H DESTINATION include/abxhttpd)
 endif()
+
+if(DEFINED ABXHTTPD_SQLITE3)
+	add_definitions(-DABXHTTPD_SQLITE3=${ABXHTTPD_SQLITE3})
+	set(CMAKE_FIND_STATIC FIRST)
+	find_package(SQLite3 REQUIRED)
+	if(SQLITE3_FOUND)
+		include_directories(${SQLite3_INCLUDE_DIRS})
+		list(APPEND ABXHTTPD_LIB ${SQLite3_LIBRARIES})
+		list(APPEND SOURCE_FILES Extension/sqlite_3.cpp)
+		install(FILES include/sqlite_3.H DESTINATION include/abxhttpd)
+	endif(SQLITE3_FOUND)
+	set(CMAKE_FIND_STATIC LAST)
+endif()
+
+list(APPEND SOURCE_FILES Extension/random.cpp)
 
 set(ABXHTTPD_TARGET abxhttpd)
 if(DEFINED ABXHTTPD_STATIC)
@@ -64,7 +80,8 @@ install(
 	ARCHIVE DESTINATION lib
 )
 
-install(DIRECTORY include/ DESTINATION include/abxhttpd)
+install(FILES include/abxhttpd.H DESTINATION include/abxhttpd)
+install(DIRECTORY include/ DESTINATION include/abxhttpd PATTERN "*.H" EXCLUDE)
 install(DIRECTORY Resource/man/ TYPE MAN)
 install(DIRECTORY Resource/doc/ TYPE DOC)
 

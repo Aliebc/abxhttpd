@@ -9,8 +9,13 @@
 #include "include/HttpdSession.hxx"
 #include "include/Httpd.hxx"
 #include "include/mimes.hxx"
+#include "include/HttpResponse.hxx"
+#include "include/HttpRequest.hxx"
+#include "include/HttpdSession.hxx"
+#include "include/Httpd.hxx"
+#include "include/mimes.hxx"
 
-abxhttpd::ConfigureInfo AX_HTTP_INFO={"http",{
+abxhttpd::ModuleConfigure AX_HTTP_INFO={"http",{
     {"Support","enabled"},
     {"Module Version","AB.X HTTP Parser 0.2"},
     {"Protocol Version","HTTP/1.1"}
@@ -18,15 +23,15 @@ abxhttpd::ConfigureInfo AX_HTTP_INFO={"http",{
 abxhttpd::Module AX_HTTP_MODULE(&AX_HTTP_INFO);
 
 namespace abxhttpd{
-ABXHTTPD_API void _DefaultHttpH(HttpResponse & Response, HttpRequest & Request, void * _args){
+ABXHTTPD_API void _DefaultHttpH(HttpResponse & Response,const HttpRequest & Request, void * _args){
     SocketRequest * _ssrc =static_cast<SocketRequest *>(_args);
-    if(Request.path().at(Request.path().size()-1)=='/'){
-        Request.path().insert(Request.path().size(),"index.html");
-    }
     std::string _path(_ssrc->Http_S.Path+HttpdTools::ABX_URLDecode(Request.path()));
-    std::string _suffix(HttpdTools::_FileSuffix(Request.path()));
+    if(Request.path().at(Request.path().size()-1)=='/'){
+        _path.insert(_path.size(),"index.html");
+    }
+    std::string _suffix(HttpdTools::_FileSuffix(_path));
     if(Request.path()=="/abxhttpd"){
-        Response.body(HttpdTools::ABXInfoPageHTML(Request));
+        Response.body(HttpdTools::ABXInfoPageHTML(&Request));
     }else{
         try{
             Response.header("Content-Type",_GMIME(_suffix));

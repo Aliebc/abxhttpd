@@ -59,7 +59,12 @@ BasicStream & operator>> ( BasicStream & src, std::string & is){
     return src;
 }
 
-BasicStream & operator<< (BasicStream & src, const std::string & in){
+BasicStream & operator<< (BasicStream & src, const const std::string & in){
+    src.write(in);
+    return src;
+}
+
+BasicStream & operator<< (BasicStream & src, const char * in){
     src.write(in);
     return src;
 }
@@ -75,7 +80,7 @@ BasicStream & operator<< (BasicStream & to, BasicStream & from){
     while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
         to.write(tmp_s,_read_len);
         tmp_s.clear();
-        if(!(from.status()&BasicStream::FLAG::READABLE)){
+        if(!(from.status()&BasicStream::FLAG::READABLE)||!(to.status()&BasicStream::FLAG::WRITEABLE)){
             break;
         }
     }
@@ -86,6 +91,15 @@ BasicStream & operator>> (BasicStream & from, BasicStream & to){
     to<<from;
     return from;
 }
+
+BasicFilter::BasicFilter(BasicStream & src,BasicStream & dst):
+source(src),destination(dst){
+    status_id=B_FLAG::SUCCESS;
+}
+
+size_t BasicFilter::exec(size_t s){
+    if(s==0){s--;}
+    return StreamFilter(source, destination, s);
 
 BasicFilter::BasicFilter(BasicStream & src,BasicStream & dst):
 source(src),destination(dst){
@@ -114,6 +128,9 @@ int BasicFilter::status(int which) const{
     return sid;
 }
 
+int BasicFilter::status() const{
+    return status_id;
+}
 
 size_t BasicFilter::StreamFilter(BasicStream & f,BasicStream & t,size_t size){
     size_t r_size;
