@@ -29,7 +29,7 @@ if(DEFINED ABXHTTPD_SSL)
 	set(OPENSSL_USE_STATIC_LIBS TRUE)
 	find_package(OpenSSL REQUIRED)
 	list(APPEND ABXHTTPD_LIB OpenSSL::SSL)
-	list(APPEND SOURCE_FILES Extension/SSL.cpp Extension/Hash.cpp)
+	list(APPEND SOURCE_FILES Extension/SSL.cpp Extension/hash.cpp)
 	install(FILES include/hash.H DESTINATION include/abxhttpd)
 endif()
 
