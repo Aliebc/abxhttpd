@@ -73,11 +73,14 @@ BasicStream & operator<< (BasicStream & to, BasicStream & from){
     std::string tmp_s;
     size_t _read_len=0;
     while ((_read_len=from.read(tmp_s,from.buffer_size()))!=0) {
-        to.write(tmp_s,_read_len);
-        tmp_s.clear();
-        if(!(from.status()&BasicStream::FLAG::READABLE)||!(to.status()&BasicStream::FLAG::WRITEABLE)){
+        if(_read_len==0){
             break;
         }
+        to.write(tmp_s,_read_len);
+        tmp_s.clear();
+        /*if(!(from.status()&BasicStream::FLAG::READABLE)||!(to.status()&BasicStream::FLAG::WRITEABLE)){
+            break;
+        }*/
     }
     return to;
 }
