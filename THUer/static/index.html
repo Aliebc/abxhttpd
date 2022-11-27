@@ -1,0 +1,86 @@
+<!DOCTYPE HTML>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>清华人-登录</title>
+        <style>
+            body{
+                background: #006633;
+                font-family: sans-serif;
+            }
+            .login-block{
+                padding:10px;
+                background: #55aa55;
+                border: #00aa00 1px solid;
+                width: 70%;
+                position: relative;
+                left: 15%;
+            }
+            .login-form{
+                padding: 10px;
+                position: relative;
+                border-collapse:collapse;
+                border-spacing: 2px;
+                width: 400px;
+                left: 50%;
+                transform: translate(-200px,0);
+            }
+            td{
+                border: #00aa00 1px solid;
+                vertical-align: top;
+                background: #c6e3c6;
+            }
+        </style>
+        <script>
+            captcha=1;
+            captcha_url="/thuer-captcha";
+            function fresh_captcha(){
+                captcha++;
+                document.getElementById("captcha").src=captcha_url+"?t="+captcha;
+            }
+        </script>
+    </head>
+    <body>
+            <h2 style="text-align: center;color: #c6e3c6;">
+                THUer 清华人
+            </h2>
+            <hr>
+            <div class="login-block">
+                <div style="text-align:center;">
+                    <p><b>注意</b>: 你需要启用cookies才能登录</p>
+                </span>
+                <form action="login" method="post" class="login-form">
+                    <table class="login-form" border="0" cellpadding="5" >
+                        <tr>
+                            <td style="text-align:right;">用户名:</td>
+                            <td style="text-align:left;"><input type="text" name="username" autocomplete="off" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">密码:</td>
+                            <td style="text-align:left;"><input type="password" name="password" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">验证图片:</td>
+                            <td style="text-align:left;"><img id="captcha" src="thuer-captcha"><br><a href="javascript:fresh_captcha();">看不清?点此刷新</a></td>
+                        </tr>
+                        <tr>
+                            <td style="text-align:right;">验证码:</td>
+                            <td style="text-align:left;"><input type="text" name="captcha" autocomplete="off" required="true"></td>
+                        </tr>
+                        <tr>
+                            <td></td>
+                            <td style="text-align:right;">
+                                <input type="submit" value="登录">
+                                <input type="reset" value="重置">
+                            </td>
+                        </tr>
+                    </table>
+                </form>
+                <div style="text-align:center;">
+                    <p>没有用户？现在&nbsp;<a href="reg.html" target="_blank">注册</a>!!!&lt;====</p>
+                    <p>&copy; THUer &nbsp; 清华人文件分享系统</p>
+                    <p>Powered by <a href="/abxhttpd" target="_blank">Abxhttpd</a> 用于C++大作业</p>
+                </div>
+            </div>  
+    </body>
+</html>

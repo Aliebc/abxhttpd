@@ -9,6 +9,11 @@
 #include "include/HttpdSession.hxx"
 #include "include/Httpd.hxx"
 #include "include/mimes.hxx"
+#include "include/HttpResponse.hxx"
+#include "include/HttpRequest.hxx"
+#include "include/HttpdSession.hxx"
+#include "include/Httpd.hxx"
+#include "include/mimes.hxx"
 
 abxhttpd::ModuleConfigure AX_HTTP_INFO={"http",{
     {"Support","enabled"},
