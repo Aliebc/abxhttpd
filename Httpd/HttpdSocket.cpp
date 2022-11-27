@@ -98,7 +98,7 @@ size_t HttpdSocket::write(const std::string & _res,size_t size)
         int ad=_src._ad;
         long int _send_lv=-1;
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Now invoke send.",ad);
-        _send_lv=send(ad,_res.c_str()+_send_len,_r_send_len-_send_len,MSG_DONTWAIT);
+        _send_lv=send(ad,_res.c_str()+_send_len,_r_send_len-_send_len,0);
         ABXHTTPD_INFO_PRINT(11,"[Socket %d][System API]Invoked send, returning %ld.",ad,_send_lv);
         ABXHTTPD_INFO_PRINT(105,"[Socket %d]\n[OStream]\n%s[End OStream]\n",ad,_res.c_str());
         if(_send_lv>0){
