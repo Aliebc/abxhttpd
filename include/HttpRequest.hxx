@@ -33,10 +33,9 @@ namespace abxhttpd{
 class ABXHTTPD_API HttpRequest:public BasicHttp
 {
 private:
-    size_t Length;
     std::string Method;
     std::string Path;
-    std::string Query_String;
+    std::string QueryString;
     std::string Protocol;
     SSMap GET;
     SSMap POST;

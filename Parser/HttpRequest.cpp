@@ -1,6 +1,7 @@
 #include "include/HttpRequest.hxx"
 #include <cstring>
 #include <algorithm>
+#include <string>
 #ifndef ULONG_MAX
 #define ULONG_MAX (1ULL<<(8*sizeof(size_t)-1))
 #endif
@@ -41,7 +42,7 @@ int HttpRequest::parse_header(){
         Path=_src.substr(0L,_p1);
     }else{
         Path=_src.substr(0L,_p2);
-        Query_String=_src.substr(_p2+1,_p1-(_p2+1));
+        QueryString=_src.substr(_p2+1,_p1-(_p2+1));
     }
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of('\n');
@@ -84,13 +85,14 @@ int HttpRequest::parse_header(){
         }
     }
     Body=_src;
-    
     status_id=0;
+    //std::cout << header("Content-Length") <<std::endl;
+    //Length=std::stoul(header("Content-Length"),NULL,10);
     return 0;
 }
 
 int HttpRequest::parse_body(){
-    HttpdTools::ParseQueryString(GET, Query_String);
+    HttpdTools::ParseQueryString(GET, QueryString);
     REQUEST=GET;
     if(Method=="POST"){
         if(header("Content-Type")=="application/x-www-form-urlencoded"){
@@ -133,7 +135,7 @@ const std::string & HttpRequest::path(void) const{
 };
 
 std::string & HttpRequest::query_string(void){
-    return Query_String;
+    return QueryString;
 };
 
 const std::string & HttpRequest::body(void) const{

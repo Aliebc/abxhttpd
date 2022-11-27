@@ -59,6 +59,7 @@ public:
     virtual ~BasicHttp();
     void append(const std::string & source);
     bool is_header(const std::string &) const;
+    size_t length() const;
     const std::string & header(const std::string &) const;
     void header(const std::string &,const std::string &&);
     void header(const std::string &,const std::string &);

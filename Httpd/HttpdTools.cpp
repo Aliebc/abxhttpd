@@ -131,9 +131,9 @@ std::string HttpdTools::ABX_URLDecode(const std::string & _src){
 }
 #endif
 
-std::string HttpdTools::ABXInfoPageHTML(const HttpRequest & _req){
+std::string HttpdTools::ABXInfoPageHTML(const HttpRequest * _req){
     std::stringstream res;
-    res<<ABXHTTPD_INFO_PAGE_1<<Module::ShowModules_HTML(&_req)<<ABXHTTPD_INFO_PAGE_2;
+    res<<ABXHTTPD_INFO_PAGE_1<<Module::ShowModules_HTML(_req)<<ABXHTTPD_INFO_PAGE_2;
     return res.str();
 }
 
