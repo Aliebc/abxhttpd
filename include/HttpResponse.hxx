@@ -52,6 +52,7 @@ public:
     std::string & body(void);
     void body(const std::string && _src);
     void write(const std::string && _src);
+    void write(const std::string & _src);
     template <class Tp>
     void writeA(Tp && _src){
         this->write(std::to_string(_src));

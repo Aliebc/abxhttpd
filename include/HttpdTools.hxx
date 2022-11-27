@@ -1,12 +1,15 @@
 #ifndef HTTPD_TOOLS_H
 #define HTTPD_TOOLS_H
 
+#include "BasicHttp.hxx"
+#include <string>
 #define ABXHTTPD_MIN(a,b) (a<b?a:b)
 
-#include "HttpRequest.hxx"
 #include "BasicException.hxx"
 
 namespace abxhttpd {
+class HttpRequest;
+typedef std::map<std::string,std::string> SSMap;
 /**
  * @brief 工具类
  *
@@ -33,9 +36,9 @@ public:
      @brief 输出信息页面
      @param _req 源请求
      */
-    static std::string ABXInfoPageHTML(const HttpRequest & _req);
-    static void ParseQueryString(SSMap & ssm, const std::string & _src);
-    static void ParseCookie(SSMap & ssm, const std::string & _src);
+    static std::string ABXInfoPageHTML(const HttpRequest * _req);
+    static void ParseQueryString(SSMap & ssm, const std::string & _src) noexcept;
+    static void ParseCookie(SSMap & ssm, const std::string & _src) noexcept;
     /// 默认构造函数
     HttpdTools();
     /// 默认析构函数

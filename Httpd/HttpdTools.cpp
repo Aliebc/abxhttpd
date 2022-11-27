@@ -131,13 +131,13 @@ std::string HttpdTools::ABX_URLDecode(const std::string & _src){
 }
 #endif
 
-std::string HttpdTools::ABXInfoPageHTML(const HttpRequest & _req){
+std::string HttpdTools::ABXInfoPageHTML(const HttpRequest * _req){
     std::stringstream res;
-    res<<ABXHTTPD_INFO_PAGE_1<<Module::ShowModules_HTML(&_req)<<ABXHTTPD_INFO_PAGE_2;
+    res<<ABXHTTPD_INFO_PAGE_1<<Module::ShowModules_HTML(_req)<<ABXHTTPD_INFO_PAGE_2;
     return res.str();
 }
 
-void HttpdTools::ParseQueryString(SSMap & ssm, const std::string & _src){
+void HttpdTools::ParseQueryString(SSMap & ssm, const std::string & _src) noexcept{
     std::string tmp=_ABX_URLDecode(_src);
     while(tmp.size()>0){
         auto p1=tmp.find_first_of('=');
@@ -157,7 +157,7 @@ void HttpdTools::ParseQueryString(SSMap & ssm, const std::string & _src){
     }
 }
 
-void HttpdTools::ParseCookie(SSMap & ssm, const std::string & _src){
+void HttpdTools::ParseCookie(SSMap & ssm, const std::string & _src) noexcept{
     std::string tmp(_src);
     while(tmp.size()>0){
         auto p1=tmp.find_first_of('=');

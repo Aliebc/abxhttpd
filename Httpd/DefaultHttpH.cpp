@@ -26,7 +26,7 @@ ABXHTTPD_API void _DefaultHttpH(HttpResponse & Response,const HttpRequest & Requ
     }
     std::string _suffix(HttpdTools::_FileSuffix(_path));
     if(Request.path()=="/abxhttpd"){
-        Response.body(HttpdTools::ABXInfoPageHTML(Request));
+        Response.body(HttpdTools::ABXInfoPageHTML(&Request));
     }else{
         try{
             Response.header("Content-Type",_GMIME(_suffix));

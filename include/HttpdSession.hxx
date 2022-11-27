@@ -6,6 +6,8 @@
 #include <random>
 #include <ctime>
 
+#include "BasicException.hxx"
+
 #define ABXHTTPD_SESSION_STR "ABXHTTPD-SESSIONID"
 #define ABXHTTPD_SESSION_IDLEN 32
 #define ABXHTTPD_SESSION_DEAD 600
@@ -70,6 +72,9 @@ public:
     }
     template <class Ty>
     Ty & cast(){
+        if(null()){
+            throw BasicException("Trying to cast null ptr.");
+        }
         return *static_cast<Ty*>(address);
     }
     void destory_unique(){

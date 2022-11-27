@@ -34,8 +34,8 @@ typedef struct _ThreadSettingList {
     int SocketMainID;
     bool Multithreading;
     bool Running;
-    const char * abxout;
-    const char * abxerr;
+    const char * Log;
+    const char * Error;
     void * Args;
 } ThreadSettingList;
 

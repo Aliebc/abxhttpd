@@ -69,13 +69,13 @@ Httpd::Httpd(const HttpdCore & _core, const HttpdSettingList & _set){
     this->MCore.IFilter=this->Core.IFilter;
     this->MCore.OFilter=this->Core.OFilter;
     this->Setting=_set;
-    if(Setting.Thread_S.abxout!=NULL){
-        success_logger=new Logger(_set.Thread_S.abxout);
+    if(Setting.Thread_S.Log!=NULL){
+        success_logger=new Logger(_set.Thread_S.Log);
     }else{
         success_logger=new Logger(Logger::FILE_FLAG::STDOUT);
     }
-    if(Setting.Thread_S.abxerr!=NULL){
-        except_logger=new Logger(_set.Thread_S.abxerr);
+    if(Setting.Thread_S.Error!=NULL){
+        except_logger=new Logger(_set.Thread_S.Error);
     }else{
         except_logger=new Logger(Logger::FILE_FLAG::STDERR);
     }

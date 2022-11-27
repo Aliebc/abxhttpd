@@ -12,16 +12,11 @@
 #endif
 
 namespace abxhttpd {
-    Logger logtest(1);
-
-    void* _ThreadHandler(void* _ptr);
 
     void* _ThreadHandler(void* _ptr) {
         SocketRequestWithSL* SourceRequest = static_cast<SocketRequestWithSL*>(_ptr);
         HttpdSocket* SocketStream=SourceRequest->socket_p;
         bool need_free=SourceRequest->free;
-        char _time[128];
-        time_t tt;
         SocketRequest src = (SourceRequest->socket_p->info());
         ABXHTTPD_INFO_PRINT(4, "[Socket %d]Entered thread.", src._ad);
         std::string & _ip(src.src_in_ip);
@@ -32,8 +27,6 @@ namespace abxhttpd {
             SocketRequest.clear();
             SocketResponse.clear();
             *SocketStream >> SocketRequest;
-            tt = time(NULL);
-            strftime(_time, 128, "[%Y-%m-%d %H:%M:%S] ", localtime(&tt));
             size_t _recv_len = SocketRequest.size();
             ABXHTTPD_INFO_PRINT(105, "[Socket %d]\n[IStream]\n%s[End IStream]\n", src._ad, SocketRequest.c_str());
             HttpRequest H_req;
@@ -51,7 +44,9 @@ namespace abxhttpd {
                         H_res.header("Connection","close");
                     }
                     if(H_req.cookie(ABXHTTPD_SESSION_STR).size()==0){
-                        H_res.set_cookie(ABXHTTPD_SESSION_STR, HttpdSession::allocate());
+                        std::string && cook = HttpdSession::allocate();
+                        H_res.set_cookie(ABXHTTPD_SESSION_STR, cook);
+                        H_req.cookies()[ABXHTTPD_SESSION_STR]=cook;
                     }
                     src.MCore->Handler(H_res,H_req, &src);
                     Httpd::success_logger->write(_ip + " " +H_res.header("Content-Length")+" "+  H_req.method() + " " + H_req.path() +" " + H_req.query_string()+ " " + H_req.header("User-Agent"));
@@ -67,6 +62,11 @@ namespace abxhttpd {
                     if(e.code()==301||e.code()==302){
                         except_page.header("Location", e.what());
                     }
+                    SocketResponse = except_page.raw();
+                }catch (const BasicException &e){
+                    Httpd::except_logger->write(_ip + " [Except][500]  " + e.what());
+                    HttpException except_info(500);
+                    HttpResponse except_page(except_info.html(),except_info.code());
                     SocketResponse = except_page.raw();
                 }
                 *SocketStream << SocketResponse;

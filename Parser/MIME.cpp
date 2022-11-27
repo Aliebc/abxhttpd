@@ -24,12 +24,12 @@ namespace abxhttpd{
     }
 
     std::string _GMIME(const std::string & _suffix){
-        return IsMIMEExist(_suffix)?MIMEList[_suffix]:ABXHTTPD_MIME_DEFAULT;
+        return IsMIMEExist(_suffix)?MIMEList.at(_suffix):ABXHTTPD_MIME_DEFAULT;
     }
 
     std::string _GMIME(const char * _suffix){
         std::string __suffix(_suffix);
-        return IsMIMEExist(__suffix)?MIMEList[__suffix]:ABXHTTPD_MIME_DEFAULT;
+        return IsMIMEExist(__suffix)?MIMEList.at(__suffix):ABXHTTPD_MIME_DEFAULT;
     }
 
 }

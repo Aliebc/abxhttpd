@@ -114,6 +114,9 @@ int BasicFilter::status(int which) const{
     return sid;
 }
 
+int BasicFilter::status() const{
+    return status_id;
+}
 
 size_t BasicFilter::StreamFilter(BasicStream & f,BasicStream & t,size_t size){
     size_t r_size;
