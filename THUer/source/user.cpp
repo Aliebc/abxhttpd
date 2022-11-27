@@ -1,28 +1,18 @@
 #include "../include/user.h"
-#include "../include/database.h"
+#include <abxhttpd/sqlite_3.H>
+#include <abxhttpd/hash.H>
 #include <iostream>
 #include <cstdio>
 #include <cstring>
 using namespace std;
 
+using abxhttpd::sqlite_3;
+using abxhttpd::sqlite_3_stmt;
+using abxhttpd::Hash;
+
 /**************************
 // (1) private函数的实现
 ***************************/
-
-
-string hash_a(const string & _src){
-    char dst[65], *_dst = dst;
-    SHA256_CTX tmp;
-    unsigned char tmpc[32]={0};
-    SHA256_Init(&tmp);
-    SHA256_Update(&tmp,_src.c_str(),_src.size());
-    SHA256_Final(tmpc,&tmp);
-    for(int j=0;j<sizeof(tmpc);++j){
-        snprintf(_dst,3,"%02x",tmpc[j]);
-        _dst+=2;
-    }
-    return (string)dst;
-}
 
 bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
 {
@@ -69,7 +59,7 @@ bool User::Verify(const string & Username, const string & Password)
     UserListStruct CurUser;
     if (!readFile(Username, &CurUser))
         return false;
-    return (strcmp(CurUser.Password, hash_a(Username+Password).c_str()) == 0);
+    return (strcmp(CurUser.Password, Hash::sha256(Username+Password).c_str()) == 0);
 }
 
 
@@ -82,7 +72,7 @@ bool User::CreateUser(const string & Username, const string & Password)
     else
     {
         CurUser.UserCoins = 0;
-        snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", hash_a(Username+Password).c_str());
+        snprintf(CurUser.Password, sizeof(CurUser.Password), "%s", Hash::sha256(Username+Password).c_str());
         CurUser.UserDownloads = 0;
         CurUser.UserUploads = 0;
         snprintf(CurUser.UserName, sizeof(CurUser.UserName), "%s", Username.c_str());
@@ -178,9 +168,9 @@ int User::UpdateCoins(int const DeltaC)
 
 bool User::ChangePassword(const string & OldPassword, const string & NewPassword)
 {
-    if (hash_a(OldPassword) != UserPassword)
+    if (Hash::sha256(OldPassword) != UserPassword)
         return false;
-    UserPassword = hash_a(NewPassword);
+    UserPassword = Hash::sha256(NewPassword);
     SaveUser();
     return true;
 }
