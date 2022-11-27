@@ -19,7 +19,7 @@ In your program, you can only include this file to get whole functions.
 #endif
 
 #include "Version.hxx"
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 #include "config.hxx"
 #include "Module.hxx"
 #include "mimes.hxx"
@@ -31,8 +31,5 @@ In your program, you can only include this file to get whole functions.
 #include "AbxInfo.hxx"
 #include "HttpdSocket.hxx"
 #include "HttpdTools.hxx"
-#include <iostream>
-#include <initializer_list>
-#include <fstream>
 
 #endif

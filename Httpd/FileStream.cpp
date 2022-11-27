@@ -9,14 +9,14 @@ namespace abxhttpd{
 FileStream::FileStream(const char * path,int method):BasicStream(){
     length=0;
     if(!(method>0&&method<16)){
-        throw BasicException("No method");
+        throw BasicException(std::string(path)+"No method");
     }else{
         if(open_method[method]==NULL){
-            throw BasicException("No method");
+            throw BasicException(std::string(path)+"No method");
         }else{
             fp=fopen(path, open_method[method]);
             if(fp==NULL){
-                throw BasicException(strerror(errno));
+                throw BasicException(std::string(path)+": "+strerror(errno));
             }
         }
     }

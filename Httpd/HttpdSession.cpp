@@ -5,8 +5,10 @@
 
 namespace abxhttpd{
 std::map <std::string,SessionStruct> HttpdSession::sm_sheet;
+SVMap HttpdSession::global;
+int HttpdSession::dead=ABXHTTPD_SESSION_DEAD;
 
-ConfigureInfo AX_SESSION_INFO={
+ModuleConfigure AX_SESSION_INFO={
     "session",{
         {"Support","enabled"},
         {"Default Expire",ABXHTTPD_STR(ABXHTTPD_SESSION_DEAD) "s"},
@@ -17,7 +19,6 @@ ConfigureInfo AX_SESSION_INFO={
 
 Module AX_SESSION(&AX_SESSION_INFO);
 
-int HttpdSession::dead=ABXHTTPD_SESSION_DEAD;
 void HttpdSession::set_expire(int d){
     dead=d;
 }
@@ -32,23 +33,21 @@ std::string HttpdSession::allocate(){
     }while(ABXHTTPD_SESSION_UNIQUE&&sm_sheet.find(tmp)!=sm_sheet.end());
     sm_sheet[tmp]=SessionStruct();
     sm_sheet[tmp].update=time(NULL);
-    check_expire();
     return tmp;
 }
 
-void HttpdSession::check_expire(){
+bool HttpdSession::check_expire(const SessionStruct & session_ss){
     time_t now=time(NULL);
-    for(auto i=sm_sheet.begin();i!=sm_sheet.end();){
-        if(now-(i->second.update)>dead){
-            sm_sheet.erase(i++);
-        }else{
-            ++i;
-        }
+    if((now-session_ss.update)>dead){
+        return false;
     }
+    return true;
 }
 
 SVMap & HttpdSession::get(const std::string & _key){
-    check_expire();
+    if(!check_expire(sm_sheet[_key])){
+        sm_sheet.erase(_key);
+    }
     sm_sheet[_key].update=time(NULL);
     return sm_sheet[_key].pt;
 }

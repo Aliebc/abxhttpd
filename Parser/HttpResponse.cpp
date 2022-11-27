@@ -84,6 +84,14 @@ bool HttpResponse::status(int _code){
     return true;
 }
 
+void HttpResponse::write(const std::string && _src){
+    Body+=_src;
+}
+
+void HttpResponse::write(const std::string & _src){
+    Body+=_src;
+}
+
 void HttpResponse::location(std::string && _loc){
     throw HttpException(302,_loc.c_str());
 }

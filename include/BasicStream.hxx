@@ -4,7 +4,7 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include "abxerror.hxx"
+#include "BasicException.hxx"
 
 namespace abxhttpd{
 
@@ -163,7 +163,7 @@ public:
         FROM=1, ///< 源流
         TO=2 ///< 目标流
     };
-    /// 指定目标流的属性
+    /// 判断指定目标流的属性
     enum B_FLAG{
         SUCCESS=0, ///< 成功执行
         EXCEPT ///< 出现异常
@@ -191,6 +191,7 @@ public:
     BasicFilter(const BasicFilter &) = default;
     virtual size_t exec(size_t);
     int status(int which) const;
+    int status() const;
     size_t length() const;
     const char * GetLastError() const noexcept;
 };
