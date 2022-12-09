@@ -10,24 +10,26 @@ using abxhttpd::sqlite_3;
 using abxhttpd::sqlite_3_stmt;
 using abxhttpd::Hash;
 
+extern sqlite_3 dta;
+
 /**************************
 // (1) private函数的实现
 ***************************/
 
 bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
 {
-    sqlite_3 dta("./thuer.db");
     std::unique_ptr<sqlite_3_stmt> dta_usr(dta.prepare(
-        "SELECT USERNAME,PASSWORD,DOWNLOAD,UPLOAD,COIN,RANK FROM U_INFO WHERE USERNAME = ?"
+        "SELECT ID,USERNAME,PASSWORD,DOWNLOAD,UPLOAD,COIN,RANK FROM U_INFO WHERE USERNAME = ?"
         ));
     dta_usr->bind(1,UserName.c_str());
     if(dta_usr->step()==SQLITE_ROW){
-        strcpy(CurUser->UserName,(const char *)dta_usr->row(0));
-        strcpy(CurUser->Password,(const char *)dta_usr->row(1));
-        dta_usr->row(2,&CurUser->UserDownloads);
-        dta_usr->row(3,&CurUser->UserUploads);
-        dta_usr->row(4,&CurUser->UserCoins);
-        dta_usr->row(5,&CurUser->UserRank);
+        strcpy(CurUser->UserName,(const char *)dta_usr->row(1));
+        strcpy(CurUser->Password,(const char *)dta_usr->row(2));
+        dta_usr->row(3,&CurUser->UserDownloads);
+        dta_usr->row(4,&CurUser->UserUploads);
+        dta_usr->row(5,&CurUser->UserCoins);
+        dta_usr->row(6,&CurUser->UserRank);
+        dta_usr->row(0,&CurUser->UserID);
         if(CurUser->UserDownloads!=0){
             CurUser->UserShareRate=CurUser->UserUploads/CurUser->UserDownloads;
         }
@@ -39,14 +41,15 @@ bool User::readFile(const string & UserName, struct UserListStruct *CurUser)
 
 bool User::writeFile(const string & UserName, struct UserListStruct *CurUser)
 {
-    sqlite_3 dta("./thuer.db");
     std::unique_ptr<sqlite_3_stmt> dta_usr(dta.prepare(
-        "INSERT INTO U_INFO (USERNAME,PASSWORD) VALUES (?,?) ON CONFLICT(USERNAME) DO \
-        UPDATE SET PASSWORD=?"
+        "INSERT INTO U_INFO (USERNAME,PASSWORD,DOWNLOAD,UPLOAD,COIN,RANK) VALUES (?,?,?,?,?,?)"
     ));
     dta_usr->bind(1,CurUser->UserName);
     dta_usr->bind(2,CurUser->Password);
-    dta_usr->bind(3,CurUser->Password);
+    dta_usr->bind(3,CurUser->UserDownloads);
+    dta_usr->bind(4,CurUser->UserUploads);
+    dta_usr->bind(5,CurUser->UserCoins);
+    dta_usr->bind(6,CurUser->UserRank);
     if(dta_usr->step()==SQLITE_DONE){
         return true;
     }else{
@@ -144,6 +147,7 @@ long int User::UpdateDownloads(int const DeltaD)
     else
         UserDownloads = 0;
     UpdateShareRate();
+    SaveUser();
     return UserDownloads;
 }
 
@@ -154,6 +158,7 @@ long int User::UpdateUploads(int const DeltaU)
     else
         UserUploads = 0;
     UpdateShareRate();
+    SaveUser();
     return UserUploads; 
 }
 
@@ -163,6 +168,7 @@ int User::UpdateCoins(int const DeltaC)
         UserCoins += DeltaC;
     else
         UserCoins = 0;
+    SaveUser();
     return UserCoins;
 }
 
@@ -172,5 +178,37 @@ bool User::ChangePassword(const string & OldPassword, const string & NewPassword
         return false;
     UserPassword = Hash::sha256(NewPassword);
     SaveUser();
+    return true;
+}
+
+string User::DownloadFile(int FID)
+{
+    auto k = dta.prepare("UPDATE F_INFO SET Download = Download+1 WHERE ID = ?");  
+    if (k == NULL)
+    {
+        throw abxhttpd::BasicException("NULL");
+        return " ";
+    }
+    k->bind(1, FID);
+    k->step();
+    auto ret = dta.prepare("SELECT PATH FROM F_INFO WHERE ID = ?");    
+    ret->bind(1, FID);
+    ret->step();
+    return (const char *)(ret -> row(0));
+}
+
+bool User::UploadFile(const char * path, const char * title, const char * info)
+{
+    auto k = dta.prepare("INSERT INTO F_INFO (TITLE,INFO,SHARER,PATH) VALUES (?,?,?,?)");
+    if (k == NULL)
+    {
+        throw abxhttpd::BasicException("NULL");
+        return false;
+    }
+    k->bind(1, title);
+    k->bind(2, info);
+    k->bind(3, UserID);
+    k->bind(4, path);
+    k->step();
     return true;
 }
