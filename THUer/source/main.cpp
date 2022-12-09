@@ -13,25 +13,14 @@ int main()
     // sqlite_3_stmt * dta = FileRecord::ShowFile(20, 20);
     // cout << FileRecord::ConstructJSON(dta);
 
-
-    User test;
-    cout << test.UploadFile("helloworld", "hh", "ww") << endl;
     if (User::RegisterNewUser("TTDiang", "123456"))
         cout << "true" << endl;
     else
         cout << "false" << endl;
-    if (User::RegisterNewUser("TTDiang2", "123456"))
-        cout << "true" << endl;
+    if (User::Login("TTDiang", "123456"))
+        cout << "Login!" << endl;
     else
-        cout << "false" << endl;
-    if (User::RegisterNewUser("X123", "123"))
-        cout << "true" << endl;
-    else
-        cout << "false" << endl;
-    if (User::RegisterNewUser("X456", "456"))
-        cout << "true" << endl;
-    else
-        cout << "false" << endl;
+        cout << "Failed!" << endl;
 
     // sqlite_3 base("./thuer.db");
     // auto k=base.prepare("INSERT INTO F_INFO (TITLE,INFO,SHARER) VALUES (?,?,?)");
