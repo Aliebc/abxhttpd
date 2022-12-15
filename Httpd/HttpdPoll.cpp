@@ -1,10 +1,12 @@
 #include "include/HttpdPoll.hxx"
 #include "Extension/SSL.H"
+#include <sys/poll.h>
 
 #define ABXHTTPD_POLL_INIT 8
 
 namespace abxhttpd{
 void* _ThreadHandler(void* _ptr);
+void* _ThreadHandler2(void* _ptr);
 HttpdPoll::HttpdPoll(const ThreadSettingList& _set, const CCore& _core,const HttpdSettingList * http_s,int StreamType):npfd(0){
     MSocketID=_set.SocketMainID;
     thread_s=&_set;
@@ -52,17 +54,18 @@ bool HttpdPoll::accept(){
         break;
     }
     SocketRequestWithSL* __src = new SocketRequestWithSL({thread_s,SocketStream,false});
+    __src->filter=new BasicHttpFilter(*SocketStream,*SocketStream);
+    __src->filter->set(_core->Handler,_src);
     if(SocketMap.find(st)!=SocketMap.end()){
-        delete SocketMap[st]->socket_p;
         delete SocketMap[st];
     }
     SocketMap[st]=__src;
-    npfd=SocketMap.size();
+    npfd=(int)SocketMap.size();
     return true;
 }
 
 bool HttpdPoll::alloc_poll(){
-    npfd=SocketMap.size();
+    npfd=(int)SocketMap.size();
     if(SLsize<=npfd){
         SocketList=(struct pollfd *)::realloc(static_cast<void*>(SocketList), 2*npfd*sizeof(struct pollfd));
         SLsize=2*npfd;
@@ -78,6 +81,9 @@ bool HttpdPoll::alloc_poll(){
     while(_p<=npfd){
         SocketList[_p].fd=_j->first;
         SocketList[_p].events=POLLIN;
+        if(_j->second->filter->status()&BasicFilter::S_FLAG::CONTINUE_WRITE){
+            SocketList[_p].events=POLLOUT;
+        }
         _p++;
         _j++;
     }
@@ -90,11 +96,12 @@ bool HttpdPoll::run(){
         poll(SocketList,npfd+1,-1);
         for(int _i=1;_i<npfd+1;_i++){
             if(SocketList[_i].revents&POLLIN){
-                _ThreadHandler(SocketMap[SocketList[_i].fd]);
+                _ThreadHandler2(SocketMap[SocketList[_i].fd]);
             }else if(SocketList[_i].revents&(POLLNVAL|POLLHUP)){
-                delete SocketMap[SocketList[_i].fd]->socket_p;
                 delete SocketMap[SocketList[_i].fd];
                 SocketMap.erase(SocketList[_i].fd);
+            }else if(SocketList[_i].revents&POLLOUT){
+                _ThreadHandler2(SocketMap[SocketList[_i].fd]);
             }
         }
         if(SocketList[0].revents&POLLIN){

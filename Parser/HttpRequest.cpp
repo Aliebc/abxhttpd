@@ -1,4 +1,5 @@
 #include "include/HttpRequest.hxx"
+#include <cstdlib>
 #include <cstring>
 #include <algorithm>
 #include <string>
@@ -17,24 +18,21 @@ int toupper_s(int _s){
 
 int HttpRequest::parse_header(){
     status_id=S_ID::NOT_FINISHED;
-    std::string _src(Buffer);
+    string _src=Buffer;
     Length=_src.size();
-    HttpRequest_Parser_Assert(Length > 5,0LU,"Http request too short.");
-    if(Length<6){
+    if(Length<8){
         throw HttpParserException(S_ID::NOT_FINISHED);
     }
     size_t _p1=0;
     size_t _p2=0;
     _p1=_src.find_first_of(' ');
-    HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
-    if(_p1>=Length){
-        throw HttpParserException(S_ID::NOT_FINISHED);
+    if(_p1==std::string::npos){
+        throw HttpParserException(S_ID::UNKNOWN_PROTOCOL);
     }
     Method=_src.substr(0L,_p1);
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of(' ');
     _p2=_src.find_first_of('?');
-    HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
     if(_p1>=Length){
         throw HttpParserException(S_ID::NOT_FINISHED);
     }
@@ -46,12 +44,10 @@ int HttpRequest::parse_header(){
     }
     _src.erase(0L,_p1+1);
     _p1=_src.find_first_of('\n');
-    HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
     if(_p1>=Length){
         throw HttpParserException(S_ID::NOT_FINISHED);
     }
     Protocol=_src.substr(0L,_p1);
-    HttpRequest_Parser_Assert(!strncmp(Protocol.c_str(),"HTTP/",5),_p1,"Unknown protocol.");
     if(strncmp(Protocol.c_str(),"HTTP/",5)!=0){
         throw HttpParserException(S_ID::UNKNOWN_PROTOCOL);
     }
@@ -61,17 +57,15 @@ int HttpRequest::parse_header(){
     _src.erase(0L,_p1+1);
     while(true){
         _p1=_src.find_first_of('\n');
-        HttpRequest_Parser_Assert(_p1 < Length,_p1,"Reach end of request.");
         if(_p1>=Length){
             throw HttpParserException(S_ID::NOT_FINISHED);
         }
         _p2=_src.find_first_of(':');
-        HttpRequest_Parser_Assert(_p2<_p1,_p1,"Header format error.");
         if(_p2>=_p1){
             throw HttpParserException(S_ID::INVALID_FORMAT);
         }
-        std::string _h(_src.substr(0L,_p2));
-        std::string _rh=_src.substr(_p2+1,_p1-(_p2+1));
+        string _h(_src.substr(0L,_p2));
+        string _rh=_src.substr(_p2+1,_p1-(_p2+1));
         size_t _p3=_rh.find_first_of('\r');
         size_t _p4=_rh.find_first_of(' ');
         header(_h,_rh.substr(_p4+1,_p3-(_p4+1)));
@@ -86,8 +80,7 @@ int HttpRequest::parse_header(){
     }
     Body=_src;
     status_id=0;
-    //std::cout << header("Content-Length") <<std::endl;
-    //Length=std::stoul(header("Content-Length"),NULL,10);
+    Length=is_header("Content-Length")?atol(header("Content-Length").c_str()):0;
     return 0;
 }
 
@@ -111,7 +104,7 @@ int HttpRequest::parse_body(){
     return 0;
 }
 
-HttpRequest::HttpRequest(const std::string & _src){
+HttpRequest::HttpRequest(const string & _src){
     Buffer=_src;
 }
 
@@ -126,28 +119,30 @@ HttpRequest::HttpRequest(const char * _src){
     Buffer.append(_src);
 }
 
-const std::string & HttpRequest::method(void) const{
+const string & HttpRequest::method(void) const{
     return Method;
 };
 
-const std::string & HttpRequest::path(void) const{
+const string & HttpRequest::path(void) const{
     return Path;
 };
 
-std::string & HttpRequest::query_string(void){
+string & HttpRequest::query_string(void){
     return QueryString;
 };
 
-const std::string & HttpRequest::body(void) const{
+const string & HttpRequest::body(void) const{
     return Body;
 };
 
 HttpRequest::HttpRequest(HttpRequest const & SS) {
     Buffer = SS.Buffer;
+    SESSION = SS.SESSION;
     parse_header();
+    parse_body();
 }
 
-const std::string & HttpRequest::request(const std::string && _key) const{
+const string & HttpRequest::request(const string && _key) const{
     auto _f=REQUEST.find(_key);
     if(_f!=REQUEST.end()){
         return _f->second;
@@ -159,7 +154,7 @@ SSMap & HttpRequest::cookies(){
     return COOKIE;
 }
 
-const std::string & HttpRequest::cookie(const std::string && _key) const{
+const string & HttpRequest::cookie(const string && _key) const{
     auto _f=COOKIE.find(_key);
     if(_f!=COOKIE.end()){
         return _f->second;
@@ -167,15 +162,15 @@ const std::string & HttpRequest::cookie(const std::string && _key) const{
     return null_str;
 }
 
-void HttpRequest::variables(const std::string & _key,const std::string & _val){
+void HttpRequest::variables(const string & _key,const string & _val){
     ServerVariables[_key]=_val;
 }
 
-void HttpRequest::variables(const std::string & _key,const std::string && _val){
+void HttpRequest::variables(const string & _key,const string && _val){
     ServerVariables[_key]=_val;
 }
 
-const std::string & HttpRequest::variables(const std::string && _key) const{
+const string & HttpRequest::variables(const string && _key) const{
     auto _f=ServerVariables.find(_key);
     if(_f!=ServerVariables.end()){
         return _f->second;
@@ -187,7 +182,7 @@ const SSMap & HttpRequest::variables() const{
     return ServerVariables;
 }
 
-const std::string & HttpRequest::raw(void) const{
+const string & HttpRequest::raw(void) const{
     return Buffer;
 };
 
@@ -196,18 +191,21 @@ void HttpRequest::clear(){
     
 }
 
-SessionPtr * HttpRequest::session(const std::string && _key) const{
+SessionPtr * HttpRequest::session(const string && _key) const{
     if(SESSION==NULL){
         return NULL;
     }
     return &(*SESSION)[_key];
 }
 
-SessionPtr * HttpRequest::global(const std::string && _key) const{
+SessionPtr * HttpRequest::global(const string && _key) const{
     return &HttpdSession::global[_key];
 }
 
-HttpRequest::~HttpRequest(){
-};
+size_t HttpRequest::size() const{
+    return Body.size();
+}
+
+HttpRequest::~HttpRequest()=default;
 
 }

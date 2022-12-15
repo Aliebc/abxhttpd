@@ -1,6 +1,7 @@
 #ifndef _THREAD_POOL_H
 #define _THREAD_POOL_H
 #include "HttpdSocket.hxx"
+#include "BasicHttpFilter.hxx"
 
 #include <thread>
 #include <condition_variable>
@@ -15,6 +16,11 @@ typedef struct _SocketRequestWithSL
     const ThreadSettingList * thread_s;
     HttpdSocket * socket_p;
     bool free;
+    BasicHttpFilter * filter;
+    ~_SocketRequestWithSL(){
+        delete socket_p;
+        delete filter;
+    }
 }SocketRequestWithSL;
 
 class HttpdThreadPool{

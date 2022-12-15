@@ -14,8 +14,6 @@
 
 #define ABXHTTPD_CORE_MAX 64
 #define ABXHTTPD_CONNECT_MAX SOMAXCONN
-ABXHTTPD_API extern int verbose;
-ABXHTTPD_API extern int info_color;
 
 namespace abxhttpd{
 
@@ -132,6 +130,8 @@ public:
     static void SetExtraSetting(const char *, const char *);
     static Logger * success_logger;
     static Logger * except_logger;
+    static int verbose;
+    static int info_color;
     ~Httpd();
 };
 

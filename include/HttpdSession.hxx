@@ -23,69 +23,39 @@ private:
     }
     void * address;
     void (*del)(void *);
-    void inter_del(){
-        if((address!=NULL)&&(unique==true)){
-            del(address);
-            del=NULL;
-            address=NULL;
-        }
-    }
+    void inter_del();
     bool unique;
 public:
-    SessionPtr(){
-        address=NULL;
-        del=NULL;
-        unique=true;
-    }
+    SessionPtr();
     template <class Ty>
-    SessionPtr(Ty * ptr):SessionPtr(){
+    inline SessionPtr(Ty * ptr):SessionPtr(){
         this->set(ptr);
     }
     template <class Ty>
-    void set(Ty * ptr){
+    inline void set(Ty * ptr){
         inter_del();
         address=(void *)ptr;
         del=free_ptr<Ty>;
     }
-    void move(SessionPtr & s){
-        inter_del();
-        s.destory_unique();
-        address=s.address;
-        del=s.del;
-        s.address=NULL;
-        s.del=NULL;
-    }
-    bool null(){
-        return (address==NULL);
-    }
-    void move(SessionPtr && s){
-        inter_del();
-        s.destory_unique();
-        address=s.address;
-        del=s.del;
-        s.address=NULL;
-        s.del=NULL;
-    }
-    template <class Tp>
-    void wrap(Tp * ptr){
-        this->set(ptr);
-    }
     template <class Ty>
-    Ty & cast(){
+    inline Ty & cast(){
         if(null()){
             throw BasicException("Trying to cast null ptr.");
         }
         return *static_cast<Ty*>(address);
     }
-    void destory_unique(){
-        unique=false;
+    template <class Tp>
+    inline void wrap(Tp * ptr){
+        this->set(ptr);
     }
-    void destory(){
-        inter_del();
-    }
+    bool null();
+    void move(SessionPtr & s);
+    void move(SessionPtr && s);
+    void destory_unique();
+    void destory() noexcept;
     SessionPtr (const SessionPtr &)=delete;
     SessionPtr operator=(const SessionPtr &)=delete;
-    ~SessionPtr(){inter_del();}
+    ~SessionPtr();
 };
 
 

@@ -2,7 +2,7 @@
 #define MACRO_FUNC_H
 
 #define ABXHTTPD_CLI_ERR(fmt,...) \
-if(info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);exit(1);}\
+if(Httpd::info_color==0){printf("[Abxhttpd ERROR] " fmt "\n",##__VA_ARGS__);exit(1);}\
 else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS__);exit(1);}
 
 #ifdef ABXHTTPD_DEBUG
@@ -20,8 +20,8 @@ else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS_
 #define ABXHTTPD_ZERO_MEMORY(dst) memset(dst,0,sizeof(dst))
 
 #ifndef ABXHTTPD_NO_INFO
-#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=verbose){\
-if(info_color==0){\
+#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=abxhttpd::Httpd::verbose){\
+if(abxhttpd::Httpd::info_color==0){\
     printf("[Abxhttpd INFO][Grade %d] " fmt "\n",grade,##__VA_ARGS__);\
 }else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Grade %d] \033[1;37m" fmt "\033[0m\n",grade,##__VA_ARGS__);fflush(stdout);}\
 }

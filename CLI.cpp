@@ -24,10 +24,10 @@ int main(int argc,char ** argv){
     HttpdSettingList MainSetting{};
     if(CmdArrayIs(&cmd_argu,'v')){
         if(cmd_argu['v'].at(0)=='c'){
-            info_color=1;
-            verbose=atoi(cmd_argu['v'].c_str()+1);
+            Httpd::info_color=1;
+            Httpd::verbose=atoi(cmd_argu['v'].c_str()+1);
         }else{
-            verbose=atoi(cmd_argu['v'].c_str());
+            Httpd::verbose=atoi(cmd_argu['v'].c_str());
         }
     }
     ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");

@@ -4,13 +4,15 @@
 #include <cstring>
 #include <string>
 
-int verbose=0;
-int info_color=0;
+
 int global_argc=0;
 const char ** global_argv=NULL;
 const CmdArray * global_argu=NULL;
 
 namespace abxhttpd{
+
+int Httpd::verbose=0;
+int Httpd::info_color=0;
 
 HttpdCore DefaultHttpdCore={
     DefaultIFilter,
