@@ -41,14 +41,11 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         Request->append(tmp);
     }else if(status_id&S_FLAG::CONTINUE_WRITE){
         if(send_from_stream){
-            std::string tmps;
-            tmp_stream->read(tmps,size);
-            
-            To.write(tmps,size);
-            
-            if(tmps.size()==0){
-                delete tmp_stream;
+            auto st=tmp_stream->read(tmp,size);
+            To.write(tmp,size);
+            if(st==0){
                 send_from_stream=false;
+                delete tmp_stream;
                 status_id^=S_FLAG::CONTINUE_WRITE;
                 status_id|=S_FLAG::FINISHED_WRITE;
             }
