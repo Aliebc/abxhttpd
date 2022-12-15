@@ -94,6 +94,9 @@ size_t FileStream::read(std::string &dst,size_t size){
         dst.insert(dst.size(), buffer_tmp, _read_len);
         _read_size-=_read_len;
         _read_all+=_read_len;
+        if(_read_len==0){
+            break;
+        }
     }
     return _read_all;
 }

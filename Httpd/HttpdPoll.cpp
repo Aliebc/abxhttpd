@@ -81,7 +81,8 @@ bool HttpdPoll::alloc_poll(){
     while(_p<=npfd){
         SocketList[_p].fd=_j->first;
         SocketList[_p].events=POLLIN;
-        if(_j->second->filter->status()&BasicFilter::S_FLAG::CONTINUE_WRITE){
+        if(_j->second->filter->status()&
+           (BasicFilter::S_FLAG::CONTINUE_WRITE|BasicFilter::S_FLAG::FINISHED_WRITE)){
             SocketList[_p].events=POLLOUT;
         }
         _p++;

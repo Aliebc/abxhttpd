@@ -46,10 +46,10 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             if(st==0){
                 send_from_stream=false;
                 delete tmp_stream;
+                tmp_stream=nullptr;
                 status_id^=S_FLAG::CONTINUE_WRITE;
                 status_id|=S_FLAG::FINISHED_WRITE;
             }
-            
             return size;
         }
         
