@@ -28,7 +28,7 @@ private:
 public:
     SessionPtr();
     template <class Ty>
-    inline SessionPtr(Ty * ptr):SessionPtr(){
+    explicit inline SessionPtr(Ty * ptr):SessionPtr(){
         this->set(ptr);
     }
     template <class Ty>

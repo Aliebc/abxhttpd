@@ -57,7 +57,7 @@ FileStream::FileStream(int fd){
 
 FileStream::~FileStream(){
     status_id=CLOSED;
-    fclose(fp);
+    close();
 }
 
 void FileStream::get_file_length(){
@@ -79,6 +79,8 @@ size_t FileStream::get_length() const{
     return length;
 }
 
+int p=0;
+
 size_t FileStream::read(std::string &dst,size_t size){
     if(!(status_id&READABLE)){
         SetLastError("Cannot read file now");
@@ -90,7 +92,7 @@ size_t FileStream::read(std::string &dst,size_t size){
     while(_read_size>0&&(!feof(fp))){
         size_t _read_len=0;
         clear_tmp();
-        _read_len=fread(buffer_tmp, sizeof(char), I_MIN(buffer_size(),_read_size), fp);
+        _read_len=fread(buffer_tmp, sizeof(char), std::min(_read_size,buffer_size()), fp);
         dst.insert(dst.size(), buffer_tmp, _read_len);
         _read_size-=_read_len;
         _read_all+=_read_len;

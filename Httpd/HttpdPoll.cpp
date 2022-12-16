@@ -90,11 +90,15 @@ bool HttpdPoll::alloc_poll(){
     }
     return true;
 }
-
+int k=0;
 bool HttpdPoll::run(){
     while(running){
+        
         alloc_poll();
         poll(SocketList,npfd+1,-1);
+        if(SocketList[0].revents&POLLIN){
+            this->accept();
+        }
         for(int _i=1;_i<npfd+1;_i++){
             if(SocketList[_i].revents&POLLIN){
                 _ThreadHandler2(SocketMap[SocketList[_i].fd]);
@@ -104,9 +108,6 @@ bool HttpdPoll::run(){
             }else if(SocketList[_i].revents&POLLOUT){
                 _ThreadHandler2(SocketMap[SocketList[_i].fd]);
             }
-        }
-        if(SocketList[0].revents&POLLIN){
-            this->accept();
         }
     }
     return true;

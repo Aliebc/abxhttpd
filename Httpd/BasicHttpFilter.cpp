@@ -7,6 +7,8 @@ BasicHttpFilter::BasicHttpFilter(BasicStream & src, BasicStream & dst)
     Request=new HttpRequest();
     status_id=S_FLAG::CONTINUE_RECV;
     Response=new HttpResponse();
+    send_from_stream=false;
+    tmp_stream=nullptr;
 }
 
 void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
@@ -23,6 +25,7 @@ void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
  * @return size_t 处理成功的字节数量
  */
 size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_t size){
+    
     tmp.clear();
     if(status_id==S_FLAG::CLOSED){
         From.close();
@@ -42,11 +45,10 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
     }else if(status_id&S_FLAG::CONTINUE_WRITE){
         if(send_from_stream){
             auto st=tmp_stream->read(tmp,size);
-            To.write(tmp,size);
+            From.write(tmp);
             if(st==0){
                 send_from_stream=false;
                 delete tmp_stream;
-                tmp_stream=nullptr;
                 status_id^=S_FLAG::CONTINUE_WRITE;
                 status_id|=S_FLAG::FINISHED_WRITE;
             }
@@ -54,15 +56,22 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         }
         
         if(Response->need_send_from_stream){
+            //tmp_stream = new FileStream(Response->need_send_from_stream_src.c_str());
+            //send_from_stream=true;
             tmp_stream = new FileStream(Response->need_send_from_stream_src.c_str());
             send_from_stream=true;
             To.write(Response->raw());
+            //To << *tmp_stream;
+            //delete tmp_stream;
+            //status_id|=S_FLAG::FINISHED_WRITE;
+            //To.close();
             return 0;
         }else{
             To.write(Response->raw());
         }
         
         status_id^=S_FLAG::CONTINUE_WRITE;
+        status_id|=S_FLAG::FINISHED_WRITE;
         
         return size;
     }
