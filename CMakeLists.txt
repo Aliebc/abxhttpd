@@ -83,7 +83,7 @@ install(
 install(FILES include/abxhttpd.H DESTINATION include/abxhttpd)
 install(DIRECTORY include/ DESTINATION include/abxhttpd PATTERN "*.H" EXCLUDE)
 install(DIRECTORY Resource/man/ TYPE MAN)
-install(DIRECTORY Resource/doc/ TYPE DOC)
+install(DIRECTORY Resource/doc/ TYPE DOC OPTIONAL)
 
 if(NOT TARGET uninstall)
   configure_file(

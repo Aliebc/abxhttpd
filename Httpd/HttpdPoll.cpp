@@ -93,20 +93,21 @@ bool HttpdPoll::alloc_poll(){
 int k=0;
 bool HttpdPoll::run(){
     while(running){
-        
         alloc_poll();
         poll(SocketList,npfd+1,-1);
         if(SocketList[0].revents&POLLIN){
             this->accept();
         }
         for(int _i=1;_i<npfd+1;_i++){
-            if(SocketList[_i].revents&POLLIN){
+            if(SocketList[_i].revents&(POLLIN|POLLOUT)){
                 _ThreadHandler2(SocketMap[SocketList[_i].fd]);
+                if(SocketMap[SocketList[_i].fd]->socket_p->status()==0){
+                    delete SocketMap[SocketList[_i].fd];
+                    SocketMap.erase(SocketList[_i].fd);
+                }
             }else if(SocketList[_i].revents&(POLLNVAL|POLLHUP)){
                 delete SocketMap[SocketList[_i].fd];
                 SocketMap.erase(SocketList[_i].fd);
-            }else if(SocketList[_i].revents&POLLOUT){
-                _ThreadHandler2(SocketMap[SocketList[_i].fd]);
             }
         }
     }

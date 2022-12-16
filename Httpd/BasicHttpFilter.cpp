@@ -8,7 +8,7 @@ BasicHttpFilter::BasicHttpFilter(BasicStream & src, BasicStream & dst)
     status_id=S_FLAG::CONTINUE_RECV;
     Response=new HttpResponse();
     send_from_stream=false;
-    tmp_stream=nullptr;
+    tmp_fstream=nullptr;
 }
 
 void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
@@ -44,11 +44,12 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         Request->append(tmp);
     }else if(status_id&S_FLAG::CONTINUE_WRITE){
         if(send_from_stream){
-            auto st=tmp_stream->read(tmp,size);
+            auto st=tmp_fstream->read(tmp,size);
             From.write(tmp);
             if(st==0){
                 send_from_stream=false;
-                delete tmp_stream;
+                delete tmp_fstream;
+                tmp_fstream=NULL;
                 status_id^=S_FLAG::CONTINUE_WRITE;
                 status_id|=S_FLAG::FINISHED_WRITE;
             }
@@ -56,9 +57,7 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         }
         
         if(Response->need_send_from_stream){
-            //tmp_stream = new FileStream(Response->need_send_from_stream_src.c_str());
-            //send_from_stream=true;
-            tmp_stream = new FileStream(Response->need_send_from_stream_src.c_str());
+            tmp_fstream = new FileStream(Response->need_send_from_stream_src.c_str());
             send_from_stream=true;
             To.write(Response->raw());
             //To << *tmp_stream;
@@ -137,7 +136,7 @@ BasicHttpFilter::~BasicHttpFilter(){
     delete Request;
     delete Response;
     if(send_from_stream){
-        delete tmp_stream;
+        delete tmp_fstream;
     }
 }
 }

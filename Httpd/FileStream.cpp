@@ -56,8 +56,9 @@ FileStream::FileStream(int fd){
 }
 
 FileStream::~FileStream(){
-    status_id=CLOSED;
-    close();
+    if(status_id!=FLAG::CLOSED){
+        this->close();
+    }
 }
 
 void FileStream::get_file_length(){
@@ -78,8 +79,6 @@ bool FileStream::SetOffset(size_t offset){
 size_t FileStream::get_length() const{
     return length;
 }
-
-int p=0;
 
 size_t FileStream::read(std::string &dst,size_t size){
     if(!(status_id&READABLE)){
@@ -116,11 +115,12 @@ size_t FileStream::write(const std::string &dst,size_t size){
 }
 
 bool FileStream::close(){
-    if(status_id!=CLOSED){
-        status_id=CLOSED;
+    if(status_id!=FLAG::CLOSED){
+        status_id=FLAG::CLOSED;
         if(fclose(fp)!=0){
             return false;
         }
+        fp=NULL;
     }
     return true;
 }

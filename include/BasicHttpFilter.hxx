@@ -20,7 +20,7 @@ protected:
     HttpRequest * Request; 
     HttpResponse * Response; ///< 响应
     HttpHandler Handler;
-    FileStream * tmp_stream;
+    FileStream * tmp_fstream;
     bool send_from_stream;
     SocketRequest Iset;
     //virtual size_t HttpHandler();
