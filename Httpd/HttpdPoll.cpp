@@ -90,7 +90,7 @@ bool HttpdPoll::alloc_poll(){
     }
     return true;
 }
-int k=0;
+
 bool HttpdPoll::run(){
     while(running){
         alloc_poll();

@@ -101,9 +101,14 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
     // Use Session
     status_id=S_FLAG::HANDLING;
     if(Request->cookie(ABXHTTPD_SESSION_STR).size()==0){
-        std::string && cook = HttpdSession::allocate();
+        auto && cook = HttpdSession::allocate();
         Response->set_cookie(ABXHTTPD_SESSION_STR, cook);
     }
+    
+    auto && _ip =Iset.src_in_ip;
+    
+    Request->variables("REMOTE_ADDR", _ip);
+    Request->variables("REMOTE_PORT", std::to_string(Iset.port_in));
     
     if(Request->header("Connection")=="keep-alive"){
         Response->header("Connection", "keep-alive");
@@ -116,12 +121,12 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         if(e.code()==301||e.code()==302){
             Response->header("Location", e.what());
         }
-        Httpd::except_logger->write(Iset.src_in_ip +
+        Httpd::except_logger->write(_ip +
         " [Except][" + std::to_string(e.code())+"]  "
         + e.what());
     }
     Httpd::success_logger->write(
-    Iset.src_in_ip + " " +
+    _ip + " " +
     Response->header("Content-Length")+" "+
     Request->method() + " " + Request->path() +
     " " + Request->query_string()+ " " +

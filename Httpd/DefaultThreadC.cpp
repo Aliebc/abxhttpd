@@ -16,7 +16,7 @@ namespace abxhttpd {
     void* _ThreadHandler2(void* _ptr) {
         SocketRequestWithSL* SourceRequest = static_cast<SocketRequestWithSL*>(_ptr);
         ABXHTTPD_INFO_PRINT(4, "[Socket %d]Entered filter.", SourceRequest->socket_p->info()._ad);
-        SourceRequest->filter->exec(20480000);
+        SourceRequest->filter->exec(1024);
         return NULL;
     }
 

@@ -58,9 +58,7 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 "-v\t: Set detailed information grade.\n\tDetailed info of given grade will be printed to STDOUT.\n\tAdd c before grade can print colorful info\n\t(Example: -v 5/-vc11)\n" \
 "-m\t: Show cores and modules installed.\n" \
 "-c\t: Specify abxhttpd-core to use.\n\t(Example: -c OtherCore, some command line arguments may be different in this case)\n" \
-"-C\t: Dynamically load other core or module.(Unrealized)\n\t(Example: -C ./libothercore.so)\n" \
 "-h\t: Show manual page(This page).\n" \
-"-g\t: Start the graphical user interface(GUI).\n" \
 "-p\t: Specify and listening port.\n\t(Example: -p 80)\n" \
 "-d\t: Start deamon.\n\t(Example: -d)\n" \
 "-b\t: Specify bind IP.\n\t(Example: -b 127.0.0.1(Default:0.0.0.0))\n" \

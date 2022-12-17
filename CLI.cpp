@@ -17,10 +17,10 @@ void abxhttpd_fork(int argc,const char ** argv);
 
 int main(int argc,char ** argv){
     signal(SIGINT,sigint_handle);
-    global_argc=argc;
-    global_argv=(const char **)argv;
+    Httpd::global_argc=argc;
+    Httpd::global_argv=(const char **)argv;
     CmdArray cmd_argu=CmdParse(argc,(const char **)argv);
-    global_argu=&cmd_argu;
+    Httpd::global_argu=&cmd_argu;
     HttpdSettingList MainSetting{};
     if(CmdArrayIs(&cmd_argu,'v')){
         if(cmd_argu['v'].at(0)=='c'){
@@ -30,7 +30,6 @@ int main(int argc,char ** argv){
             Httpd::verbose=atoi(cmd_argu['v'].c_str());
         }
     }
-    ABXHTTPD_INFO_PRINT(3,"[Main]Parsed command line arguments.");
     const HttpdCore * _HttpdCore;
     if(CmdArrayIs(&cmd_argu,'h')){
         std::cout << ABXHTTPD_HELP <<std::endl;
