@@ -1,4 +1,4 @@
-.TH abxhttpd "1" "November, 2022" "Abxhttpd/2.1.0" "Abxhttpd Manual"
+.TH abxhttpd "1" "November, 2022" "Abxhttpd/2.1.1" "Abxhttpd Manual"
 
 .ds n 5
 .SH NAME
@@ -41,8 +41,6 @@ Show version information (No value)
 Show installed core and modules (No value)
 .IP -h
 Show help list (No value)
-.IP -g
-Start GUI (No value)
 .IP "-v[c] \fIVerbose\ grade\fR"
 Set verbose grade, and detailed message whose grade under it will be printed, and c option means printing colorful message (Integer: 1-500)
 .LP
@@ -52,7 +50,7 @@ Set website root directory (Valid directory, exp: C:\\Users\\Administrator)
 .IP "-c \fICorename\fR" 
 Set internal core (Valid corename, printed by -m, exp: DefaultHttpdCore)
 .IP "-T \fIThread\ count\fR"
-Set how many threads program will use (Integer: 1-4294967296, limited by your OS)
+Set how many threads program will use (Integer: 1-65536, limited by your OS)
 .IP "-l \fInormal\ log\ file\fR"
 Set normal log file (Valid file path, exp: C:\\Users\\Administrator\\logs\\access.log)
 .IP "-e \fIerror\ log\ file\fR"
