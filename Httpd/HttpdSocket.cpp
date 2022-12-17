@@ -113,14 +113,12 @@ size_t HttpdSocket::write(const std::string & _res,size_t size)
 }
 HttpdSocket::~HttpdSocket()
 {
-    if(status_id!=0){
-        this->close();
-    }
+    this->close();
 }
 bool HttpdSocket::close()
 {
-    if(status_id!=0){
-        status_id=0;
+    if(status_id!=FLAG::CLOSED){
+        status_id=FLAG::CLOSED;
         return (__close_socket(_src._ad)==0);
     }
     return true;

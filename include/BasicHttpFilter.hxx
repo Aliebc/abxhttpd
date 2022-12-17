@@ -3,20 +3,33 @@
 
 #include "BasicHttp.hxx"
 #include "Httpd.hxx"
-
+#include "include/BasicStream.hxx"
 namespace abxhttpd{
-class BasicHttpFilter:BasicFilter{
+/**
+ * @brief 基础HTTP过滤器类
+ * 
+    基础HTTP过滤器类, 他的功能是....
+ */
+class BasicHttpFilter:public BasicFilter{
 protected:
-    HttpRequest * Request;
-    HttpResponse * Response;
+    /**
+     * @brief 请求
+     * 
+     * 这个请求的详细内容是...
+     */
+    HttpRequest * Request; 
+    HttpResponse * Response; ///< 响应
     HttpHandler Handler;
-    BasicStream ** tmp_stream;
+    FileStream * tmp_fstream;
+    bool send_from_stream;
+    SocketRequest Iset;
     //virtual size_t HttpHandler();
     size_t StreamFilter(BasicStream &, BasicStream &, size_t) override;
 public:
     BasicHttpFilter(BasicStream & src, BasicStream & dst);
-    void set_handler(HttpHandler handler);
+    void set(HttpHandler handler,SocketRequest &);
     ~BasicHttpFilter();
+    BasicHttpFilter(const BasicHttpFilter &)=delete;
     //virtual size_t exec(size_t);
 };
 }

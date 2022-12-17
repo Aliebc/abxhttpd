@@ -96,6 +96,8 @@ std::string _ABX_URLDecode(const std::string & _src){
 }
 
 #ifdef ABXHTTPD_WINDOWS
+
+//
 char* Utf8ToGB2312(const char* utf8)
 {
     int len = MultiByteToWideChar(CP_UTF8, 0, utf8, -1, NULL, 0);

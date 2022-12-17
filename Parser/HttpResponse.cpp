@@ -9,12 +9,11 @@ HttpResponse::HttpResponse(){
     header("Connection", "close");
     header("Content-Type","text/html; charset=utf-8");
     Protocol=ABXHTTPD_DEFAULT_PROTOCOL;
-    Code=200;
+    status(200);
 }
 
 HttpResponse::HttpResponse(const std::string & _src):HttpResponse(){
     Body=_src;
-    Code=200;
 }
 
 HttpResponse::HttpResponse(const std::string & _src,int code):HttpResponse(_src){

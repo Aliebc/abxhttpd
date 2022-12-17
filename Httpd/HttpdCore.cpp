@@ -1,16 +1,17 @@
 #include "include/Httpd.hxx"
 #include "include/config.hxx"
 #include "include/MacroFunctions.hxx"
+#include <cstdlib>
 #include <cstring>
 #include <string>
 
-int verbose=0;
-int info_color=0;
-int global_argc=0;
-const char ** global_argv=NULL;
-const CmdArray * global_argu=NULL;
-
 namespace abxhttpd{
+
+int Httpd::verbose=0;
+int Httpd::info_color=0;
+int Httpd::global_argc=0;
+const char ** Httpd::global_argv=NULL;
+const CmdArray * Httpd::global_argu=NULL;
 
 HttpdCore DefaultHttpdCore={
     DefaultIFilter,
@@ -64,6 +65,7 @@ Logger * Httpd::success_logger = NULL;
 Logger * Httpd::except_logger = NULL;
 
 Httpd::Httpd(const HttpdCore & _core, const HttpdSettingList & _set){
+    env();
     this->Core=_core;
     this->MCore.Handler=this->Core.Handler;
     this->MCore.IFilter=this->Core.IFilter;
@@ -109,11 +111,14 @@ void Httpd::env(){
         throw BasicException("Cannot start WSA!");
     }
     #endif
+    char * gcolor=getenv("CLICOLOR");
+    if(gcolor!=NULL){
+        info_color=1;
+    }
 }
 
 httpd_t Httpd::start(){
     httpd_t _r=0;
-    env();
     Module::init();
     Setting.Thread_S.Running=true;
     int _sk=Core.Initializer(Setting.Socket_S);

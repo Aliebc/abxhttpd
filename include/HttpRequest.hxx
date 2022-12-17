@@ -10,71 +10,169 @@
 #include "HttpdSession.hxx"
 #include "HttpCode.hxx"
 
-#ifdef DEBUG
-
-#define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
-snprintf(errx,1024,"HttpRequest Parser Error: At pointer %zu(%s).\
-\n(Debug info:at %d lines of %s)",_p,_s,__LINE__,__FILE__);\
-throw HttpException(400,errx);
-
-#else
-
-#define HttpRequest_Parser_Error(_p,_s) char errx[1024];\
-snprintf(errx,1024,"HttpRequest Parser Error: At pointer %ld(%s).",_p,_s);\
-throw HttpException(400,errx);
-
-#endif
-
-#define HttpRequest_Parser_Assert(_assert, _position, _error_string) \
-if(!(_assert)){HttpRequest_Parser_Error(_position,_error_string)};
+using std::string;
 
 namespace abxhttpd{
-
+/**
+ * @brief Http请求类
+ * 
+ */
 class ABXHTTPD_API HttpRequest:public BasicHttp
 {
 private:
-    std::string Method;
-    std::string Path;
-    std::string QueryString;
-    std::string Protocol;
+    string Method;
+    string Path;
+    string QueryString;
     SSMap GET;
     SSMap POST;
     SSMap REQUEST;
     SSMap ServerVariables;
     SSMap COOKIE;
     SVMap * SESSION;
-    std::string Body;
 public:
     HttpRequest(const char * _src,size_t _len);
-    explicit HttpRequest(const std::string & _src);
+    explicit HttpRequest(const string & _src);
     explicit HttpRequest(const char * _src);
     HttpRequest();
     HttpRequest(const HttpRequest & _src);
+    /**
+     * @brief 解析Http头
+     * 
+     * @return int 状态码
+     * @exception @link HttpParserException @endlink 解析器异常信息
+     */
     int parse_header();
+    /**
+     * @brief 解析Http主体
+     * 
+     * @return int 0
+     */
     int parse_body();
-    const std::string & method() const;
-    const std::string & request(const std::string &&) const;
+    /**
+     * @brief 获取主体的长度
+     * 
+     * @return size_t 主体长度
+     */
+    size_t size() const override;
+    const string & method() const;
+    /**
+     * @brief 根据键获取GET/POST方法的值
+     * 
+     * POST只支持application/x-www-form-urlencoded
+     * @return const string& 字符串值
+     */
+    const string & request(const string && _key) const;
+    /**
+     * @brief 获取Cookie映射列表
+     * 
+     * @return SSMap& Cookie映射列表
+     */
     SSMap & cookies();
-    const std::string & cookie(const std::string &&) const;
-    void variables(const std::string & _key,const std::string & _val);
-    void variables(const std::string & _key,const std::string && _val);
-    const std::string & variables(const std::string &&) const;
+    /**
+     * @brief 根据键获取Cookie
+     * 
+     * @param _key 键
+     * @return const string& 字符串值
+     */
+    const string & cookie(const string && _key) const;
+    /**
+     * @brief 设置ServerVariables(服务器全局变量)
+     * 
+     * @param _key 键
+     * @param _val 值
+     */
+    void variables(const string & _key,const string & _val);
+    /**
+     * @brief 设置ServerVariables(服务器全局变量)
+     * 
+     * @param _key 键
+     * @param _val 值
+     */
+    void variables(const string & _key,const string && _val);
+    /**
+     * @brief 根据键获取ServerVariable
+     * 
+     * @param _key 键
+     * @return const string& 字符串值
+     */
+    const string & variables(const string && _key) const;
+    /**
+     * @brief 获取ServerVariables映射列表
+     * 
+     * @return SSMap& ServerVariables映射列表
+     */
     const SSMap & variables() const;
-    SessionPtr * session(const std::string &&) const;
-    SessionPtr * global(const std::string &&) const;
-    const std::string & path() const;
-    std::string & query_string();
-    const std::string & body() const;
-    std::string & protocol();
-    const std::string & raw() const;
-    std::string & rebuild();
+    /**
+     * @brief 获取Session
+     * 
+     * @param _key 键
+     * @return @link SessionPtr @endlink 智能会话指针
+     */
+    SessionPtr * session(const string && _key) const;
+    /**
+     * @brief 获取全局变量
+     * 
+     * @param _key 键
+     * @return @link SessionPtr @endlink 智能会话指针
+     */
+    SessionPtr * global(const string &&) const;
+    /**
+     * @brief 获取请求(相对)路径
+     * 
+     * @return const string& 字符串值
+     */
+    const string & path() const;
+    /**
+     * @brief 获取QueryString
+     * 
+     * @return string& QueryString
+     */
+    string & query_string();
+    /**
+     * @brief 获取主体部分值
+     * 
+     * @return const string& 字符串值
+     */
+    const string & body() const;
+    /**
+     * @brief 获取协议版本
+     * 
+     * @return string& 字符串值
+     */
+    string & protocol();
+    /**
+     * @brief 获取原生字符串
+     * 
+     * @return const string& 字符串值
+     */
+    const string & raw() const;
+    /**
+     * @brief 清空缓冲区
+     * 
+     */
     void clear();
+    /**
+     * @brief 根据键获取Session值(自动解引用)
+     * 
+     * @tparam Tp 目标指针类型
+     * @param _key 键
+     * @return Tp& 目标解引用
+     * @warning 如果目标为空指针,抛出 @link BasicException @endlink 异常
+     */
     template <class Tp>
-    inline Tp & sessionA(const std::string && _key) const{
+    inline Tp & sessionA(const string && _key) const{
         return session(std::move(_key))->cast<Tp>();
     }
+    /**
+     * @brief 根据键获取Session值(自动解引用)
+     * 
+     * @tparam Tp 目标指针类型
+     * @param _key 键
+     * @return Tp& 目标解引用
+     * @warning 如果目标为空指针,抛出 @link BasicException @endlink 异常
+     */
     template <class Tp>
-    inline Tp & globalA(const std::string && _key) const{
+    inline Tp & globalA(const string && _key) const{
         return global(std::move(_key))->cast<Tp>();
     }
     ~HttpRequest();

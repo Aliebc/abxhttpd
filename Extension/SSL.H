@@ -10,7 +10,7 @@ namespace abxhttpd
 {
     extern HttpdCoreAddress SSLHttpdCoreAddress;
     /**
-     *@brief SSL流
+     *@brief SSL(安全套接字协议)拓展模块
      *
      *SSL流，用于安全的流传输，其可以通过TLS的方式建立安全通道，保证信息不被窃取或篡改
      */

@@ -8,6 +8,10 @@
 
 namespace abxhttpd {
 
+/**
+ * @brief SQLite3语句类
+ * 
+ */
 class ABXHTTPD_API sqlite_3_stmt
 {
 private:
@@ -26,7 +30,11 @@ public:
     int row(int, const char **);
     void reset();
 };
-
+/**
+ * @brief SQLite3数据库拓展模块
+ * 
+ * 提供一个C->C++的转写,用C++类包装一些基础SQL操作, 用于底层数据库的拓展
+ */
 class ABXHTTPD_API sqlite_3
 {
 private:
