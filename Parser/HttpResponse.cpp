@@ -20,7 +20,7 @@ HttpResponse::HttpResponse(const std::string & _src,int code):HttpResponse(_src)
     status(code);
 }
 
-HttpResponse::HttpResponse(const std::string & _src,int code,HttpHeaders headers):
+HttpResponse::HttpResponse(const std::string & _src,int code,const HttpHeaders & headers):
 HttpResponse(_src,code){
     Headers=headers;
 }
@@ -35,7 +35,7 @@ HttpResponse::HttpResponse(const char * _src):HttpResponse(){
     Code=200;
 }
 
-std::string & HttpResponse::body(void){
+const std::string & HttpResponse::body() const{
     return Body;
 }
 
@@ -43,7 +43,7 @@ void HttpResponse::body(const std::string &&_src){
     Body=std::move(_src);
 }
 
-std::string HttpResponse::raw(void){
+std::string HttpResponse::raw(){
     std::stringstream _rr;
     if(header("Content-Length").size()==0){
         header("Content-Length",std::to_string(Body.size()));
