@@ -17,7 +17,7 @@
 
 (后台运行)
 
-## 小并发测试
+## 低并发测试
 
 测试命令：（并发量5，测试10000次）
 
@@ -83,7 +83,7 @@ Percentage of the requests served within a certain time (ms)
  100%      1 (longest request)
 ```
 
-## 普通并发测试
+## 一般并发测试
 
 测试命令2：（并发量150，测试100000次）
 

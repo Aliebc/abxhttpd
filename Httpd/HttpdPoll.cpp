@@ -1,6 +1,5 @@
 #include "include/HttpdPoll.hxx"
 #include "Extension/SSL.H"
-#include <sys/poll.h>
 
 #define ABXHTTPD_POLL_INIT 8
 
