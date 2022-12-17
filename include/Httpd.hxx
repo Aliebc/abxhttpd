@@ -16,6 +16,12 @@
 #define ABXHTTPD_CORE_MAX 64 ///< 最大核心数量
 #define ABXHTTPD_CONNECT_MAX SOMAXCONN ///< 最大队列数量(可等待多少套接字排队)
 
+
+/**
+ * @brief 核心命名空间
+ * 
+ * 所有的类与函数都在这个命名空间下, 通过using namespace abxhttpd去调用
+ */
 namespace abxhttpd{
 
 /**
