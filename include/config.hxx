@@ -4,12 +4,9 @@
 #include <map>
 #include <string>
 #include <cstring>
+#include "Platform.hxx"
 
 typedef std::map <char,std::string> CmdArray;
-
-ABXHTTPD_API extern int global_argc;
-ABXHTTPD_API extern const char ** global_argv;
-ABXHTTPD_API extern const CmdArray * global_argu;
 
 namespace abxhttpd{
 

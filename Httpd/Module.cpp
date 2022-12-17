@@ -47,9 +47,9 @@ namespace abxhttpd{
 
     std::string Get_StartArgu(){
         std::stringstream _ret;
-        if(global_argv!=NULL){
-            for(int i=0;i<global_argc;i++){
-                _ret << global_argv[i] << " ";
+        if(Httpd::global_argv!=NULL){
+            for(int i=0;i<Httpd::global_argc;i++){
+                _ret << Httpd::global_argv[i] << " ";
             }
         }else{
             _ret << "[Internal]";
@@ -57,6 +57,7 @@ namespace abxhttpd{
         return _ret.str();
     }
 
+    /// 获取系统版本
     std::string Get_OS(){
         #ifdef ABXHTTPD_WINDOWS
         char os[1024] = { 0 };
@@ -71,7 +72,12 @@ namespace abxhttpd{
         return uts.str();
         #endif
     }
-
+    /**
+     * @brief 拼接模块显示列表(HTML)
+     * 
+     * @param _src Http请求
+     * @return std::string 拼接好的字符串
+     */
     std::string Module::ShowModules_HTML(const HttpRequest * _src){
         std::stringstream _ret;
         _ret<< "<div class=\"sub-title\"> core </div>"<<std::endl;

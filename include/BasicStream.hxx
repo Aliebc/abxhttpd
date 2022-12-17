@@ -108,7 +108,7 @@ public:
     virtual ~BasicStream();
     /**
      @brief 状态函数,返回流的状态
-     @return 状态码
+     @return int 状态码(见 @link FLAG @endlink)
      */
     int status() const;
     /**
@@ -190,9 +190,30 @@ public:
     virtual ~BasicFilter() = default;
     BasicFilter(const BasicFilter &) = default;
     virtual size_t exec(size_t);
+    /**
+     * @brief 获取流状态函数
+     * 
+     * @param[in] which 指定流类型(见 @link WHICH @endlink)
+     * @return int 
+     */
     int status(int which) const;
+    /**
+     * @brief 获取过滤器状态函数
+     * 
+     * @return int 状态码(见 @link S_FLAG @endlink)
+     */
     int status() const;
+    /**
+     * @brief 获取长度
+     * 
+     * @return size_t 长度
+     */
     size_t length() const;
+    /**
+     * @brief 获取错误
+     * 
+     * @return const char* 错误信息
+     */
     const char * GetLastError() const noexcept;
 };
 

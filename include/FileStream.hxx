@@ -18,7 +18,7 @@ namespace abxhttpd {
 class FileStream:public BasicStream{
 private:
     /// 内部文件指针
-    FILE * fp;
+    FILE * fp=NULL;
     /// 获取内部文件长度
     void get_file_length();
     /// 文件长度

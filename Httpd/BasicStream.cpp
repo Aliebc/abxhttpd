@@ -8,7 +8,7 @@ void BasicStream::clear_tmp(){
 }
 
 BasicStream::BasicStream(){
-    buffer_tmp = new char [__buffer_size];
+    buffer_tmp = new char [__buffer_size+1]();
     clear_tmp();
     status_id=0;
     err_str="success";

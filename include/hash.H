@@ -4,6 +4,11 @@
 #include "Module.hxx"
 
 namespace abxhttpd {
+/**
+ * @brief 哈希拓展模块
+ * 
+ * 提供主流的md5,sha256,sha384,sha512(包含大小写)哈希运算拓展
+ */
 class ABXHTTPD_API Hash{
 public:
     static std::string md5(const std::string &);

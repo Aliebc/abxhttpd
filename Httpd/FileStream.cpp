@@ -56,8 +56,9 @@ FileStream::FileStream(int fd){
 }
 
 FileStream::~FileStream(){
-    status_id=CLOSED;
-    fclose(fp);
+    if(status_id!=FLAG::CLOSED){
+        this->close();
+    }
 }
 
 void FileStream::get_file_length(){
@@ -90,10 +91,13 @@ size_t FileStream::read(std::string &dst,size_t size){
     while(_read_size>0&&(!feof(fp))){
         size_t _read_len=0;
         clear_tmp();
-        _read_len=fread(buffer_tmp, sizeof(char), buffer_size(), fp);
+        _read_len=fread(buffer_tmp, sizeof(char), std::min(_read_size,buffer_size()), fp);
         dst.insert(dst.size(), buffer_tmp, _read_len);
         _read_size-=_read_len;
         _read_all+=_read_len;
+        if(_read_len==0){
+            break;
+        }
     }
     return _read_all;
 }
@@ -111,11 +115,12 @@ size_t FileStream::write(const std::string &dst,size_t size){
 }
 
 bool FileStream::close(){
-    if(status_id!=CLOSED){
-        status_id=CLOSED;
+    if(status_id!=FLAG::CLOSED){
+        status_id=FLAG::CLOSED;
         if(fclose(fp)!=0){
             return false;
         }
+        fp=NULL;
     }
     return true;
 }

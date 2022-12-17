@@ -44,6 +44,10 @@ size_t BasicHttp::length() const{
     return Length;
 }
 
+size_t BasicHttp::size() const{
+    return Length;
+}
+
 void BasicHttp::header(const std::string & _h,const std::string && _v){
     (Headers)[_h]=_v;
 }

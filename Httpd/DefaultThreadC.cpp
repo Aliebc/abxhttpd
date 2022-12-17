@@ -6,12 +6,19 @@
 #include "include/HttpdPoll.hxx"
 #include "include/Logger.hxx"
 #include "include/HttpdSession.hxx"
+#include "include/BasicHttpFilter.hxx"
 
 #ifdef ABXHTTPD_SSL
 #include "Extension/SSL.H"
 #endif
 
 namespace abxhttpd {
+    void* _ThreadHandler2(void* _ptr) {
+        SocketRequestWithSL* SourceRequest = static_cast<SocketRequestWithSL*>(_ptr);
+        ABXHTTPD_INFO_PRINT(4, "[Socket %d]Entered filter.", SourceRequest->socket_p->info()._ad);
+        SourceRequest->filter->exec(1024);
+        return NULL;
+    }
 
     void* _ThreadHandler(void* _ptr) {
         SocketRequestWithSL* SourceRequest = static_cast<SocketRequestWithSL*>(_ptr);
@@ -156,6 +163,11 @@ namespace abxhttpd {
         }else{
             _ThreadController_POLL(_set, _core, _args, ABXHTTPD_SOCK_STREAM);
         }
+        return NULL;
+    }
+
+    void* _ThreadController_TEST(const ThreadSettingList& _set, const CCore& _core, void* _args, int StreamType){
+        
         return NULL;
     }
 
