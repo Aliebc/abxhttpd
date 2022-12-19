@@ -22,7 +22,7 @@ namespace abxhttpd{
  * 内部实现了一个自动析构的智能指针, 用来在每次会话中存储信息并自动释放
  * 作用域之外会自动析构
  */
-ABXHTTPD_API class SessionPtr{
+class SessionPtr{
 private:
     template <class P>
     static void free_ptr(void * ptr){
