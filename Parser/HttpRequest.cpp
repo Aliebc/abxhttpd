@@ -88,7 +88,9 @@ int HttpRequest::parse_body(){
     HttpdTools::ParseQueryString(GET, QueryString);
     REQUEST=GET;
     if(Method=="POST"){
-        if(header("Content-Type")=="application/x-www-form-urlencoded"){
+        if(strncmp(header("Content-Type").c_str(),
+        "application/x-www-form-urlencoded",sizeof("application/x-www-form-urlencoded")-1
+        )==0){
             HttpdTools::ParseQueryString(POST, Body);
             for(auto _i=POST.begin();_i!=POST.end();++_i){
                 REQUEST[_i->first]=_i->second;

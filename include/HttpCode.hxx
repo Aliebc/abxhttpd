@@ -13,7 +13,7 @@ typedef const std::map <int, std::string> HttpCodeL;
 namespace abxhttpd{
 extern HttpCodeL HttpCodeList;
 extern const std::string & HttpCodeStatus(int _code);
-std::string HttpCodeStatusHTML(int _code);
+ABXHTTPD_API std::string HttpCodeStatusHTML(int _code);
 
 }
 

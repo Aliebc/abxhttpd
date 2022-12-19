@@ -22,7 +22,7 @@ namespace abxhttpd{
  * 内部实现了一个自动析构的智能指针, 用来在每次会话中存储信息并自动释放
  * 作用域之外会自动析构
  */
-class SessionPtr{
+ABXHTTPD_API class SessionPtr{
 private:
     template <class P>
     static void free_ptr(void * ptr){
@@ -124,8 +124,6 @@ public:
     ~SessionPtr();
 };
 
-
-
 typedef std::map <std::string,SessionPtr> SVMap;
 
 /**
@@ -184,6 +182,49 @@ public:
      */
     static void del(const std::string & _key);
 };
+
+inline void SessionPtr::move(SessionPtr && s){
+    inter_del();
+    s.destory_unique();
+    address=s.address;
+    del=s.del;
+    s.address=NULL;
+    s.del=NULL;
+}
+
+inline void SessionPtr::move(SessionPtr & s){
+    this->move(std::move(s));
+}
+
+inline bool SessionPtr::null(){
+    return (address==NULL);
+}
+
+inline SessionPtr::SessionPtr(){
+    address=NULL;
+    del=NULL;
+    unique=true;
+}
+
+inline void SessionPtr::destory(){
+        inter_del();
+}
+
+inline void SessionPtr::destory_unique(){
+    unique=false;
+}
+
+inline void SessionPtr::inter_del(){
+    if((address!=NULL)&&(unique==true)){
+        del(address);
+        del=NULL;
+        address=NULL;
+    }
+}
+
+inline SessionPtr::~SessionPtr(){inter_del();}
+
+
 }
 
 #endif

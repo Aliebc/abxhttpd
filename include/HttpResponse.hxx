@@ -131,7 +131,17 @@ public:
      * 
      * @param _loc 要重定向到的网址
      */
-    void location(string && _loc);
+    void location(const string && _loc);
+    /**
+     * @brief 析构函数
+     * 
+     */
+    /**
+     * @brief 重定向
+     * 
+     * @param _loc 要重定向到的网址
+     */
+    void location(const string & _loc);
     /**
      * @brief 析构函数
      * 
