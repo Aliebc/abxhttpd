@@ -27,9 +27,9 @@ void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
  * @return size_t 处理成功的字节数量
  */
 size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_t size){
-    try{
     tmp.clear();
     auto && _ip =Iset.src_in_ip;
+    try{
     if(status_id==S_FLAG::CLOSED){
         From.close();
         return 0;
@@ -80,7 +80,7 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             HttpException BadReq(400);
             To << HttpResponse(BadReq.html(),BadReq.code()).raw() ;
             Httpd::except_logger->write(_ip +
-                " [Except] Parser Error.");
+                " [Exception] Parser Error.");
             From.close();
             status_id=S_FLAG::CLOSED;
         }else{
@@ -120,23 +120,10 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             Response->header("Location", e.what());
         }
         Httpd::except_logger->write(_ip +
-        " [Except][" + std::to_string(e.code())+"]  "
+        " [Exception][" + std::to_string(e.code())+"]  "
         + e.what());
-    }catch (const BasicException & e){
-        Httpd::except_logger->write(_ip +
-        " [Except] "
-        + e.what());
-        delete Response;
-        HttpException exp(500);
-        Response=new HttpResponse(exp.html(),exp.code());
-        status_id=S_FLAG::CONTINUE_WRITE;
-        return 1;
-    }catch(const std::exception & p){
-        HttpException exp(500);
-        Response=new HttpResponse(exp.html(),exp.code());
-        status_id=S_FLAG::CONTINUE_WRITE;
-        return 1;
     }
+    
     Httpd::success_logger->write(
     _ip + " " +
     Response->header("Content-Length")+" "+
@@ -147,7 +134,17 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
     Request=new HttpRequest();
     status_id=S_FLAG::CONTINUE_WRITE;
     tmp.clear();
-    }catch(const std::exception & p){
+    }catch(const std::exception & e){
+        Httpd::except_logger->write(_ip +
+        " [Exception] "
+        + e.what());
+        HttpException exp(500);
+        Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 2;
+    }catch(...){
+        Httpd::except_logger->write(_ip +
+        " [Exception] Internal Error.");
         delete Response;
         HttpException exp(500);
         Response=new HttpResponse(exp.html(),exp.code());
