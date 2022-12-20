@@ -27,7 +27,7 @@ void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
  * @return size_t 处理成功的字节数量
  */
 size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_t size){
-    
+    try{
     tmp.clear();
     auto && _ip =Iset.src_in_ip;
     if(status_id==S_FLAG::CLOSED){
@@ -63,10 +63,6 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             tmp_fstream = new FileStream(Response->need_send_from_stream_src.c_str());
             send_from_stream=true;
             To.write(Response->raw());
-            //To << *tmp_stream;
-            //delete tmp_stream;
-            //status_id|=S_FLAG::FINISHED_WRITE;
-            //To.close();
             return 0;
         }else{
             To.write(Response->raw());
@@ -109,9 +105,6 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         auto && cook = HttpdSession::allocate();
         Response->set_cookie(ABXHTTPD_SESSION_STR, cook);
     }
-    
-    
-    
     Request->variables("REMOTE_ADDR", _ip);
     Request->variables("REMOTE_PORT", std::to_string(Iset.port_in));
     
@@ -136,9 +129,13 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         delete Response;
         HttpException exp(500);
         Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 1;
     }catch(const std::exception & p){
         HttpException exp(500);
         Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 1;
     }
     Httpd::success_logger->write(
     _ip + " " +
@@ -150,6 +147,13 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
     Request=new HttpRequest();
     status_id=S_FLAG::CONTINUE_WRITE;
     tmp.clear();
+    }catch(const std::exception & p){
+        delete Response;
+        HttpException exp(500);
+        Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 1;
+    }
     return 0;
 }
 BasicHttpFilter::~BasicHttpFilter(){
