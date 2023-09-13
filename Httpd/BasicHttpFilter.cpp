@@ -1,5 +1,7 @@
 #include "include/BasicHttpFilter.hxx"
+#include "include/BasicException.hxx"
 #include "include/FileStream.hxx"
+#include <exception>
 
 namespace abxhttpd{
 BasicHttpFilter::BasicHttpFilter(BasicStream & src, BasicStream & dst)
@@ -25,8 +27,9 @@ void BasicHttpFilter::set(HttpHandler handler,SocketRequest & req){
  * @return size_t 处理成功的字节数量
  */
 size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_t size){
-    
     tmp.clear();
+    auto && _ip =Iset.src_in_ip;
+    try{
     if(status_id==S_FLAG::CLOSED){
         From.close();
         return 0;
@@ -60,10 +63,6 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             tmp_fstream = new FileStream(Response->need_send_from_stream_src.c_str());
             send_from_stream=true;
             To.write(Response->raw());
-            //To << *tmp_stream;
-            //delete tmp_stream;
-            //status_id|=S_FLAG::FINISHED_WRITE;
-            //To.close();
             return 0;
         }else{
             To.write(Response->raw());
@@ -80,6 +79,8 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         if(ParserExcept.code()!=BasicHttp::S_ID::NOT_FINISHED){
             HttpException BadReq(400);
             To << HttpResponse(BadReq.html(),BadReq.code()).raw() ;
+            Httpd::except_logger->write(_ip +
+                " [Exception] Parser Error.");
             From.close();
             status_id=S_FLAG::CLOSED;
         }else{
@@ -104,9 +105,6 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
         auto && cook = HttpdSession::allocate();
         Response->set_cookie(ABXHTTPD_SESSION_STR, cook);
     }
-    
-    auto && _ip =Iset.src_in_ip;
-    
     Request->variables("REMOTE_ADDR", _ip);
     Request->variables("REMOTE_PORT", std::to_string(Iset.port_in));
     
@@ -122,9 +120,10 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
             Response->header("Location", e.what());
         }
         Httpd::except_logger->write(_ip +
-        " [Except][" + std::to_string(e.code())+"]  "
+        " [Exception][" + std::to_string(e.code())+"]  "
         + e.what());
     }
+    
     Httpd::success_logger->write(
     _ip + " " +
     Response->header("Content-Length")+" "+
@@ -135,6 +134,23 @@ size_t BasicHttpFilter::StreamFilter(BasicStream & From, BasicStream & To, size_
     Request=new HttpRequest();
     status_id=S_FLAG::CONTINUE_WRITE;
     tmp.clear();
+    }catch(const std::exception & e){
+        Httpd::except_logger->write(_ip +
+        " [Exception] "
+        + e.what());
+        HttpException exp(500);
+        Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 2;
+    }catch(...){
+        Httpd::except_logger->write(_ip +
+        " [Exception] Internal Error.");
+        delete Response;
+        HttpException exp(500);
+        Response=new HttpResponse(exp.html(),exp.code());
+        status_id=S_FLAG::CONTINUE_WRITE;
+        return 1;
+    }
     return 0;
 }
 BasicHttpFilter::~BasicHttpFilter(){

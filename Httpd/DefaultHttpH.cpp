@@ -23,6 +23,28 @@ abxhttpd::ModuleConfigure AX_HTTP_INFO={"http",{
 abxhttpd::Module AX_HTTP_MODULE(&AX_HTTP_INFO);
 
 namespace abxhttpd{
+
+bool PathSecurityCheck(const std::string & _path){
+    int _root = 0;
+    for (int i = 0; i < _path.size(); i++) {
+        if (_path.at(i) == '/') {
+            _root++;
+            if(i + 1 < _path.size() && _path.at(i + 1)=='.' && 
+            i + 2 < _path.size() && _path.at(i + 2)=='.' && 
+            i + 3 < _path.size() && _path.at(i + 3)=='/'){
+                _root -= 2;
+                i += 2;
+            }else if(i + 1 < _path.size() && _path.at(i + 1)=='/'){
+                _root--;
+            }
+        }
+        if (_root < 0) {
+            return false;
+        }
+    }
+    return true;
+}
+
 ABXHTTPD_API void _DefaultHttpH(HttpResponse & Response,const HttpRequest & Request, void * _args){
     SocketRequest * _ssrc =static_cast<SocketRequest *>(_args);
     std::string _path(_ssrc->Http_S.Path+HttpdTools::ABX_URLDecode(Request.path()));
@@ -34,6 +56,9 @@ ABXHTTPD_API void _DefaultHttpH(HttpResponse & Response,const HttpRequest & Requ
         Response.body(HttpdTools::ABXInfoPageHTML(&Request));
     }else{
         try{
+            if(!PathSecurityCheck(_path)){
+                throw HttpException(400);
+            }
             Response.header("Content-Type",_GMIME(_suffix));
             Response.header("Content-Length",std::to_string(HttpdTools::_FileLength(_path)));
             Response.need_send_from_stream=true;
