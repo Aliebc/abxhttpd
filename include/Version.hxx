@@ -10,8 +10,8 @@
 
 #define ABXHTTPD_VERSION_MAIN 2
 #define ABXHTTPD_VERSION_SUB 1
-#define ABXHTTPD_VERSION_LAST 2
-#define ABXHTTPD_RELEASE_DATE "2023-09-13"
+#define ABXHTTPD_VERSION_LAST 3
+#define ABXHTTPD_RELEASE_DATE "2025-09-16"
 
 #define ABXHTTPD_STR1(R) #R
 #define ABXHTTPD_STR(R) ABXHTTPD_STR1(R)
@@ -55,7 +55,7 @@ ABXHTTPD_STR_DEF(ABXHTTPD_COMPILE_TIME)
 #define ABXHTTPD_HELP "Abxhttpd \nUsage: abxhttpd [option] ... [ -p port | -D dir | -] [arg] ...\n\n" \
 "Options and arguments:\n" \
 "-V\t: See version and copyright information.\n" \
-"-v\t: Set detailed information grade.\n\tDetailed info of given grade will be printed to STDOUT.\n\tAdd c before grade can print colorful info\n\t(Example: -v 5/-vc11)\n" \
+"-v\t: Set detailed information level.\n\tDetailed info of given level will be printed to STDOUT.\n\tAdd c before level can print colorful info\n\t(Example: -v 5/-vc11)\n" \
 "-m\t: Show cores and modules installed.\n" \
 "-c\t: Specify abxhttpd-core to use.\n\t(Example: -c OtherCore, some command line arguments may be different in this case)\n" \
 "-h\t: Show manual page(This page).\n" \

@@ -20,13 +20,13 @@ else{printf("\033[1;31m[Abxhttpd ERROR] \033[1;37m" fmt "\033[0m\n",##__VA_ARGS_
 #define ABXHTTPD_ZERO_MEMORY(dst) memset(dst,0,sizeof(dst))
 
 #ifndef ABXHTTPD_NO_INFO
-#define ABXHTTPD_INFO_PRINT(grade,fmt,...) if(grade<=abxhttpd::Httpd::verbose){\
+#define ABXHTTPD_INFO_PRINT(level,fmt,...) if(level<=abxhttpd::Httpd::verbose){\
 if(abxhttpd::Httpd::info_color==0){\
-    printf("[Abxhttpd INFO][Grade %d] " fmt "\n",grade,##__VA_ARGS__);\
-}else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Grade %d] \033[1;37m" fmt "\033[0m\n",grade,##__VA_ARGS__);fflush(stdout);}\
+    printf("[Abxhttpd INFO][Level %d] " fmt "\n",level,##__VA_ARGS__);\
+}else{printf("\033[1;35m[Abxhttpd INFO]\033[1;32m[Level %d] \033[1;37m" fmt "\033[0m\n",level,##__VA_ARGS__);fflush(stdout);}\
 }
 #else
-#define ABXHTTPD_INFO_PRINT(grade,fmt,...)
+#define ABXHTTPD_INFO_PRINT(level,fmt,...)
 #endif
 
 #define ABXHTTPD_MIN(a,b) (a<b?a:b)
